@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "115794562052",
+    "project_id": "paapag-2c755",
+    "storage_bucket": "paapag-2c755.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:115794562052:android:7e593d1784de76cacb7951",
+        "android_client_info": {
+          "package_name": "com.paapag.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "115794562052-mb2dp52m1t3g5jvgtagkmrf3u1fjkt5h.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCV-kK7lrc9W4S_fvh4wL_sFgzpIXXfmpI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "115794562052-mb2dp52m1t3g5jvgtagkmrf3u1fjkt5h.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
