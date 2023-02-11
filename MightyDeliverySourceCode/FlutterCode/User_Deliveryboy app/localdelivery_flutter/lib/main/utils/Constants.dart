@@ -17,8 +17,8 @@ const defaultLanguage = "en";
 
 // font size
 const headingSize = 24;
-const currencySymbol = '₹';
-const currencyCode = 'INR';
+const currencySymbol = '₨';
+const currencyCode = 'PKR';
 
 // SharedReference keys
 const IS_LOGGED_IN = 'IS_LOGIN';
