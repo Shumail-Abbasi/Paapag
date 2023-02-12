@@ -58,7 +58,7 @@ class DashboardScreenState extends State<DashboardScreen> {
       ElegantNotification.info(
         title: Text(event.notification!.title.validate(), style: boldTextStyle(color: primaryColor, size: 18)),
         description: Text(event.notification!.body.validate(), style: primaryTextStyle(color: Colors.black, size: 16)),
-        notificationPosition: NotificationPosition.topCenter,
+        notificationPosition: NotificationPosition.center,
         animation: AnimationType.fromTop,
         showProgressIndicator: false,
         width: 400,
