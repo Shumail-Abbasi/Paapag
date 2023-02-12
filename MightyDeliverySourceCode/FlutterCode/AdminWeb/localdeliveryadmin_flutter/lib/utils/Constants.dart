@@ -1,6 +1,6 @@
 var errorThisFieldRequired = 'This field is required';
-const currencySymbolDefault = '₹';
-const currencyCodeDefault = 'INR';
+const currencySymbolDefault = 'PK';
+const currencyCodeDefault = 'PKR';
 
 const mBaseUrl = 'ADD_YOUR_BASE_URL';
 
