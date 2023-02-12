@@ -13,9 +13,9 @@ dependencies:
   flutter:
     sdk: flutter
 
-  shared_preferences: ^2.0.13
-  fluttertoast: ^8.0.9
-  connectivity_plus: ^2.2.1
+  shared_preferences: 2.0.13
+  fluttertoast: 8.1.2
+  connectivity_plus: 3.0.2
 
 flutter:
   plugin:
