@@ -52,8 +52,8 @@ dependencies:
   url_launcher: 6.1.2
 
   # FIREBASE
-  firebase_core: 2.5.0
   firebase_messaging: 14.2.2
+  firebase_core: 2.5.0
 
   # TIMELINE
   timeline_tile: 2.0.0

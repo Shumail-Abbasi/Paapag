@@ -1,3 +1,4 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -37,6 +38,17 @@ Future<void> initialize({
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   shared_pref = await SharedPreferences.getInstance();
+  await Firebase.initializeApp(
+    options: FirebaseOptions(
+      apiKey: "AIzaSyBNfqjs4no9jb_15Nf8Dx4Q5_ZCrurHmvs",
+      appId: "1:115794562052:web:c97997c34d05c55acb7951",
+      messagingSenderId: "115794562052",
+      projectId: "paapag-2c755",
+      authDomain: "paapag-2c755.firebaseapp.com",
+      storageBucket: "paapag-2c755.firebaseapp.com",
+      measurementId: "G-MWPPYDLTMR",
+    ),
+  );
 
   await initialize(aLocaleLanguageList: languageList());
   appStore.setLanguage(default_Language);
