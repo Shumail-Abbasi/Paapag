@@ -10,7 +10,6 @@ import 'package:paapag/main/utils/Common.dart';
 import 'package:paapag/main/utils/Constants.dart';
 import 'package:paapag/main/utils/DataProviders.dart';
 import 'package:paapag/main/utils/Widgets.dart';
-import 'package:paapag/user/components/PaymentScreen.dart';
 import 'package:nb_utils/nb_utils.dart';
 
 import '../../main.dart';
@@ -106,7 +105,7 @@ class ReturnOrderScreenState extends State<ReturnOrderScreen> {
         toast(value.message);
         finish(context);
         if (!isCashPayment) {
-          PaymentScreen(orderId: value.orderId.validate(), totalAmount: widget.orderData.totalAmount.validate()).launch(context);
+         // PaymentScreen(orderId: value.orderId.validate(), totalAmount: widget.orderData.totalAmount.validate()).launch(context);
         } else {
           DashboardScreen().launch(context, isNewTask: true);
         }

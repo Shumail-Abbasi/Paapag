@@ -17,7 +17,6 @@ import 'package:paapag/main/utils/Common.dart';
 import 'package:paapag/main/utils/Constants.dart';
 import 'package:paapag/main/utils/Widgets.dart';
 import 'package:paapag/user/components/CreateOrderConfirmationDialog.dart';
-import 'package:paapag/user/components/PaymentScreen.dart';
 import 'package:paapag/user/screens/DashboardScreen.dart';
 import 'package:nb_utils/nb_utils.dart';
 
@@ -250,7 +249,7 @@ class CreateOrderScreenState extends State<CreateOrderScreen> {
       toast(value.message);
       finish(context);
       if (!isCashPayment) {
-        PaymentScreen(orderId: value.orderId.validate(), totalAmount: totalAmount).launch(context);
+       // PaymentScreen(orderId: value.orderId.validate(), totalAmount: totalAmount).launch(context);
       } else {
         DashboardScreen().launch(context, isNewTask: true);
       }
@@ -929,10 +928,13 @@ class CreateOrderScreenState extends State<CreateOrderScreen> {
               setState(() {});
             }).expand(),
             16.width,
-            scheduleOptionWidget(context, !isCashPayment, 'assets/icons/ic_credit_card.png', language.online).onTap(() {
-              isCashPayment = false;
-              setState(() {});
-            }).expand(),
+            Visibility(
+              visible: false,
+              child: scheduleOptionWidget(context, !isCashPayment, 'assets/icons/ic_credit_card.png', language.online).onTap(() {
+                isCashPayment = false;
+                setState(() {});
+              }).expand(),
+            ),
           ],
         ),
         16.height,
