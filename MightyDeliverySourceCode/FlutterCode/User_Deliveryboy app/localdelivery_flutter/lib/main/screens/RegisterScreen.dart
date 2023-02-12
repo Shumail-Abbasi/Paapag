@@ -23,7 +23,7 @@ class RegisterScreen extends StatefulWidget {
 class RegisterScreenState extends State<RegisterScreen> {
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
   AuthServices authService = AuthServices();
-  String countryCode = '+91';
+  String countryCode = '+92';
 
   TextEditingController nameController = TextEditingController();
   TextEditingController userNameController = TextEditingController();
@@ -197,6 +197,17 @@ class RegisterScreenState extends State<RegisterScreen> {
                                     onChanged: (c) {
                                       countryCode = c.dialCode!;
                                     },
+                                    countryList: [
+                                      {
+                                        "name": "Pakistan",
+                                        "code": "PK",
+                                        "dial_code": "+92",
+                                      }
+                                    ],
+                                    countryFilter: [
+                                      "Pakistan",
+                                      "PK"
+                                    ],
                                   ),
                                   VerticalDivider(color: Colors.grey.withOpacity(0.5)),
                                 ],
