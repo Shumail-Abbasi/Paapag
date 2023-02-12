@@ -168,7 +168,7 @@ class AuthServices {
       userModel.email = loginDetail.data!.email.validate();
       userModel.userType = CLIENT;
 
-      if (isIos) {
+      if (isIOS) {
         userModel.username = fullName;
       } else {
         userModel.username = loginDetail.data!.username.validate();
