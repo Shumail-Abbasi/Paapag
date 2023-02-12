@@ -8,11 +8,11 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:html/parser.dart';
 import 'package:intl/intl.dart';
-import 'package:local_delivery_admin/main.dart';
-import 'package:local_delivery_admin/network/RestApis.dart';
-import 'package:local_delivery_admin/utils/Colors.dart';
-import 'package:local_delivery_admin/utils/Extensions/ResponsiveWidget.dart';
-import 'package:local_delivery_admin/utils/Extensions/StringExtensions.dart';
+import 'package:paapag_admin/main.dart';
+import 'package:paapag_admin/network/RestApis.dart';
+import 'package:paapag_admin/utils/Colors.dart';
+import 'package:paapag_admin/utils/Extensions/ResponsiveWidget.dart';
+import 'package:paapag_admin/utils/Extensions/StringExtensions.dart';
 import 'package:lottie/lottie.dart';
 
 import 'Constants.dart';
@@ -49,10 +49,9 @@ Widget commonButton(String title, Function() onTap, {double? width}) {
     width: width,
     child: ElevatedButton(
       style: ElevatedButton.styleFrom(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(defaultRadius)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(defaultRadius)), backgroundColor: primaryColor,
         elevation: 0,
         padding: EdgeInsets.symmetric(vertical: 20),
-        primary: primaryColor,
       ),
       child: Text(title, style: boldTextStyle(color: Colors.white)),
       onPressed: onTap,
@@ -75,7 +74,7 @@ Widget actionIcon(String title, Color color) {
   );
 }
 
-Widget OutlineActionIcon(IconData icon, Color color, String message, Function() onTap) {
+Widget outlineActionIcon(IconData icon, Color color, String message, Function() onTap) {
   return GestureDetector(
     child: Tooltip(
       message: message,
@@ -191,9 +190,8 @@ Widget dialogSecondaryButton(String title, Function() onTap) {
     height: 40,
     child: ElevatedButton(
       style: ElevatedButton.styleFrom(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(defaultRadius), side: BorderSide(color: appStore.isDarkMode ? Colors.white12 : viewLineColor)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(defaultRadius), side: BorderSide(color: appStore.isDarkMode ? Colors.white12 : viewLineColor)), backgroundColor: Colors.transparent,
           elevation: 0,
-          primary: Colors.transparent,
           shadowColor: Colors.transparent),
       child: Text(title, style: boldTextStyle(color: Colors.grey)),
       onPressed: onTap,
@@ -207,9 +205,8 @@ Widget dialogPrimaryButton(String title, Function() onTap, {Color? color}) {
     height: 40,
     child: ElevatedButton(
       style: ElevatedButton.styleFrom(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(defaultRadius)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(defaultRadius)), backgroundColor: color ?? primaryColor,
         elevation: 0,
-        primary: color ?? primaryColor,
       ),
       child: Text(title, style: boldTextStyle(color: Colors.white)),
       onPressed: onTap,

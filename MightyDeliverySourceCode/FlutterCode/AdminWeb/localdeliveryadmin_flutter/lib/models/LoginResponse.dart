@@ -1,4 +1,4 @@
-import 'package:local_delivery_admin/models/UserModel.dart';
+import 'package:paapag_admin/models/UserModel.dart';
 
 class LoginResponse {
   UserModel? data;

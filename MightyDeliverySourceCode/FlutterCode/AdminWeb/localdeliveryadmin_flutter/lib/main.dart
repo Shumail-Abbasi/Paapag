@@ -2,17 +2,17 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:local_delivery_admin/AppTheme.dart';
-import 'package:local_delivery_admin/language/AppLocalizations.dart';
-import 'package:local_delivery_admin/language/BaseLanguage.dart';
-import 'package:local_delivery_admin/models/LanguageDataModel.dart';
-import 'package:local_delivery_admin/screens/SplashScreen.dart';
-import 'package:local_delivery_admin/store/AppStore.dart';
-import 'package:local_delivery_admin/utils/Colors.dart';
-import 'package:local_delivery_admin/utils/Common.dart';
-import 'package:local_delivery_admin/utils/Constants.dart';
-import 'package:local_delivery_admin/utils/DataProvider.dart';
-import 'package:local_delivery_admin/utils/Extensions/StringExtensions.dart';
+import 'package:paapag_admin/AppTheme.dart';
+import 'package:paapag_admin/language/AppLocalizations.dart';
+import 'package:paapag_admin/language/BaseLanguage.dart';
+import 'package:paapag_admin/models/LanguageDataModel.dart';
+import 'package:paapag_admin/screens/SplashScreen.dart';
+import 'package:paapag_admin/store/AppStore.dart';
+import 'package:paapag_admin/utils/Colors.dart';
+import 'package:paapag_admin/utils/Common.dart';
+import 'package:paapag_admin/utils/Constants.dart';
+import 'package:paapag_admin/utils/DataProvider.dart';
+import 'package:paapag_admin/utils/Extensions/StringExtensions.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 

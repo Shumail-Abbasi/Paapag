@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:local_delivery_admin/main.dart';
-import 'package:local_delivery_admin/models/LanguageDataModel.dart';
-import 'package:local_delivery_admin/utils/Constants.dart';
-import 'package:local_delivery_admin/utils/DataProvider.dart';
+import 'package:paapag_admin/main.dart';
+import 'package:paapag_admin/models/LanguageDataModel.dart';
+import 'package:paapag_admin/utils/Constants.dart';
+import 'package:paapag_admin/utils/DataProvider.dart';
 
 import '../utils/Extensions/app_common.dart';
 

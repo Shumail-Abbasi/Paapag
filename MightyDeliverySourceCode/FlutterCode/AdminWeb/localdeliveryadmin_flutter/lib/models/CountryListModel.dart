@@ -1,4 +1,5 @@
-import 'package:local_delivery_admin/models/PaginationModel.dart';
+
+import 'package:paapag_admin/models/PaginationModel.dart';
 
 class CountryListModel {
   PaginationModel? pagination;

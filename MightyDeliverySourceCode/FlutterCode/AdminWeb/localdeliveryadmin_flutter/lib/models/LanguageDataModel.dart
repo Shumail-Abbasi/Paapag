@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:local_delivery_admin/main.dart';
-import 'package:local_delivery_admin/utils/Constants.dart';
-import 'package:local_delivery_admin/utils/Extensions/StringExtensions.dart';
+import 'package:paapag_admin/main.dart';
+import 'package:paapag_admin/utils/Constants.dart';
+import 'package:paapag_admin/utils/Extensions/StringExtensions.dart';
 
 class LanguageDataModel {
   int? id;

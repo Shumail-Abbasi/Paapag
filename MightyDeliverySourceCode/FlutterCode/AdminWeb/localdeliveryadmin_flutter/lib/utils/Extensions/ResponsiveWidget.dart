@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:local_delivery_admin/utils/Constants.dart';
+import 'package:paapag_admin/utils/Constants.dart';
 
 enum DeviceSize { mobile, tablet, desktop }
 

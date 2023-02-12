@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:local_delivery_admin/models/DocumentListModel.dart';
-import 'package:local_delivery_admin/network/RestApis.dart';
+import 'package:paapag_admin/models/DocumentListModel.dart';
+import 'package:paapag_admin/network/RestApis.dart';
 
 import '../main.dart';
 import '../utils/Colors.dart';
@@ -195,7 +195,7 @@ class DocumentWidgetState extends State<DocumentWidget> {
                                         DataCell(
                                           Row(
                                             children: [
-                                              OutlineActionIcon(mData.deletedAt == null ? Icons.edit : Icons.restore, Colors.green, '${mData.deletedAt == null ? language.edit : language.restore}', () {
+                                              outlineActionIcon(mData.deletedAt == null ? Icons.edit : Icons.restore, Colors.green, '${mData.deletedAt == null ? language.edit : language.restore}', () {
                                                 mData.deletedAt == null
                                                     ? showDialog(
                                                         context: context,
@@ -219,7 +219,7 @@ class DocumentWidgetState extends State<DocumentWidget> {
                                                       }, title: language.restore_document, subtitle: language.restore_document_msg);
                                               }),
                                               SizedBox(width: 8),
-                                              OutlineActionIcon(mData.deletedAt == null ? Icons.delete : Icons.delete_forever, Colors.red, '${mData.deletedAt == null ? language.delete : language.force_delete}', () {
+                                              outlineActionIcon(mData.deletedAt == null ? Icons.delete : Icons.delete_forever, Colors.red, '${mData.deletedAt == null ? language.delete : language.force_delete}', () {
                                                 commonConfirmationDialog(context, DIALOG_TYPE_DELETE, () {
                                                   if (shared_pref.getString(USER_TYPE) == DEMO_ADMIN) {
                                                     toast(language.demo_admin_msg);

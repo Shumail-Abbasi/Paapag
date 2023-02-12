@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_switch/flutter_switch.dart';
-import 'package:local_delivery_admin/components/ChangePasswordDialog.dart';
-import 'package:local_delivery_admin/components/EditProfileDialog.dart';
+import 'package:paapag_admin/components/ChangePasswordDialog.dart';
+import 'package:paapag_admin/components/EditProfileDialog.dart';
 
 import '../main.dart';
 import '../models/models.dart';

@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:local_delivery_admin/language/AppLocalizations.dart';
-import 'package:local_delivery_admin/language/BaseLanguage.dart';
-import 'package:local_delivery_admin/main.dart';
-import 'package:local_delivery_admin/models/CountryListModel.dart';
-import 'package:local_delivery_admin/models/LanguageDataModel.dart';
-import 'package:local_delivery_admin/utils/Colors.dart';
-import 'package:local_delivery_admin/utils/Constants.dart';
-import 'package:local_delivery_admin/utils/Extensions/app_common.dart';
+import 'package:paapag_admin/models/CountryListModel.dart';
+import 'package:paapag_admin/language/AppLocalizations.dart';
+import 'package:paapag_admin/language/BaseLanguage.dart';
+import 'package:paapag_admin/main.dart';
+import 'package:paapag_admin/models/LanguageDataModel.dart';
+import 'package:paapag_admin/utils/Colors.dart';
+import 'package:paapag_admin/utils/Constants.dart';
+import 'package:paapag_admin/utils/Extensions/app_common.dart';
 import 'package:mobx/mobx.dart';
 
 part 'AppStore.g.dart';

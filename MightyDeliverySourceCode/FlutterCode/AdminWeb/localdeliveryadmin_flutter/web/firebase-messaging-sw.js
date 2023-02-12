@@ -3,12 +3,13 @@ importScripts('https://www.gstatic.com/firebasejs/8.10.1/firebase-messaging.js')
 
    /*Update with yours config*/
  const firebaseConfig = {
-   apiKey: "AIzaSyBEIDsKWCjZAGvTwoFs08YABdwz45E-bw0",
-   authDomain: "mightydelivery-10da9.firebaseapp.com",
-   projectId: "mightydelivery-10da9",
-   storageBucket: "mightydelivery-10da9.appspot.com",
-   messagingSenderId: "12372904825",
-   appId: "1:12372904825:web:1e89ce46dbe7f1fd22fda8"
+   apiKey: "AIzaSyBNfqjs4no9jb_15Nf8Dx4Q5_ZCrurHmvs",
+   authDomain: "paapag-2c755.firebaseapp.com",
+   projectId: "paapag-2c755",
+   storageBucket: "paapag-2c755.appspot.com",
+   messagingSenderId: "115794562052",
+   appId: "1:115794562052:web:c97997c34d05c55acb7951",
+   measurementId: "G-MWPPYDLTMR"
  };
   firebase.initializeApp(firebaseConfig);
   const messaging = firebase.messaging();

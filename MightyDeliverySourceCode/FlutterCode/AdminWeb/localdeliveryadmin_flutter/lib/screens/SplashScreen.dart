@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:local_delivery_admin/utils/Constants.dart';
-import 'package:local_delivery_admin/utils/Extensions/app_common.dart';
+import 'package:paapag_admin/utils/Constants.dart';
+import 'package:paapag_admin/utils/Extensions/app_common.dart';
 
 import '../main.dart';
 import 'DashboardScreen.dart';

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:local_delivery_admin/main.dart';
-import 'package:local_delivery_admin/models/DashboardModel.dart';
-import 'package:local_delivery_admin/utils/Colors.dart';
-import 'package:local_delivery_admin/utils/Common.dart';
-import 'package:local_delivery_admin/utils/Constants.dart';
-import 'package:local_delivery_admin/utils/Extensions/app_common.dart';
+import 'package:paapag_admin/main.dart';
+import 'package:paapag_admin/models/DashboardModel.dart';
+import 'package:paapag_admin/utils/Colors.dart';
+import 'package:paapag_admin/utils/Common.dart';
+import 'package:paapag_admin/utils/Constants.dart';
+import 'package:paapag_admin/utils/Extensions/app_common.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
 class WeeklyOrderCountComponent extends StatefulWidget {

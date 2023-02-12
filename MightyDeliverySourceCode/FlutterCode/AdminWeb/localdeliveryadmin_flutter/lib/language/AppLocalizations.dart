@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:local_delivery_admin/language/BaseLanguage.dart';
-import 'package:local_delivery_admin/language/LanguageEn.dart';
-import 'package:local_delivery_admin/models/LanguageDataModel.dart';
+import 'package:paapag_admin/language/BaseLanguage.dart';
+import 'package:paapag_admin/language/LanguageEn.dart';
+import 'package:paapag_admin/models/LanguageDataModel.dart';
 
 class AppLocalizations extends LocalizationsDelegate<BaseLanguage> {
   const AppLocalizations();

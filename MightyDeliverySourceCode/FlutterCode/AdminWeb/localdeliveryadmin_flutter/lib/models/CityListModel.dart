@@ -1,4 +1,4 @@
-import 'package:local_delivery_admin/models/ExtraChragesListModel.dart';
+import 'package:paapag_admin/models/ExtraChragesListModel.dart';
 
 import 'CountryListModel.dart';
 import 'PaginationModel.dart';

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:local_delivery_admin/main.dart';
-import 'package:local_delivery_admin/network/RestApis.dart';
-import 'package:local_delivery_admin/utils/Colors.dart';
-import 'package:local_delivery_admin/utils/Common.dart';
-import 'package:local_delivery_admin/utils/Extensions/app_common.dart';
-import 'package:local_delivery_admin/utils/Extensions/app_textfield.dart';
+import 'package:paapag_admin/main.dart';
+import 'package:paapag_admin/network/RestApis.dart';
+import 'package:paapag_admin/utils/Colors.dart';
+import 'package:paapag_admin/utils/Common.dart';
+import 'package:paapag_admin/utils/Extensions/app_common.dart';
+import 'package:paapag_admin/utils/Extensions/app_textfield.dart';
 
 class ForgotPasswordDialog extends StatefulWidget {
   static String tag = '/ForgotPasswordDialog';

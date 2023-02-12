@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:local_delivery_admin/components/BodyCornerWidget.dart';
-import 'package:local_delivery_admin/models/NotificationModel.dart';
-import 'package:local_delivery_admin/network/RestApis.dart';
-import 'package:local_delivery_admin/screens/OrderDetailScreen.dart';
-import 'package:local_delivery_admin/utils/Colors.dart';
-import 'package:local_delivery_admin/utils/Common.dart';
-import 'package:local_delivery_admin/utils/Constants.dart';
-import 'package:local_delivery_admin/utils/Extensions/app_common.dart';
+import 'package:paapag_admin/components/BodyCornerWidget.dart';
+import 'package:paapag_admin/models/NotificationModel.dart';
+import 'package:paapag_admin/network/RestApis.dart';
+import 'package:paapag_admin/screens/OrderDetailScreen.dart';
+import 'package:paapag_admin/utils/Colors.dart';
+import 'package:paapag_admin/utils/Common.dart';
+import 'package:paapag_admin/utils/Constants.dart';
+import 'package:paapag_admin/utils/Extensions/app_common.dart';
 
 import '../main.dart';
 
@@ -116,7 +116,7 @@ class NotificationViewAllScreenState extends State<NotificationViewAllScreen> {
                                     DataCell(Text(e.data!.message ?? '-')),
                                     DataCell(Text(e.created_at ?? '-')),
                                     DataCell(
-                                      OutlineActionIcon(Icons.visibility, primaryColor, language.view, () async {
+                                      outlineActionIcon(Icons.visibility, primaryColor, language.view, () async {
                                         await launchScreen(
                                           context,
                                           OrderDetailScreen(orderId: e.data!.id!),
