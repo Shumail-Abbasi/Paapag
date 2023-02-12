@@ -24,7 +24,8 @@ dependencies:
   flutter_mobx: 2.0.6+1
 
   # Base
-  nb_utils: 5.0.5
+  nb_utils:
+    path: ./packages/nb_utils
   google_fonts: 4.0.3
   animated_bottom_navigation_bar: 1.1.0+1
 
@@ -95,4 +96,7 @@ flutter:
     - assets/
     - assets/icons/
     - assets/flag/
+
+dependency_overrides:
+  firebase_core_platform_interface: 4.5.1
 
