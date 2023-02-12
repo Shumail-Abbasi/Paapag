@@ -15,7 +15,6 @@ import 'package:paapag_admin/utils/DataProvider.dart';
 import 'package:paapag_admin/utils/Extensions/StringExtensions.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-
 AppStore appStore = AppStore();
 late SharedPreferences shared_pref;
 Color textPrimaryColorGlobal = textPrimaryColor;
@@ -77,7 +76,6 @@ class MyApp extends StatelessWidget {
           },
           debugShowCheckedModeBanner: false,
           title: language.app_name,
-
           theme: AppTheme.lightTheme,
           darkTheme: AppTheme.darkTheme,
           themeMode: appStore.isDarkMode ? ThemeMode.dark : ThemeMode.light,

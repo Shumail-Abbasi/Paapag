@@ -52,8 +52,8 @@ dependencies:
   url_launcher: 6.1.2
 
   # FIREBASE
-  firebase_core: 1.17.1
-  firebase_messaging: 11.4.1
+  firebase_core: 2.5.0
+  firebase_messaging: 14.2.2
 
   # TIMELINE
   timeline_tile: 2.0.0
@@ -87,5 +87,5 @@ flutter:
     - assets/icons/
     - assets/flag/
 
-dependency_overrides:
-  firebase_core_platform_interface: 4.5.1
+#dependency_overrides:
+#  firebase_core_platform_interface: 4.5.1

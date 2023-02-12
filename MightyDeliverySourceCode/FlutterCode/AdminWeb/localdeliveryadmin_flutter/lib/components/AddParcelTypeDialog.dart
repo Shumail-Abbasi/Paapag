@@ -42,7 +42,7 @@ class AddParcelTypeDialogState extends State<AddParcelTypeDialog> {
     }
   }
 
-  AddParcelTypeApiCall() async {
+  addParcelTypeApiCall() async {
     if (_formKey.currentState!.validate()) {
       Navigator.pop(context);
       Map req = {
@@ -133,7 +133,7 @@ class AddParcelTypeDialogState extends State<AddParcelTypeDialog> {
           if (shared_pref.getString(USER_TYPE) == DEMO_ADMIN) {
             toast(language.demo_admin_msg);
           } else {
-            AddParcelTypeApiCall();
+            addParcelTypeApiCall();
           }
         }),
       ],

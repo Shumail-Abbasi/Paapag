@@ -690,6 +690,8 @@ String statusTypeIcon({String? type}) {
 Future<void> saveFcmTokenId() async {
   await FirebaseMessaging.instance.getToken().then((value) {
      if (value!.isNotEmpty.validate()) shared_pref.setString(FCM_TOKEN, value.validate());
+  }).catchError((e) {
+    print(e);
   });
 }
 

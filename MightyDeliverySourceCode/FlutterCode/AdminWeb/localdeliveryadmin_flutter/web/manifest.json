@@ -1,6 +1,6 @@
 {
-    "name": "local_delivery_admin",
-    "short_name": "local_delivery_admin",
+    "name": "paapag_admin",
+    "short_name": "paapag_admin",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

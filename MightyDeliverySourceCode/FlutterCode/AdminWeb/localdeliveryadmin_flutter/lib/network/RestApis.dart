@@ -104,7 +104,7 @@ Future updateProfile({String? userName, String? name, String? userEmail, String?
 
   if (image != null) {
     print('Call');
-    multiPartRequest.files.add(await MultipartFile.fromBytes('profile_image', image, filename: fileName));
+    multiPartRequest.files.add(MultipartFile.fromBytes('profile_image', image, filename: fileName));
   }
 
   print('req: ${multiPartRequest.fields} ${multiPartRequest.files}');
@@ -299,8 +299,8 @@ Future<LDBaseResponse> getRestoreOrderApi(Map req) async {
   return LDBaseResponse.fromJson(await handleResponse(await buildHttpResponse('order-action', request: req, method: HttpMethod.POST)));
 }
 
-Future<LDBaseResponse> deleteOrderApi(int OrderId) async {
-  return LDBaseResponse.fromJson(await handleResponse(await buildHttpResponse('order-delete/$OrderId', method: HttpMethod.POST)));
+Future<LDBaseResponse> deleteOrderApi(int orderId) async {
+  return LDBaseResponse.fromJson(await handleResponse(await buildHttpResponse('order-delete/$orderId', method: HttpMethod.POST)));
 }
 
 Future<UserListModel> getAllDeliveryBoyList({String? type, int? page, int? cityID, int? countryId, int? perPage = 10}) async {

@@ -10,11 +10,11 @@ import 'package:paapag_admin/utils/Constants.dart';
 import 'package:paapag_admin/utils/Extensions/app_common.dart';
 
 class DeliveryOrderAssignWidget extends StatefulWidget {
-  final int OrderId;
+  final int orderId;
   final OrderModel orderModel;
   final Function()? onUpdate;
 
-  DeliveryOrderAssignWidget({this.onUpdate, required this.OrderId, required this.orderModel});
+  DeliveryOrderAssignWidget({this.onUpdate, required this.orderId, required this.orderModel});
 
   @override
   DeliveryOrderAssignWidgetState createState() => DeliveryOrderAssignWidgetState();
@@ -140,7 +140,7 @@ class DeliveryOrderAssignWidgetState extends State<DeliveryOrderAssignWidget> {
                                             if (shared_pref.getString(USER_TYPE) == DEMO_ADMIN) {
                                               toast(language.demo_admin_msg);
                                             } else {
-                                              await orderAssignApi(orderId: widget.OrderId, deliveryBoyID: e.id!);
+                                              await orderAssignApi(orderId: widget.orderId, deliveryBoyID: e.id!);
                                             }
                                           },
                                         ),

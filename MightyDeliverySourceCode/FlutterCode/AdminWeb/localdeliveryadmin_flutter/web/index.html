@@ -23,18 +23,21 @@
 <body>
 
 <script>
-  const firebaseConfig = {
-      apiKey: "AIzaSyBNfqjs4no9jb_15Nf8Dx4Q5_ZCrurHmvs",
-      authDomain: "paapag-2c755.firebaseapp.com",
-      projectId: "paapag-2c755",
-      storageBucket: "paapag-2c755.appspot.com",
-      messagingSenderId: "115794562052",
-      appId: "1:115794562052:web:c97997c34d05c55acb7951",
-      measurementId: "G-MWPPYDLTMR"
-    };
-   firebase.initializeApp(firebaseConfig);
-   const messaging = firebase.messaging();
+      var firebaseConfig = {
+          apiKey: "AIzaSyBNfqjs4no9jb_15Nf8Dx4Q5_ZCrurHmvs",
+          authDomain: "paapag-2c755.firebaseapp.com",
+          projectId: "paapag-2c755",
+          storageBucket: "paapag-2c755.appspot.com",
+          messagingSenderId: "115794562052",
+          appId: "1:115794562052:web:c97997c34d05c55acb7951",
+          measurementId: "G-MWPPYDLTMR"
+      };
+
+      // Initialize Firebase
+      firebase.initializeApp(firebaseConfig);
+       const messaging = firebase.messaging();
 </script>
+
 <script src="main.dart.js" type="application/javascript"></script>
 <script>
   if ("serviceWorker" in navigator) {

@@ -79,7 +79,7 @@ class AddCityDialogState extends State<AddCityDialog> {
     });
   }
 
-  AddCityApi() async {
+  addCityApi() async {
     if (_formKey.currentState!.validate()) {
       Navigator.pop(context);
       Map req = {
@@ -361,7 +361,7 @@ class AddCityDialogState extends State<AddCityDialog> {
           if (shared_pref.getString(USER_TYPE) == DEMO_ADMIN) {
             toast(language.demo_admin_msg);
           } else {
-            AddCityApi();
+            addCityApi();
           }
         }),
       ],

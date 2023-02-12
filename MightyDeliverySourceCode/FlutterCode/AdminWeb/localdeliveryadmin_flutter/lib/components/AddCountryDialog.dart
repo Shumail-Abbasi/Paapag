@@ -56,7 +56,7 @@ class AddCountryDialogState extends State<AddCountryDialog> {
     }
   }
 
-  AddCountryApiCall() async {
+  addCountryApiCall() async {
     if (_formKey.currentState!.validate()) {
       Navigator.pop(context);
       Map req = {
@@ -220,7 +220,7 @@ class AddCountryDialogState extends State<AddCountryDialog> {
           if (shared_pref.getString(USER_TYPE) == DEMO_ADMIN) {
             toast(language.demo_admin_msg);
           } else {
-            AddCountryApiCall();
+            addCountryApiCall();
           }
         }),
       ],

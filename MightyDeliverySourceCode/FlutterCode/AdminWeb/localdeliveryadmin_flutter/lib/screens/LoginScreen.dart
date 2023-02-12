@@ -41,7 +41,7 @@ class LoginScreenState extends State<LoginScreen> {
     });
   }
 
-  Future<void> LoginApiCall() async {
+  Future<void> loginApiCall() async {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
 
@@ -154,7 +154,7 @@ class LoginScreenState extends State<LoginScreen> {
                           Align(
                             alignment: Alignment.centerRight,
                             child: commonButton(language.login, () {
-                              LoginApiCall();
+                              loginApiCall();
                             }, width: 200),
                           ),
                         ],

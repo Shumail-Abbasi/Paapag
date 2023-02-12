@@ -83,7 +83,7 @@ class AddExtraChargeDialogState extends State<AddExtraChargeDialog> {
     });
   }
 
-  AddExtraChargeApiCall() async {
+  addExtraChargeApiCall() async {
     if (_formKey.currentState!.validate()) {
       if (chargeTypeValue == null) return toast(language.please_select_charge_type);
       Navigator.pop(context);
@@ -297,7 +297,7 @@ class AddExtraChargeDialogState extends State<AddExtraChargeDialog> {
           if (shared_pref.getString(USER_TYPE) == DEMO_ADMIN) {
             toast(language.demo_admin_msg);
           } else {
-            AddExtraChargeApiCall();
+            addExtraChargeApiCall();
           }
         }),
       ],

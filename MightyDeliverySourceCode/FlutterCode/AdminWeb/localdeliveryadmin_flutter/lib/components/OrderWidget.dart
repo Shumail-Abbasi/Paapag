@@ -74,9 +74,9 @@ class OrderWidgetState extends State<OrderWidget> {
     });
   }
 
-  deleteOrderApiCall(int OrderId) async {
+  deleteOrderApiCall(int orderId) async {
     appStore.setLoading(true);
-    await deleteOrderApi(OrderId).then((value) {
+    await deleteOrderApi(orderId).then((value) {
       appStore.setLoading(false);
       getOrderListApi();
       toast(value.message);
@@ -250,7 +250,7 @@ class OrderWidgetState extends State<OrderWidget> {
                                                               return Dialog(
                                                                 child: DeliveryOrderAssignWidget(
                                                                   orderModel: e,
-                                                                  OrderId: e.id!,
+                                                                  orderId: e.id!,
                                                                   onUpdate: () {
                                                                     getOrderListApi();
                                                                   },

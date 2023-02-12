@@ -2,7 +2,7 @@ import 'BaseLanguage.dart';
 
 class LanguageEn extends BaseLanguage {
   @override
-  String get app_name => 'Mighty Delivery';
+  String get app_name => 'Paapag Admin';
 
   @override
   String get update_city => 'Update City';
