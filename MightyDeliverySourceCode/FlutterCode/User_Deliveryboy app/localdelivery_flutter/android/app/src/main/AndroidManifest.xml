@@ -9,7 +9,7 @@
     <application
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
-        android:label="mDelivery"
+        android:label="Paapag"
         tools:replace="android:label">
 
         <meta-data
