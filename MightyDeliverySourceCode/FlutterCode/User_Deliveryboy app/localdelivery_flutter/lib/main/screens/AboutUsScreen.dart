@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:paapag/main.dart';
-import 'package:paapag/main/utils/Colors.dart';
-import 'package:paapag/main/utils/Constants.dart';
+import '../../main.dart';
+import '../../main/utils/Colors.dart';
+import '../../main/utils/Constants.dart';
 import 'package:nb_utils/nb_utils.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 import '../components/BodyCornerWidget.dart';
+import '../utils/Common.dart';
 
 class AboutUsScreen extends StatefulWidget {
   static String tag = '/AboutUsScreen';
@@ -75,7 +75,7 @@ class AboutUsScreenState extends State<AboutUsScreen> {
                 ],
               ),
               onTap: () {
-                launchUrl(Uri.parse('mailto:$mContactPref'));
+                commonLaunchUrl('mailto:$mContactPref');
               },
             ),
           ),
@@ -94,7 +94,7 @@ class AboutUsScreenState extends State<AboutUsScreen> {
                 ],
               ),
               onTap: () {
-                launchUrl(Uri.parse(mCodeCanyonURL));
+                commonLaunchUrl(mCodeCanyonURL);
               },
             ),
           ),

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:paapag/main.dart';
-import 'package:paapag/main/components/BodyCornerWidget.dart';
-import 'package:paapag/main/network/RestApis.dart';
-import 'package:paapag/main/utils/Common.dart';
-import 'package:paapag/main/utils/Widgets.dart';
+import '../../main.dart';
+import '../../main/components/BodyCornerWidget.dart';
+import '../../main/network/RestApis.dart';
+import '../../main/utils/Common.dart';
+import '../../main/utils/Widgets.dart';
 import 'package:nb_utils/nb_utils.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
@@ -30,24 +30,22 @@ class ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   }
 
   Future<void> submit() async {
-    if (formKey.currentState!.validate()) {
-      Map req = {
-        'email': forgotEmailController.text.trim(),
-      };
-      appStore.setLoading(true);
+    Map req = {
+      'email': forgotEmailController.text.trim(),
+    };
+    appStore.setLoading(true);
 
-      await forgotPassword(req).then((value) {
-        toast(value.message.validate());
+    await forgotPassword(req).then((value) {
+      toast(value.message.validate());
 
-        appStore.setLoading(false);
+      appStore.setLoading(false);
 
-        finish(context);
-      }).catchError((error) {
-        appStore.setLoading(false);
+      finish(context);
+    }).catchError((error) {
+      appStore.setLoading(false);
 
-        toast(error.toString());
-      });
-    }
+      toast(error.toString());
+    });
   }
 
   @override
@@ -87,7 +85,9 @@ class ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         ),
       ),
       bottomNavigationBar: commonButton(language.submit, () {
-        submit();
+        if (formKey.currentState!.validate()) {
+          submit();
+        }
       }).paddingAll(16),
     );
   }

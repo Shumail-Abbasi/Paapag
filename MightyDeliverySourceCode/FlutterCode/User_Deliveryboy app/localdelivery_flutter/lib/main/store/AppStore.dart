@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:paapag/main/language/AppLocalizations.dart';
-import 'package:paapag/main/language/BaseLanguage.dart';
-import 'package:paapag/main/utils/Colors.dart';
-import 'package:paapag/main/utils/Constants.dart';
+import '../../main/language/AppLocalizations.dart';
+import '../../main/language/BaseLanguage.dart';
+import '../../main/utils/Colors.dart';
+import '../../main/utils/Constants.dart';
 import 'package:mobx/mobx.dart';
 import 'package:nb_utils/nb_utils.dart';
 
@@ -41,10 +41,13 @@ abstract class _AppStore with Store {
   bool isOtpVerifyOnPickupDelivery = true;
 
   @observable
-  String currencyCode = 'PKR';
+  String currencyCode = 'INR';
 
   @observable
-  String currencySymbol = "₨";
+  String currencySymbol = "₹";
+
+  @observable
+  num availableBal = 0;
 
   @observable
   String currencyPosition = CURRENCY_POSITION_LEFT;

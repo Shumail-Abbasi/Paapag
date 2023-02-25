@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:lottie/lottie.dart';
-import 'package:paapag/delivery/screens/DeliveryDashBoard.dart';
-import 'package:paapag/main.dart';
-import 'package:paapag/main/components/BodyCornerWidget.dart';
-import 'package:paapag/main/models/CityListModel.dart';
-import 'package:paapag/main/models/CountryListModel.dart';
-import 'package:paapag/main/network/RestApis.dart';
-import 'package:paapag/main/utils/Colors.dart';
-import 'package:paapag/main/utils/Common.dart';
-import 'package:paapag/main/utils/Constants.dart';
-import 'package:paapag/user/screens/DashboardScreen.dart';
+import '../../delivery/screens/DeliveryDashBoard.dart';
+import '../../main.dart';
+import '../../main/components/BodyCornerWidget.dart';
+import '../../main/models/CityListModel.dart';
+import '../../main/models/CountryListModel.dart';
+import '../../main/network/RestApis.dart';
+import '../../main/utils/Colors.dart';
+import '../../main/utils/Common.dart';
+import '../../main/utils/Constants.dart';
+import '../../user/screens/DashboardScreen.dart';
 import 'package:nb_utils/nb_utils.dart';
 
 class UserCitySelectScreen extends StatefulWidget {

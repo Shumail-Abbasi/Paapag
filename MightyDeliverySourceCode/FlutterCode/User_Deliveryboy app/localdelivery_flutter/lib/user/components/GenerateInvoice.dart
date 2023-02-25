@@ -1,11 +1,11 @@
 import 'dart:io';
 import 'package:intl/intl.dart';
-import 'package:paapag/main.dart';
-import 'package:paapag/main/models/CountryListModel.dart';
-import 'package:paapag/main/models/ExtraChargeRequestModel.dart';
-import 'package:paapag/main/models/OrderListModel.dart';
-import 'package:paapag/main/utils/Common.dart';
-import 'package:paapag/main/utils/Constants.dart';
+import '../../main.dart';
+import '../../main/models/CountryListModel.dart';
+import '../../main/models/ExtraChargeRequestModel.dart';
+import '../../main/models/OrderListModel.dart';
+import '../../main/utils/Common.dart';
+import '../../main/utils/Constants.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
@@ -110,6 +110,8 @@ class PdfInvoiceApi {
         await PdfGoogleFonts.iBMPlexSansArabicRegular(),
         await PdfGoogleFonts.notoSansSymbols2Regular(),
         await PdfGoogleFonts.beVietnamProRegular(),
+        await PdfGoogleFonts.robotoRegular(),
+        await PdfGoogleFonts.padaukRegular(),
       ]),
     );
 
@@ -299,7 +301,7 @@ class PdfInvoiceApi {
 }
 
 class Utils {
-  static formatPrice(double price) => '${printAmount(price.toStringAsFixed(2).toDouble())}';
+  static formatPrice(double price) => '${printAmount(price.toStringAsFixed(digitAfterDecimal).toDouble())}';
 
   static formatDate(DateTime date) => DateFormat.yMd().format(date);
 }

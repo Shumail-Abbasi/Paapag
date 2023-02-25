@@ -1,11 +1,14 @@
+import 'dart:async';
+
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:paapag/main/models/models.dart';
-import 'package:paapag/main/screens/SplashScreen.dart';
-import 'package:paapag/main/utils/Constants.dart';
+import 'package:geolocator/geolocator.dart';
+import '../main/models/models.dart';
+import '../main/screens/SplashScreen.dart';
+import '../main/utils/Constants.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'AppTheme.dart';
@@ -15,6 +18,7 @@ import 'main/Services/UserServices.dart';
 import 'main/language/AppLocalizations.dart';
 import 'main/language/BaseLanguage.dart';
 import 'main/models/FileModel.dart';
+import 'main/screens/NoInternetScreen.dart';
 import 'main/store/AppStore.dart';
 import 'main/utils/Common.dart';
 import 'main/utils/DataProviders.dart';
@@ -25,6 +29,8 @@ UserService userService = UserService();
 ChatMessageService chatMessageService = ChatMessageService();
 NotificationService notificationService = NotificationService();
 late List<FileModel> fileList = [];
+bool isCurrentlyOnNoInternet = false;
+late StreamSubscription<Position> positionStream;
 
 bool mIsEnterKey = false;
 String mSelectedImage = "assets/default_wallpaper.png";
@@ -56,13 +62,48 @@ void main() async {
   runApp(MyApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+class MyApp extends StatefulWidget {
+  @override
+  MyAppState createState() => MyAppState();
+}
+
+class MyAppState extends State<MyApp> {
+  late StreamSubscription<ConnectivityResult> _connectivitySubscription;
+
+  @override
+  void initState() {
+    super.initState();
+    init();
+  }
+
+  void init() async {
+    _connectivitySubscription = Connectivity().onConnectivityChanged.listen((e) {
+      if (e == ConnectivityResult.none) {
+        log('not connected');
+        isCurrentlyOnNoInternet = true;
+        push(NoInternetScreen());
+      } else {
+        if (isCurrentlyOnNoInternet) {
+          pop();
+          isCurrentlyOnNoInternet = false;
+          toast(language.internetIsConnected);
+        }
+        log('connected');
+      }
+    });
+  }
+
+  @override
+  void setState(VoidCallback fn) {
+    _connectivitySubscription.cancel();
+    super.setState(fn);
+  }
 
   @override
   Widget build(BuildContext context) {
     return Observer(builder: (context) {
       return MaterialApp(
+        navigatorKey: navigatorKey,
         builder: (context, child) {
           return ScrollConfiguration(
             behavior: MyBehavior(),

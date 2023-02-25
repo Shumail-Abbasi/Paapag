@@ -1,21 +1,21 @@
 import 'package:animated_bottom_navigation_bar/animated_bottom_navigation_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:paapag/main.dart';
-import 'package:paapag/main/components/BodyCornerWidget.dart';
-import 'package:paapag/main/components/UserCitySelectScreen.dart';
-import 'package:paapag/main/models/CityListModel.dart';
-import 'package:paapag/main/models/models.dart';
-import 'package:paapag/main/screens/NotificationScreen.dart';
-import 'package:paapag/main/utils/Colors.dart';
-import 'package:paapag/main/utils/Constants.dart';
-import 'package:paapag/user/components/FilterOrderComponent.dart';
-import 'package:paapag/user/fragment/AccountFragment.dart';
-import 'package:paapag/user/fragment/OrderFragment.dart';
-import 'package:paapag/user/screens/CreateOrderScreen.dart';
-import 'package:nb_utils/nb_utils.dart';
-
+import '../../user/screens/WalletScreen.dart';
+import '../../main.dart';
+import '../../main/components/BodyCornerWidget.dart';
+import '../../main/components/UserCitySelectScreen.dart';
+import '../../main/models/CityListModel.dart';
+import '../../main/models/models.dart';
 import '../../main/network/RestApis.dart';
+import '../../main/screens/NotificationScreen.dart';
+import '../../main/utils/Colors.dart';
+import '../../main/utils/Constants.dart';
+import '../../user/components/FilterOrderComponent.dart';
+import '../../user/fragment/AccountFragment.dart';
+import '../../user/fragment/OrderFragment.dart';
+import '../../user/screens/CreateOrderScreen.dart';
+import 'package:nb_utils/nb_utils.dart';
 
 class DashboardScreen extends StatefulWidget {
   static String tag = '/DashboardScreen';
@@ -43,13 +43,19 @@ class DashboardScreenState extends State<DashboardScreen> {
     LiveStream().on('UpdateTheme', (p0) {
       setState(() {});
     });
-    await getAppSetting().then((value) {
-      appStore.setOtpVerifyOnPickupDelivery(value.otpVerifyOnPickupDelivery == 1);
-      appStore.setCurrencyCode(value.currencyCode ?? currencyCode);
-      appStore.setCurrencySymbol(value.currency ?? currencySymbol);
-      appStore.setCurrencyPosition(value.currencyPosition ?? CURRENCY_POSITION_LEFT);
-    }).catchError((error) {
-      log(error.toString());
+  }
+
+  getOrderListApiCall() async {
+    appStore.setLoading(true);
+    FilterAttributeModel filterData = FilterAttributeModel.fromJson(getJSONAsync(FILTER_DATA));
+    await getOrderList(orderStatus: filterData.orderStatus, fromDate: filterData.fromDate, toDate: filterData.toDate, page: 1).then((value) {
+      appStore.setLoading(false);
+      if (value.walletData != null) {
+        appStore.availableBal = value.walletData!.totalAmount;
+      }
+    }).catchError((e) {
+      appStore.setLoading(false);
+      log(e.toString());
     });
   }
 
@@ -70,7 +76,10 @@ class DashboardScreenState extends State<DashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
+    getOrderListApiCall();
+
     return Scaffold(
+      extendBody: true,
       appBar: AppBar(
         title: Text('${getTitle()}'),
         actions: [
@@ -89,10 +98,7 @@ class DashboardScreenState extends State<DashboardScreen> {
           }).paddingOnly(right: 16),
           Stack(
             children: [
-              Align(
-                alignment: AlignmentDirectional.center,
-                child: Icon(Icons.notifications),
-              ),
+              Align(alignment: AlignmentDirectional.center, child: Icon(Icons.notifications)),
               Observer(builder: (context) {
                 return Positioned(
                   right: 2,
@@ -101,10 +107,7 @@ class DashboardScreenState extends State<DashboardScreen> {
                     height: 20,
                     width: 20,
                     alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: Colors.orange,
-                      shape: BoxShape.circle,
-                    ),
+                    decoration: BoxDecoration(color: Colors.orange, shape: BoxShape.circle),
                     child: Text('${appStore.allUnreadCount < 99 ? appStore.allUnreadCount : '99+'}', style: primaryTextStyle(size: appStore.allUnreadCount > 99 ? 8 : 12, color: Colors.white)),
                   ),
                 ).visible(appStore.allUnreadCount != 0);
@@ -126,10 +129,7 @@ class DashboardScreenState extends State<DashboardScreen> {
                   child: Container(
                     height: 10,
                     width: 10,
-                    decoration: BoxDecoration(
-                      color: Colors.orange,
-                      shape: BoxShape.circle,
-                    ),
+                    decoration: BoxDecoration(color: Colors.orange, shape: BoxShape.circle),
                   ),
                 ).visible(appStore.isFiltering);
               }),
@@ -153,10 +153,15 @@ class DashboardScreenState extends State<DashboardScreen> {
         ][currentIndex],
       ),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: colorPrimary,
+        backgroundColor: appStore.availableBal >= 0 ? colorPrimary : textSecondaryColorGlobal,
         child: Icon(Icons.add, color: Colors.white),
         onPressed: () {
-          CreateOrderScreen().launch(context, pageRouteAnimation: PageRouteAnimation.SlideBottomTop);
+          if (appStore.availableBal >= 0) {
+            CreateOrderScreen().launch(context, pageRouteAnimation: PageRouteAnimation.SlideBottomTop);
+          } else {
+            toast(language.balanceInsufficient);
+            WalletScreen().launch(context);
+          }
         },
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
@@ -171,7 +176,6 @@ class DashboardScreenState extends State<DashboardScreen> {
         leftCornerRadius: 30,
         rightCornerRadius: 30,
         onTap: (index) => setState(() => currentIndex = index),
-        //other params
       ),
     );
   }

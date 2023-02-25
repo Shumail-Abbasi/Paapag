@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:paapag/main/components/BodyCornerWidget.dart';
-import 'package:paapag/main/models/OrderListModel.dart';
-import 'package:paapag/main/network/RestApis.dart';
-import 'package:paapag/main/utils/Colors.dart';
-import 'package:paapag/main/utils/Common.dart';
-import 'package:paapag/main/utils/Constants.dart';
-import 'package:paapag/user/screens/CreateOrderScreen.dart';
+import '../../main/components/BodyCornerWidget.dart';
+import '../../main/models/OrderListModel.dart';
+import '../../main/network/RestApis.dart';
+import '../../main/utils/Colors.dart';
+import '../../main/utils/Common.dart';
+import '../../main/utils/Constants.dart';
+import '../../user/screens/CreateOrderScreen.dart';
 import 'package:nb_utils/nb_utils.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../main.dart';
 
@@ -142,7 +141,7 @@ class DraftOrderListScreenState extends State<DraftOrderListScreen> {
                                                   Row(
                                                     children: [
                                                       item.date != null ? Text(printDate(item.date!), style: secondaryTextStyle()).expand() : SizedBox(),
-                                                      Text('${printAmount(item.totalAmount.validate())}', style: boldTextStyle()),
+                                                      Text('${printAmount(item.totalAmount??0)}', style: boldTextStyle()),
                                                     ],
                                                   ),
                                                 ],
@@ -152,7 +151,7 @@ class DraftOrderListScreenState extends State<DraftOrderListScreen> {
                                         : Row(
                                             children: [
                                               item.date != null ? Text(printDate(item.date!), style: secondaryTextStyle()).expand() : SizedBox(),
-                                              Text('${printAmount(item.totalAmount.validate())}', style: boldTextStyle()),
+                                              Text('${printAmount(item.totalAmount??0)}', style: boldTextStyle()),
                                             ],
                                           ),
                                     if (item.pickupPoint!.address != null || item.deliveryPoint!.address != null)
@@ -172,7 +171,7 @@ class DraftOrderListScreenState extends State<DraftOrderListScreen> {
                                                     Row(
                                                       children: [
                                                         Icon(Icons.call, color: Colors.green, size: 18).onTap(() {
-                                                          launchUrl(Uri.parse('tel:${item.pickupPoint!.contactNumber}'));
+                                                         commonLaunchUrl('tel:${item.pickupPoint!.contactNumber}');
                                                         }),
                                                         8.width,
                                                         Text('${item.pickupPoint!.contactNumber ?? ""}', style: primaryTextStyle()),
@@ -196,7 +195,7 @@ class DraftOrderListScreenState extends State<DraftOrderListScreen> {
                                                     Row(
                                                       children: [
                                                         Icon(Icons.call, color: Colors.green, size: 18).onTap((){
-                                                          launchUrl(Uri.parse('tel:${item.deliveryPoint!.contactNumber}'));
+                                                         commonLaunchUrl('tel:${item.deliveryPoint!.contactNumber}');
                                                         }),
                                                         8.width,
                                                         Text('${item.deliveryPoint!.contactNumber ?? ""}', style: primaryTextStyle()),

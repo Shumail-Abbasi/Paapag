@@ -4,14 +4,13 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:http/http.dart';
-import 'package:paapag/main/components/BodyCornerWidget.dart';
-import 'package:paapag/main/models/DeliveryDocumentListModel.dart';
-import 'package:paapag/main/models/DocumentListModel.dart';
-import 'package:paapag/main/network/RestApis.dart';
-import 'package:paapag/main/utils/Colors.dart';
-import 'package:paapag/main/utils/Common.dart';
+import '../../main/components/BodyCornerWidget.dart';
+import '../../main/models/DeliveryDocumentListModel.dart';
+import '../../main/models/DocumentListModel.dart';
+import '../../main/network/RestApis.dart';
+import '../../main/utils/Colors.dart';
+import '../../main/utils/Common.dart';
 import 'package:nb_utils/nb_utils.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../main.dart';
 import '../../main/network/NetworkUtils.dart';
@@ -258,10 +257,10 @@ class VerifyDeliveryPersonScreenState extends State<VerifyDeliveryPersonScreen> 
                                     decoration: boxDecorationWithRoundedCorners(backgroundColor: Colors.grey.withOpacity(0.2)),
                                     child: Text(deliveryPersonDocuments[index].deliveryManDocument!.split('/').last, style: primaryTextStyle()),
                                   ).onTap(() {
-                                    launchUrl(Uri.parse(deliveryPersonDocuments[index].deliveryManDocument.validate()));
+                                   commonLaunchUrl(deliveryPersonDocuments[index].deliveryManDocument.validate());
                                   })
                                 : commonCachedNetworkImage(deliveryPersonDocuments[index].deliveryManDocument!, height: 200, width: context.width(), fit: BoxFit.cover).cornerRadiusWithClipRRect(8).onTap(() {
-                                    launchUrl(Uri.parse(deliveryPersonDocuments[index].deliveryManDocument!.validate()));
+                                   commonLaunchUrl(deliveryPersonDocuments[index].deliveryManDocument!.validate());
                                   }),
                           ],
                         );

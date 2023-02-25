@@ -1,11 +1,14 @@
-import 'package:paapag/main/models/PaginationModel.dart';
+import '../../main/models/WalletListModel.dart';
+
+import '../../main/models/PaginationModel.dart';
 
 class OrderListModel {
   PaginationModel? pagination;
   List<OrderData>? data;
   int? allUnreadCount;
+  UserWalletModel? walletData;
 
-  OrderListModel({this.pagination, this.data, this.allUnreadCount});
+  OrderListModel({this.pagination, this.data, this.allUnreadCount,this.walletData});
 
   OrderListModel.fromJson(Map<String, dynamic> json) {
     pagination = json['pagination'] != null ? new PaginationModel.fromJson(json['pagination']) : null;
@@ -16,6 +19,9 @@ class OrderListModel {
       });
     }
     allUnreadCount = json['all_unread_count'];
+    walletData = json['wallet_data'] != null
+        ? new UserWalletModel.fromJson(json['wallet_data'])
+        : null;
   }
 
   Map<String, dynamic> toJson() {
@@ -27,6 +33,9 @@ class OrderListModel {
       data['data'] = this.data!.map((v) => v.toJson()).toList();
     }
     data['all_unread_count'] = this.allUnreadCount;
+    if (this.walletData != null) {
+      data['wallet_data'] = this.walletData!.toJson();
+    }
     return data;
   }
 }
@@ -78,7 +87,7 @@ class OrderData {
   String? cityName;
   String? parcelType;
   num? totalWeight;
-  num? totalDistance;
+  var totalDistance;
   String? pickupDatetime;
   String? deliveryDatetime;
   int? parentOrderId;
@@ -91,7 +100,7 @@ class OrderData {
   String? deliveryManName;
   num? fixedCharges;
   var extraCharges;
-  num? totalAmount;
+  var totalAmount;
   String? reason;
   int? pickupConfirmByClient;
   int? pickupConfirmByDeliveryMan;

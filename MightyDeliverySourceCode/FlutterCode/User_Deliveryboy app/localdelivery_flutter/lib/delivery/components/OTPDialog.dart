@@ -1,11 +1,11 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:paapag/main.dart';
-import 'package:paapag/main/utils/Colors.dart';
-import 'package:paapag/main/utils/Common.dart';
-import 'package:nb_utils/nb_utils.dart';
-import 'package:otp_text_field/otp_field.dart' as otpField;
+import '../../main.dart';
+import '../../main/utils/Colors.dart';
+import '../../main/utils/Common.dart';
+import 'package:nb_utils/nb_utils.dart' hide OTPTextField;
+import 'package:otp_text_field/otp_field.dart';
 import 'package:otp_text_field/style.dart';
 
 class OTPDialog extends StatefulWidget {
@@ -20,7 +20,7 @@ class OTPDialog extends StatefulWidget {
 }
 
 class OTPDialogState extends State<OTPDialog> {
-  otpField.OtpFieldController otpController = otpField.OtpFieldController();
+  OtpFieldController otpController = OtpFieldController();
   String verId = '';
 
   @override
@@ -91,7 +91,7 @@ class OTPDialogState extends State<OTPDialog> {
               ],
             ),
             30.height,
-            otpField.OTPTextField(
+            OTPTextField(
               controller: otpController,
               length: 6,
               width: MediaQuery.of(context).size.width,

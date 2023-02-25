@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:paapag/delivery/screens/DeliveryDashBoard.dart';
-import 'package:paapag/main/components/UserCitySelectScreen.dart';
-import 'package:paapag/main/models/CityListModel.dart';
-import 'package:paapag/main/network/RestApis.dart';
-import 'package:paapag/main/screens/LoginScreen.dart';
-import 'package:paapag/main/screens/WalkThroughScreen.dart';
-import 'package:paapag/main/utils/Constants.dart';
-import 'package:paapag/user/screens/DashboardScreen.dart';
+import '../../delivery/screens/DeliveryDashBoard.dart';
+import '../../main/components/UserCitySelectScreen.dart';
+import '../../main/models/CityListModel.dart';
+import '../../main/network/RestApis.dart';
+import '../../main/screens/LoginScreen.dart';
+import '../../main/screens/WalkThroughScreen.dart';
+import '../../main/utils/Constants.dart';
+import '../../user/screens/DashboardScreen.dart';
 import 'package:nb_utils/nb_utils.dart';
 
 import '../../main.dart';
@@ -29,9 +29,9 @@ class SplashScreenState extends State<SplashScreen> {
     setStatusBarColor(appStore.isDarkMode ? Colors.black : Colors.white, statusBarBrightness: appStore.isDarkMode ? Brightness.light : Brightness.dark);
     Future.delayed(
       Duration(seconds: 1),
-      () {
-        if (appStore.isLoggedIn) {
-          getUserDetail(getIntAsync(USER_ID).validate()).then((value) {
+      () async {
+        if (appStore.isLoggedIn && getIntAsync(USER_ID) != 0) {
+          await getUserDetail(getIntAsync(USER_ID)).then((value) {
             if (value.deletedAt != null) {
               logout(context);
             } else {
@@ -45,6 +45,8 @@ class SplashScreenState extends State<SplashScreen> {
                 UserCitySelectScreen().launch(context);
               }
             }
+          }).catchError((e) {
+            log(e);
           });
         } else {
           if (getBoolAsync(IS_FIRST_TIME, defaultValue: true)) {

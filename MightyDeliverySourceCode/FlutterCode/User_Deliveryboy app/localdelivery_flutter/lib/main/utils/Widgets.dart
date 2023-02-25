@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:paapag/main.dart';
+import '../../main.dart';
 import 'package:nb_utils/nb_utils.dart';
 
 import 'Colors.dart';
 
-Widget commonButton(String title, Function() onTap, {double? width, Color? color}) {
+Widget commonButton(String title, Function() onTap, {double? width, Color? color,Color? textColor}) {
   return SizedBox(
     width: width,
     child: AppButton(
@@ -13,7 +13,7 @@ Widget commonButton(String title, Function() onTap, {double? width, Color? color
       elevation: 0,
       child: Text(
         title,
-        style: boldTextStyle(color: white),
+        style: boldTextStyle(color: textColor ?? white),
       ),
       color: color ?? colorPrimary,
       onTap: onTap,

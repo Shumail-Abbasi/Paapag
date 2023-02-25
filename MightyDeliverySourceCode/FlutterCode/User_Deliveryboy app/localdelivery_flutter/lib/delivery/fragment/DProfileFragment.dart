@@ -1,20 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:paapag/main.dart';
-import 'package:paapag/main/components/BodyCornerWidget.dart';
-import 'package:paapag/main/network/RestApis.dart';
-import 'package:paapag/main/screens/LanguageScreen.dart';
-import 'package:paapag/main/utils/Colors.dart';
-import 'package:paapag/main/utils/Common.dart';
-import 'package:paapag/main/utils/Constants.dart';
+import '../../main/screens/BankDetailScreen.dart';
+import '../../main.dart';
+import '../../main/components/BodyCornerWidget.dart';
+import '../../main/network/RestApis.dart';
+import '../../main/screens/LanguageScreen.dart';
+import '../../main/utils/Colors.dart';
+import '../../main/utils/Common.dart';
+import '../../main/utils/Constants.dart';
 import 'package:nb_utils/nb_utils.dart';
-import 'package:url_launcher/url_launcher.dart';
-
 import '../../main/screens/AboutUsScreen.dart';
 import '../../main/screens/ChangePasswordScreen.dart';
 import '../../main/screens/EditProfileScreen.dart';
 import '../../main/screens/ThemeScreen.dart';
 import '../../main/components/UserCitySelectScreen.dart';
+import '../../user/screens/DeleteAccountScreen.dart';
+import '../../user/screens/WalletScreen.dart';
+import '../screens/EarningHistoryScreen.dart';
 import '../screens/VerifyDeliveryPersonScreen.dart';
 
 class DProfileFragment extends StatefulWidget {
@@ -71,6 +73,15 @@ class DProfileFragmentState extends State<DProfileFragment> {
                         settingItemWidget(Icons.assignment_outlined, language.verifyDocument, () {
                           VerifyDeliveryPersonScreen().launch(context);
                         },suffixIcon: getBoolAsync(IS_VERIFIED_DELIVERY_MAN) ? Icons.verified_user : null),
+                        settingItemWidget(Icons.add_card_outlined, language.earningHistory, () {
+                          EarningHistoryScreen().launch(context);
+                        }),
+                        settingItemWidget(Icons.wallet, language.wallet, () {
+                          WalletScreen().launch(context);
+                        }),
+                        settingItemWidget(Icons.credit_card, language.bankDetails, () {
+                          BankDetailScreen().launch(context);
+                        }),
                         settingItemWidget(Icons.lock_outline, language.changePassword, () {
                           ChangePasswordScreen().launch(context);
                         }),
@@ -84,16 +95,19 @@ class DProfileFragmentState extends State<DProfileFragment> {
                           ThemeScreen().launch(context);
                         }),
                         settingItemWidget(Icons.assignment_outlined, language.privacyPolicy, () {
-                          launchUrl(Uri.parse(mPrivacyPolicy));
+                          commonLaunchUrl(mPrivacyPolicy);
                         }),
                         settingItemWidget(Icons.help_outline, language.helpAndSupport, () {
-                          launchUrl(Uri.parse(mHelpAndSupport));
+                         commonLaunchUrl(mHelpAndSupport);
                         }),
                         settingItemWidget(Icons.assignment_outlined, language.termAndCondition, () {
-                          launchUrl(Uri.parse(mTermAndCondition));
+                         commonLaunchUrl(mTermAndCondition);
                         }),
                         settingItemWidget(Icons.info_outline, language.aboutUs, () {
                           AboutUsScreen().launch(context);
+                        }),
+                        settingItemWidget(Icons.delete_forever, language.deleteAccount, ()  {
+                          DeleteAccountScreen().launch(context);
                         }),
                         settingItemWidget(
                           Icons.logout,

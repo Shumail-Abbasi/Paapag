@@ -5,14 +5,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
-import 'package:paapag/main.dart';
-import 'package:paapag/main/components/BodyCornerWidget.dart';
-import 'package:paapag/main/models/OrderListModel.dart';
-import 'package:paapag/main/network/RestApis.dart';
-import 'package:paapag/main/utils/Colors.dart';
-import 'package:paapag/main/utils/Common.dart';
-import 'package:paapag/main/utils/Constants.dart';
-import 'package:paapag/user/components/CancelOrderDialog.dart';
+import '../../main.dart';
+import '../../main/components/BodyCornerWidget.dart';
+import '../../main/models/OrderListModel.dart';
+import '../../main/network/RestApis.dart';
+import '../../main/utils/Colors.dart';
+import '../../main/utils/Common.dart';
+import '../../main/utils/Constants.dart';
+import '../../user/components/CancelOrderDialog.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:screenshot/screenshot.dart';
@@ -62,7 +62,8 @@ class ReceivedScreenOrderScreenState extends State<ReceivedScreenOrderScreen> {
   Future<void> init() async {
     mIsUpdate = widget.orderData != null;
     if (mIsUpdate) {
-      picUpController.text = DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.parse(widget.orderData!.pickupDatetime.validate().isEmpty ? DateTime.now().toString() : widget.orderData!.pickupDatetime.validate()));
+      picUpController.text =
+          DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.parse(widget.orderData!.pickupDatetime.validate().isEmpty ? DateTime.now().toString() : widget.orderData!.pickupDatetime.validate()));
       reasonController.text = widget.orderData!.reason.validate();
       reason = widget.orderData!.reason.validate();
       log(picUpController);
@@ -149,7 +150,7 @@ class ReceivedScreenOrderScreenState extends State<ReceivedScreenOrderScreen> {
     setState(() {});
   }
 
-  sendOtp() async{
+  sendOtp() async {
     appStore.setLoading(true);
     await FirebaseAuth.instance.verifyPhoneNumber(
       timeout: const Duration(seconds: 60),
@@ -359,34 +360,33 @@ class ReceivedScreenOrderScreenState extends State<ReceivedScreenOrderScreen> {
                               if (!mIsCheck && widget.orderData!.paymentId == null && widget.isShowPayment) {
                                 return toast(language.pleaseConfirmPayment);
                               } else {
-                                appStore.isOtpVerifyOnPickupDelivery
-                                    ? sendOtp()
-                                    : saveOrderData();
+                                appStore.isOtpVerifyOnPickupDelivery ? sendOtp() : saveOrderData();
                               }
                             },
                           ).expand(),
-                          16.width,
-                          AppButton(
-                            width: context.width(),
-                            text: language.cancelOrder,
-                            textStyle: primaryTextStyle(color: white),
-                            elevation: 0,
-                            color: Colors.red,
-                            onTap: () async {
-                              showInDialog(
-                                context,
-                                contentPadding: EdgeInsets.all(16),
-                                builder: (p0) {
-                                  return CancelOrderDialog(
-                                    orderId: widget.orderData!.id.validate(),
-                                    onUpdate: () {
-                                      finish(context);
-                                    },
-                                  );
-                                },
-                              );
-                            },
-                          ).expand(),
+                          if (widget.orderData!.status == ORDER_ACTIVE && widget.orderData!.status == ORDER_ARRIVED) 16.width,
+                          if (widget.orderData!.status == ORDER_ACTIVE && widget.orderData!.status == ORDER_ARRIVED)
+                            AppButton(
+                              width: context.width(),
+                              text: language.cancelOrder,
+                              textStyle: primaryTextStyle(color: white),
+                              elevation: 0,
+                              color: Colors.red,
+                              onTap: () async {
+                                showInDialog(
+                                  context,
+                                  contentPadding: EdgeInsets.all(16),
+                                  builder: (p0) {
+                                    return CancelOrderDialog(
+                                      orderId: widget.orderData!.id.validate(),
+                                      onUpdate: () {
+                                        finish(context);
+                                      },
+                                    );
+                                  },
+                                );
+                              },
+                            ).expand(),
                         ],
                       ),
                     ],
@@ -447,7 +447,8 @@ class ReceivedScreenOrderScreenState extends State<ReceivedScreenOrderScreen> {
   }
 
   Future<void> paymentConfirmDialog(OrderData orderData) {
-    return showConfirmDialogCustom(context, primaryColor: colorPrimary, dialogType: DialogType.CONFIRMATION, title: orderTitle(orderData.status!), positiveText: language.yes, negativeText: language.cancel, onAccept: (c) async {
+    return showConfirmDialogCustom(context,
+        primaryColor: colorPrimary, dialogType: DialogType.CONFIRMATION, title: orderTitle(orderData.status!), positiveText: language.yes, negativeText: language.cancel, onAccept: (c) async {
       appStore.setLoading(true);
       Map req = {
         'order_id': orderData.id,

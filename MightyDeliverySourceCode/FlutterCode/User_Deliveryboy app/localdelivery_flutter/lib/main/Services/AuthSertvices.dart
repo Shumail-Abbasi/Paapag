@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:paapag/main/screens/LoginScreen.dart';
+import '../../main/screens/LoginScreen.dart';
 import 'package:nb_utils/nb_utils.dart';
 
 import '../../delivery/screens/DeliveryDashBoard.dart';
@@ -266,4 +266,11 @@ getCityDetailApiCall(int cityId, context) async {
       UserCitySelectScreen().launch(context, isNewTask: true);
     }
   }).catchError((error) {});
+}
+
+Future deleteUserFirebase() async {
+  if(FirebaseAuth.instance.currentUser != null) {
+    FirebaseAuth.instance.currentUser!.delete();
+    await FirebaseAuth.instance.signOut();
+  }
 }

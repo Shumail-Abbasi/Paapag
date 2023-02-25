@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:paapag/main/components/BodyCornerWidget.dart';
-import 'package:paapag/main/utils/Constants.dart';
+import '../../main/components/BodyCornerWidget.dart';
+import '../../main/utils/Constants.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:timeline_tile/timeline_tile.dart';
 

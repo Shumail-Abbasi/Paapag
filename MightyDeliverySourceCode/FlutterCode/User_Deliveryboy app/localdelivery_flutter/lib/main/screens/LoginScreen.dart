@@ -1,12 +1,13 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:paapag/main/network/RestApis.dart';
-import 'package:paapag/main/screens/ForgotPasswordScreen.dart';
-import 'package:paapag/main/screens/RegisterScreen.dart';
-import 'package:paapag/main/utils/Colors.dart';
-import 'package:paapag/main/utils/Common.dart';
-import 'package:paapag/main/utils/Constants.dart';
-import 'package:paapag/main/utils/Widgets.dart';
+import '../../main/network/RestApis.dart';
+import '../../main/screens/ForgotPasswordScreen.dart';
+import '../../main/screens/RegisterScreen.dart';
+import '../../main/utils/Colors.dart';
+import '../../main/utils/Common.dart';
+import '../../main/utils/Constants.dart';
+import '../../main/utils/Widgets.dart';
 import 'package:nb_utils/nb_utils.dart';
 
 import '../../delivery/screens/DeliveryDashBoard.dart';
@@ -34,6 +35,8 @@ class LoginScreenState extends State<LoginScreen> {
   FocusNode passFocus = FocusNode();
 
   bool mIsCheck = false;
+
+  bool isAcceptedTc = false;
 
   @override
   void initState() {
@@ -63,42 +66,46 @@ class LoginScreenState extends State<LoginScreen> {
   Future<void> loginApiCall() async {
     if (formKey.currentState!.validate()) {
       formKey.currentState!.save();
+      hideKeyboard(context);
+      if (isAcceptedTc) {
+        appStore.setLoading(true);
 
-      appStore.setLoading(true);
+        Map req = {
+          "email": emailController.text,
+          "password": passController.text,
+          "player_id": getStringAsync(PLAYER_ID).validate(),
+        };
 
-      Map req = {
-        "email": emailController.text,
-        "password": passController.text,
-        "player_id": getStringAsync(PLAYER_ID).validate(),
-      };
-
-      if (mIsCheck) {
-        await setValue(REMEMBER_ME, mIsCheck);
-        await setValue(USER_EMAIL, emailController.text);
-        await setValue(USER_PASSWORD, passController.text);
-      }
-      authService.signInWithEmailPassword(context, email: emailController.text, password: passController.text).then((value) async {
-        await logInApi(req).then((value) async {
-          appStore.setLoading(false);
-          if(value.data!.userType!=CLIENT && value.data!.userType!=DELIVERY_MAN){
-            await logout(context,isFromLogin: true);
-          }else {
-            if (getIntAsync(STATUS) == 1) {
-              if (value.data!.countryId != null && value.data!.cityId != null) {
-                await getCountryDetailApiCall(value.data!.countryId.validate());
-                getCityDetailApiCall(value.data!.cityId.validate());
-              } else {
-                UserCitySelectScreen().launch(context, isNewTask: true, pageRouteAnimation: PageRouteAnimation.Slide);
-              }
+        if (mIsCheck) {
+          await setValue(REMEMBER_ME, mIsCheck);
+          await setValue(USER_EMAIL, emailController.text);
+          await setValue(USER_PASSWORD, passController.text);
+        }
+        authService.signInWithEmailPassword(context, email: emailController.text, password: passController.text).then((value) async {
+          await logInApi(req).then((value) async {
+            appStore.setLoading(false);
+            if (value.data!.userType != CLIENT && value.data!.userType != DELIVERY_MAN) {
+              await logout(context, isFromLogin: true);
             } else {
-              toast(language.userNotApproveMsg);
+              if (getIntAsync(STATUS) == 1) {
+                if (value.data!.countryId != null && value.data!.cityId != null) {
+                  await getCountryDetailApiCall(value.data!.countryId.validate());
+                  getCityDetailApiCall(value.data!.cityId.validate());
+                } else {
+                  UserCitySelectScreen().launch(context, isNewTask: true, pageRouteAnimation: PageRouteAnimation.Slide);
+                }
+              } else {
+                toast(language.userNotApproveMsg);
+              }
             }
-          }
-        }).catchError((e) {
-          appStore.setLoading(false);
-          toast(e.toString());
+          }).catchError((e) {
+            appStore.setLoading(false);
+            toast(e.toString());
+          });
         });
-      });
+      }else{
+        toast(language.acceptTermService);
+      }
     }
   }
 
@@ -189,6 +196,39 @@ class LoginScreenState extends State<LoginScreen> {
                             setState(() {});
                           },
                         ),
+                        CheckboxListTile(
+                          contentPadding: EdgeInsets.zero,
+                          controlAffinity: ListTileControlAffinity.leading,
+                          activeColor: colorPrimary,
+                          title: RichTextWidget(
+                            list: [
+                              TextSpan(text: '${language.iAgreeToThe} ', style: secondaryTextStyle()),
+                              TextSpan(
+                                text: language.termOfService,
+                                style: boldTextStyle(color: colorPrimary, size: 14),
+                                recognizer: TapGestureRecognizer()
+                                  ..onTap = () {
+                                    commonLaunchUrl(mTermAndCondition);
+                                  },
+                              ),
+                              TextSpan(text: ' & ', style: secondaryTextStyle()),
+                              TextSpan(
+                                text: language.privacyPolicy,
+                                style: boldTextStyle(color: colorPrimary, size: 14),
+                                recognizer: TapGestureRecognizer()
+                                  ..onTap = () {
+                                    commonLaunchUrl(mPrivacyPolicy);
+                                  },
+                              ),
+                            ],
+                          ),
+                          value: isAcceptedTc,
+                          onChanged: (val) async {
+                            isAcceptedTc = val!;
+                            setState(() {});
+                          },
+                        ),
+                        16.height,
                         commonButton(
                           language.signIn,
                           () {

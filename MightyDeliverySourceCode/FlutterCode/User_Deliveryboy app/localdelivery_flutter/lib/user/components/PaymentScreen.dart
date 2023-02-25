@@ -3,24 +3,26 @@
 // import 'package:flutter/material.dart';
 // import 'package:flutter_braintree/flutter_braintree.dart';
 // import 'package:flutter_mobx/flutter_mobx.dart';
+// import 'package:flutter_paystack/flutter_paystack.dart';
 // import 'package:flutter_paytabs_bridge/BaseBillingShippingInfo.dart' as payTab;
 // import 'package:flutter_paytabs_bridge/IOSThemeConfiguration.dart';
 // import 'package:flutter_paytabs_bridge/PaymentSdkApms.dart';
 // import 'package:flutter_paytabs_bridge/PaymentSdkConfigurationDetails.dart';
 // import 'package:flutter_paytabs_bridge/flutter_paytabs_bridge.dart';
 // import 'package:flutter_stripe/flutter_stripe.dart';
+// import 'package:flutterwave_standard/flutterwave.dart';
+// import 'package:flutterwave_standard/view/view_utils.dart';
 // import 'package:http/http.dart' as http;
 // import 'package:intl/intl.dart';
 // import 'package:mercado_pago_mobile_checkout/mercado_pago_mobile_checkout.dart';
-// import 'package:paapag/main/components/BodyCornerWidget.dart';
-// import 'package:paapag/main/models/PaymentGatewayListModel.dart';
-// import 'package:paapag/main/network/NetworkUtils.dart';
-// import 'package:paapag/main/network/RestApis.dart';
-// import 'package:paapag/main/utils/Colors.dart';
-// import 'package:paapag/main/utils/Common.dart';
-// import 'package:paapag/main/utils/Constants.dart';
-// import 'package:paapag/main/utils/Widgets.dart';
-// import 'package:paapag/user/screens/DashboardScreen.dart';
+// import '../../main/components/BodyCornerWidget.dart';
+// import '../../main/models/PaymentGatewayListModel.dart';
+// import '../../main/network/RestApis.dart';
+// import '../../main/utils/Colors.dart';
+// import '../../main/utils/Common.dart';
+// import '../../main/utils/Constants.dart';
+// import '../../main/utils/Widgets.dart';
+// import '../../user/screens/DashboardScreen.dart';
 // import 'package:my_fatoorah/my_fatoorah.dart';
 // import 'package:nb_utils/nb_utils.dart';
 // import 'package:paytm/paytm.dart';
@@ -34,9 +36,10 @@
 // class PaymentScreen extends StatefulWidget {
 //   static String tag = '/PaymentScreen';
 //   final num totalAmount;
-//   final int orderId;
+//   final int? orderId;
+//   final bool? isWallet;
 //
-//   PaymentScreen({required this.totalAmount, required this.orderId});
+//   PaymentScreen({required this.totalAmount, this.orderId, this.isWallet = false});
 //
 //   @override
 //   PaymentScreenState createState() => PaymentScreenState();
@@ -63,7 +66,8 @@
 //   String? selectedPaymentType;
 //   bool isTestType = true;
 //   late Razorpay _razorpay;
-//
+//   final plugin = PaystackPlugin();
+//   CheckoutMethod method = CheckoutMethod.card;
 //
 //   bool isDisabled = false;
 //
@@ -79,14 +83,21 @@
 //
 //   Future<void> init() async {
 //     await paymentListApiCall();
-//     Stripe.publishableKey = stripPaymentPublishKey.validate();
-//     await Stripe.instance.applySettings().catchError((e) {
-//       log("${e.toString()}");
-//     });
-//     _razorpay = Razorpay();
-//     _razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, _handlePaymentSuccess);
-//     _razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, _handlePaymentError);
-//     _razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET, _handleExternalWallet);
+//     if (paymentGatewayList.any((element) => element.type == PAYMENT_TYPE_STRIPE)) {
+//       Stripe.publishableKey = stripPaymentPublishKey.validate();
+//       await Stripe.instance.applySettings().catchError((e) {
+//         log("${e.toString()}");
+//       });
+//     }
+//     if (paymentGatewayList.any((element) => element.type == PAYMENT_TYPE_PAYSTACK)) {
+//       plugin.initialize(publicKey: payStackPublicKey.validate());
+//     }
+//     if (paymentGatewayList.any((element) => element.type == PAYMENT_TYPE_RAZORPAY)) {
+//       _razorpay = Razorpay();
+//       _razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, _handlePaymentSuccess);
+//       _razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, _handlePaymentError);
+//       _razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET, _handleExternalWallet);
+//     }
 //   }
 //
 //   /// Get Payment Gateway Api Call
@@ -104,6 +115,10 @@
 //             payStackPublicKey = element.isTest == 1 ? element.testValue!.publicKey : element.liveValue!.publicKey;
 //           } else if (element.type == PAYMENT_TYPE_RAZORPAY) {
 //             razorKey = element.isTest == 1 ? element.testValue!.keyId.validate() : element.liveValue!.keyId.validate();
+//           } else if (element.type == PAYMENT_TYPE_FLUTTERWAVE) {
+//             flutterWavePublicKey = element.isTest == 1 ? element.testValue!.publicKey : element.liveValue!.publicKey;
+//             flutterWaveSecretKey = element.isTest == 1 ? element.testValue!.secretKey : element.liveValue!.secretKey;
+//             flutterWaveEncryptionKey = element.isTest == 1 ? element.testValue!.encryptionKey : element.liveValue!.encryptionKey;
 //           } else if (element.type == PAYMENT_TYPE_PAYPAL) {
 //             payPalTokenizationKey = element.isTest == 1 ? element.testValue!.tokenizationKey : element.liveValue!.tokenizationKey;
 //           } else if (element.type == PAYMENT_TYPE_PAYTABS) {
@@ -160,7 +175,7 @@
 //       'key': razorKey.validate(),
 //       'amount': (widget.totalAmount * 100).toInt(),
 //       'theme.color': '#5957b0',
-//       'name': 'Paapag',
+//       'name': mAppName,
 //       'description': 'On Demand Local Delivery System',
 //       'retry': {'enabled': true, 'max_count': 1},
 //       'send_sms_hash': true,
@@ -184,7 +199,11 @@
 //       'txn_id': response.paymentId,
 //       'signature': response.signature,
 //     };
-//     savePaymentApiCall(paymentType: PAYMENT_TYPE_RAZORPAY, paymentStatus: 'paid', txnId: response.paymentId, transactionDetail: req);
+//     if (widget.isWallet == true) {
+//       paymentConfirm();
+//     } else {
+//       savePaymentApiCall(paymentType: PAYMENT_TYPE_RAZORPAY, paymentStatus: 'paid', txnId: response.paymentId, transactionDetail: req);
+//     }
 //   }
 //
 //   void _handlePaymentError(PaymentFailureResponse response) {
@@ -193,6 +212,40 @@
 //
 //   void _handleExternalWallet(ExternalWalletResponse response) {
 //     Fluttertoast.showToast(msg: "EXTERNAL_WALLET: " + response.walletName!, toastLength: Toast.LENGTH_SHORT);
+//   }
+//
+//   /// FlutterWave Payment
+//   void flutterWaveCheckout() async {
+//     final customer = Customer(name: getStringAsync(NAME), phoneNumber: getStringAsync(USER_CONTACT_NUMBER), email: getStringAsync(USER_EMAIL));
+//
+//     final Flutterwave flutterwave = Flutterwave(
+//       context: context,
+//       publicKey: flutterWavePublicKey.validate(),
+//       currency: appStore.currencyCode,
+//       redirectUrl: "https://www.google.com",
+//       txRef: DateTime.now().millisecond.toString(),
+//       amount: widget.totalAmount.toString(),
+//       customer: customer,
+//       paymentOptions: "card, payattitude",
+//       customization: Customization(title: "Test Payment"),
+//       isTestMode: isTestType,
+//     );
+//     final ChargeResponse response = await flutterwave.charge();
+//     if (response.status == 'successful') {
+//       Map<String, dynamic> req = {
+//         "txn_id": response.transactionId.toString(),
+//         "status": response.status.toString(),
+//         "reference": response.txRef.toString(),
+//       };
+//       if (widget.isWallet == true) {
+//         paymentConfirm();
+//       } else {
+//         savePaymentApiCall(paymentStatus: PAYMENT_PAID, txnId: response.transactionId, paymentType: PAYMENT_TYPE_FLUTTERWAVE, transactionDetail: req);
+//       }
+//       print("${response.toJson()}");
+//     } else {
+//       FlutterwaveViewUtils.showToast(context, 'Transaction Failed');
+//     }
 //   }
 //
 //   /// StripPayment
@@ -220,7 +273,7 @@
 //       appStore.setLoading(false);
 //       http.Response.fromStream(value).then((response) async {
 //         if (response.statusCode == 200) {
-//           var res = StripePayModel.fromJson(await handleResponse(response));
+//           var res = StripePayModel.fromJson(jsonDecode(response.body));
 //
 //           await Stripe.instance.initPaymentSheet(
 //             paymentSheetParameters: SetupPaymentSheetParameters(
@@ -230,14 +283,18 @@
 //               googlePay: true,
 //               testEnv: isTestType,
 //               merchantCountryCode: 'IN',
-//               merchantDisplayName: 'Paapag',
+//               merchantDisplayName: mAppName,
 //               customerId: getIntAsync(USER_ID).toString(),
 //               setupIntentClientSecret: res.clientSecret.validate(),
 //             ),
 //           );
 //           await Stripe.instance.presentPaymentSheet(parameters: PresentPaymentSheetParameters(clientSecret: res.clientSecret!, confirmPayment: true)).then(
 //             (value) async {
-//               savePaymentApiCall(paymentType: PAYMENT_TYPE_STRIPE, paymentStatus: PAYMENT_PAID, txnId: res.id);
+//               if (widget.isWallet == true) {
+//                 paymentConfirm();
+//               } else {
+//                 savePaymentApiCall(paymentType: PAYMENT_TYPE_STRIPE, paymentStatus: PAYMENT_PAID, txnId: res.id);
+//               }
 //             },
 //           ).catchError((e) {
 //             log("presentPaymentSheet ${e.toString()}");
@@ -253,6 +310,63 @@
 //     });
 //   }
 //
+//   ///PayStack Payment
+//   void payStackPayment(BuildContext context) async {
+//     Charge charge = Charge()
+//       ..amount = (widget.totalAmount * 100).toInt() // In base currency
+//       ..email = getStringAsync(USER_EMAIL);
+//
+//     charge.reference = _getReference();
+//
+//     try {
+//       CheckoutResponse response = await plugin.checkout(context, method: method, charge: charge, fullscreen: false);
+//       payStackUpdateStatus(response.reference, response.message);
+//       Map<String, dynamic> req = {
+//         "status": response.status.toString(),
+//         "card": {
+//           "number": response.card!.number,
+//           "cvc": response.card!.cvc,
+//           "expiry_month": response.card!.expiryMonth,
+//           "expiry_year": response.card!.expiryYear,
+//         },
+//         "message": response.message.toString(),
+//         "method": response.method.name.toString(),
+//         "reference": response.reference.toString(),
+//       };
+//       if (response.message == 'Success') {
+//         if (widget.isWallet == true) {
+//           paymentConfirm();
+//         } else {
+//           savePaymentApiCall(paymentType: PAYMENT_TYPE_PAYSTACK, paymentStatus: PAYMENT_PAID, transactionDetail: req, txnId: response.reference);
+//         }
+//       } else {
+//         toast('Payment Failed');
+//       }
+//     } catch (e) {
+//       payStackShowMessage("Check console for error");
+//       rethrow;
+//     }
+//   }
+//
+//   payStackUpdateStatus(String? reference, String message) {
+//     payStackShowMessage(message, const Duration(seconds: 7));
+//   }
+//
+//   void payStackShowMessage(String message, [Duration duration = const Duration(seconds: 4)]) {
+//     toast(message);
+//     log(message);
+//   }
+//
+//   String _getReference() {
+//     String platform;
+//     if (Platform.isIOS) {
+//       platform = 'iOS';
+//     } else {
+//       platform = 'Android';
+//     }
+//     return 'ChargedFrom${platform}_${DateTime.now().millisecondsSinceEpoch}';
+//   }
+//
 //   /// Paypal Payment
 //   void payPalPayment() async {
 //     final request = BraintreePayPalRequest(amount: widget.totalAmount.toString(), currencyCode: appStore.currencyCode, displayName: getStringAsync(USER_NAME));
@@ -266,7 +380,11 @@
 //         "description": result.description,
 //         "paypal_payer_id": result.paypalPayerId,
 //       };
-//       savePaymentApiCall(paymentType: PAYMENT_TYPE_PAYPAL, paymentStatus: PAYMENT_PAID, txnId: result.nonce, transactionDetail: request);
+//       if (widget.isWallet == true) {
+//         paymentConfirm();
+//       } else {
+//         savePaymentApiCall(paymentType: PAYMENT_TYPE_PAYPAL, paymentStatus: PAYMENT_PAID, txnId: result.nonce, transactionDetail: request);
+//       }
 //     }
 //   }
 //
@@ -278,7 +396,11 @@
 //           var transactionDetails = event["data"];
 //           if (transactionDetails["isSuccess"]) {
 //             toast("successful transaction");
-//             savePaymentApiCall(txnId: transactionDetails['transactionReference'], paymentType: PAYMENT_TYPE_PAYTABS, paymentStatus: 'paid');
+//             if (widget.isWallet == true) {
+//               paymentConfirm();
+//             } else {
+//               savePaymentApiCall(txnId: transactionDetails['transactionReference'], paymentType: PAYMENT_TYPE_PAYTABS, paymentStatus: 'paid');
+//             }
 //           } else {
 //             toast("failed transaction");
 //           }
@@ -293,8 +415,8 @@
 //   }
 //
 //   PaymentSdkConfigurationDetails generateConfig() {
-//     var billingDetails = payTab.BillingDetails(getStringAsync(NAME), getStringAsync(USER_EMAIL), getStringAsync(USER_CONTACT_NUMBER), getStringAsync(USER_ADDRESS), CountryModel.fromJson(getJSONAsync(COUNTRY_DATA)).name.validate(),
-//         CityModel.fromJson(getJSONAsync(CITY_DATA)).name.validate(), "", "");
+//     var billingDetails = payTab.BillingDetails(getStringAsync(NAME), getStringAsync(USER_EMAIL), getStringAsync(USER_CONTACT_NUMBER), getStringAsync(USER_ADDRESS),
+//         CountryModel.fromJson(getJSONAsync(COUNTRY_DATA)).name.validate(), CityModel.fromJson(getJSONAsync(CITY_DATA)).name.validate(), "", "");
 //     List<PaymentSdkAPms> apms = [];
 //     apms.add(PaymentSdkAPms.STC_PAY);
 //     var configuration = PaymentSdkConfigurationDetails(
@@ -336,13 +458,21 @@
 //         body: body,
 //         headers: {'Content-type': "application/json"},
 //       );
-//       String preferenceId = json.decode(response.body)['id'];
-//       PaymentResult result = await MercadoPagoMobileCheckout.startCheckout(
-//         mercadoPagoPublicKey!,
-//         preferenceId,
-//       );
-//       if (result.status == 'approved') {
-//         savePaymentApiCall(paymentStatus: 'paid', paymentType: PAYMENT_TYPE_MERCADOPAGO, txnId: result.id.toString());
+//       String? preferenceId = json.decode(response.body)['id'];
+//       if (preferenceId != null) {
+//         PaymentResult result = await MercadoPagoMobileCheckout.startCheckout(
+//           mercadoPagoPublicKey!,
+//           preferenceId,
+//         );
+//         if (result.status == 'approved') {
+//           if (widget.isWallet == true) {
+//             paymentConfirm();
+//           } else {
+//             savePaymentApiCall(paymentStatus: 'paid', paymentType: PAYMENT_TYPE_MERCADOPAGO, txnId: result.id.toString());
+//           }
+//         }
+//       } else {
+//         toast(json.decode(response.body)['message']);
 //       }
 //     } catch (e) {
 //       print(e);
@@ -398,7 +528,11 @@
 //             if (value['response'] != null) {
 //               toast(value['response']['RESPMSG']);
 //               if (value['response']['STATUS'] == 'TXN_SUCCESS') {
-//                 savePaymentApiCall(paymentType: PAYMENT_TYPE_PAYTM, paymentStatus: 'paid', txnId: value['response']['TXNID']);
+//                 if (widget.isWallet == true) {
+//                   paymentConfirm();
+//                 } else {
+//                   savePaymentApiCall(paymentType: PAYMENT_TYPE_PAYTM, paymentStatus: 'paid', txnId: value['response']['TXNID']);
+//                 }
 //               }
 //             }
 //           }
@@ -443,10 +577,33 @@
 //             ),
 //     );
 //     if (response.isSuccess) {
-//       savePaymentApiCall(paymentType: PAYMENT_TYPE_MYFATOORAH, txnId: response.paymentId, paymentStatus: 'paid');
+//       if (widget.isWallet == true) {
+//         paymentConfirm();
+//       } else {
+//         savePaymentApiCall(paymentType: PAYMENT_TYPE_MYFATOORAH, txnId: response.paymentId, paymentStatus: 'paid');
+//       }
 //     } else if (response.isError) {
 //       toast('Payment Failed');
 //     }
+//   }
+//
+//   Future<void> paymentConfirm() async {
+//     Map req = {
+//       "user_id": getIntAsync(USER_ID),
+//       "type": "credit",
+//       "amount": widget.totalAmount,
+//       "transaction_type": "topup",
+//       "currency": appStore.currencyCode,
+//     };
+//     appStore.isLoading = true;
+//     await saveWallet(req).then((value) {
+//       appStore.isLoading = false;
+//       finish(context, true);
+//     }).catchError((error) {
+//       appStore.isLoading = false;
+//       finish(context);
+//       log(error.toString());
+//     });
 //   }
 //
 //   @override
@@ -517,6 +674,10 @@
 //                               stripePay();
 //                             } else if (selectedPaymentType == PAYMENT_TYPE_RAZORPAY) {
 //                               razorPayPayment();
+//                             } else if (selectedPaymentType == PAYMENT_TYPE_PAYSTACK) {
+//                               payStackPayment(context);
+//                             } else if (selectedPaymentType == PAYMENT_TYPE_FLUTTERWAVE) {
+//                               flutterWaveCheckout();
 //                             } else if (selectedPaymentType == PAYMENT_TYPE_PAYPAL) {
 //                               payPalPayment();
 //                             } else if (selectedPaymentType == PAYMENT_TYPE_PAYTABS) {

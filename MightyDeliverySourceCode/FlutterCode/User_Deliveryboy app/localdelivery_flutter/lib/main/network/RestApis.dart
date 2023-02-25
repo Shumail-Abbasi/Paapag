@@ -3,21 +3,21 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
 import 'package:intl/intl.dart';
-import 'package:paapag/main/models/ChangePasswordResponse.dart';
-import 'package:paapag/main/models/CityDetailModel.dart';
-import 'package:paapag/main/models/CityListModel.dart';
-import 'package:paapag/main/models/CountryDetailModel.dart';
-import 'package:paapag/main/models/CountryListModel.dart';
-import 'package:paapag/main/models/DeliveryDocumentListModel.dart';
-import 'package:paapag/main/models/DocumentListModel.dart';
-import 'package:paapag/main/models/LDBaseResponse.dart';
-import 'package:paapag/main/models/LoginResponse.dart';
-import 'package:paapag/main/models/NotificationModel.dart';
-import 'package:paapag/main/models/OrderListModel.dart';
-import 'package:paapag/main/models/ParcelTypeListModel.dart';
-import 'package:paapag/main/models/PaymentGatewayListModel.dart';
-import 'package:paapag/main/screens/LoginScreen.dart';
-import 'package:paapag/main/utils/Constants.dart';
+import '../../main/models/ChangePasswordResponse.dart';
+import '../../main/models/CityDetailModel.dart';
+import '../../main/models/CityListModel.dart';
+import '../../main/models/CountryDetailModel.dart';
+import '../../main/models/CountryListModel.dart';
+import '../../main/models/DeliveryDocumentListModel.dart';
+import '../../main/models/DocumentListModel.dart';
+import '../../main/models/LDBaseResponse.dart';
+import '../../main/models/LoginResponse.dart';
+import '../../main/models/NotificationModel.dart';
+import '../../main/models/OrderListModel.dart';
+import '../../main/models/ParcelTypeListModel.dart';
+import '../../main/models/PaymentGatewayListModel.dart';
+import '../../main/screens/LoginScreen.dart';
+import '../../main/utils/Constants.dart';
 import 'package:nb_utils/nb_utils.dart';
 
 import '../../main.dart';
@@ -25,6 +25,9 @@ import '../models/AppSettingModel.dart';
 import '../models/AutoCompletePlacesListModel.dart';
 import '../models/OrderDetailModel.dart';
 import '../models/PlaceIdDetailModel.dart';
+import '../models/UserProfileDetailModel.dart';
+import '../models/WalletListModel.dart';
+import '../models/WithDrawListModel.dart';
 import 'NetworkUtils.dart';
 
 //region Auth
@@ -47,7 +50,7 @@ Future<LoginResponse> signUpApi(Map request) async {
     await setValue(USER_ID, loginResponse.data!.id.validate());
     await setValue(NAME, loginResponse.data!.name.validate());
     await setValue(USER_EMAIL, loginResponse.data!.email.validate());
-    await setValue(USER_TOKEN, loginResponse.data!.apiToken.validate());
+    await setValue(USER_TOKEN, loginResponse.data!.fcmToken.validate());
     await setValue(USER_CONTACT_NUMBER, loginResponse.data!.contactNumber.validate());
     await setValue(USER_PROFILE_PHOTO, loginResponse.data!.profileImage.validate());
     await setValue(USER_TYPE, loginResponse.data!.userType.validate());
@@ -110,18 +113,16 @@ Future<LoginResponse> logInApi(Map request, {bool isSocialLogin = false}) async 
     await setValue(COUNTRY_ID, loginResponse.data!.countryId.validate());
     await setValue(CITY_ID, loginResponse.data!.cityId.validate());
     await setValue(UID, loginResponse.data!.uid.validate());
-    await setValue(IS_VERIFIED_DELIVERY_MAN,loginResponse.data!.isVerifiedDeliveryMan == 1);
-
+    await setValue(IS_VERIFIED_DELIVERY_MAN, loginResponse.data!.isVerifiedDeliveryMan == 1);
     /* await appStore.setUserName(loginResponse.userData!.username.validate());
     await appStore.setRole(loginResponse.userData!.user_type.validate());
     await appStore.setToken(loginResponse.userData!.api_token.validate());
     await appStore.setUserID(loginResponse.userData!.id.validate());*/
     await appStore.setUserEmail(loginResponse.data!.email.validate());
-    if(getIntAsync(STATUS) == 1){
+    if (getIntAsync(STATUS) == 1) {
       await appStore.setLogin(true);
-    }else{
+    } else {
       await appStore.setLogin(false);
-
     }
 
     await setValue(USER_PASSWORD, request['password']);
@@ -132,33 +133,49 @@ Future<LoginResponse> logInApi(Map request, {bool isSocialLogin = false}) async 
   });
 }
 
-Future<void> logout(BuildContext context,{bool isFromLogin=false}) async {
-  await removeKey(USER_ID);
-  await removeKey(NAME);
-  await removeKey(USER_TOKEN);
-  await removeKey(USER_CONTACT_NUMBER);
-  await removeKey(USER_PROFILE_PHOTO);
-  await removeKey(USER_TYPE);
-  await removeKey(USER_NAME);
-  await removeKey(USER_ADDRESS);
-  await removeKey(STATUS);
-  await removeKey(COUNTRY_ID);
-  await removeKey(COUNTRY_DATA);
-  await removeKey(CITY_ID);
-  await removeKey(CITY_DATA);
-  await removeKey(FILTER_DATA);
-  await removeKey(IS_VERIFIED_DELIVERY_MAN);
-  if (!getBoolAsync(REMEMBER_ME)) {
-    await removeKey(USER_EMAIL);
-    await removeKey(USER_PASSWORD);
+Future<void> logout(BuildContext context, {bool isFromLogin = false,bool isDeleteAccount=false}) async {
+  clearData() async {
+    await removeKey(USER_ID);
+    await removeKey(NAME);
+    await removeKey(USER_TOKEN);
+    await removeKey(USER_CONTACT_NUMBER);
+    await removeKey(USER_PROFILE_PHOTO);
+    await removeKey(USER_TYPE);
+    await removeKey(USER_NAME);
+    await removeKey(USER_ADDRESS);
+    await removeKey(STATUS);
+    await removeKey(COUNTRY_ID);
+    await removeKey(COUNTRY_DATA);
+    await removeKey(CITY_ID);
+    await removeKey(CITY_DATA);
+    await removeKey(FILTER_DATA);
+    await removeKey(IS_VERIFIED_DELIVERY_MAN);
+    if (!getBoolAsync(REMEMBER_ME)) {
+      await removeKey(USER_EMAIL);
+      await removeKey(USER_PASSWORD);
+    }
+
+    await appStore.setLogin(false);
+    appStore.setFiltering(false);
+    if (isFromLogin) {
+      toast(language.credentialNotMatch);
+    } else {
+      LoginScreen().launch(context, isNewTask: true);
+    }
   }
 
-  await appStore.setLogin(false);
-  appStore.setFiltering(false);
-  if(isFromLogin){
-    toast('These credential do not match our records');
-  }else {
-    LoginScreen().launch(context, isNewTask: true);
+  if (getStringAsync(USER_TYPE) == DELIVERY_MAN) {
+    positionStream.cancel();
+  }
+  if (isDeleteAccount) {
+    clearData();
+  } else {
+    await logoutApi().then((value) async {
+      clearData();
+    }).catchError((e) {
+      appStore.setLoading(false);
+      throw e.toString();
+    });
   }
 }
 
@@ -217,9 +234,8 @@ Future updateProfile({String? userName, String? name, String? userEmail, String?
   });
 }
 
-
-Future<UserData> getUserDetail(int id)async{
-  return UserData.fromJson(await handleResponse(await buildHttpResponse('user-detail?id=$id',method: HttpMethod.GET)).then((value) => value['data']));
+Future<UserData> getUserDetail(int id) async {
+  return UserData.fromJson(await handleResponse(await buildHttpResponse('user-detail?id=$id', method: HttpMethod.GET)).then((value) => value['data']));
 }
 
 /// Create Order Api
@@ -231,8 +247,8 @@ Future<LDBaseResponse> deleteOrder(int id) async {
   return LDBaseResponse.fromJson(await handleResponse(await buildHttpResponse('order-delete/$id', method: HttpMethod.POST)));
 }
 
-Future<OrderDetailModel> getOrderDetails(int id)async{
-  return OrderDetailModel.fromJson(await handleResponse(await buildHttpResponse('order-detail?id=$id',method: HttpMethod.GET)));
+Future<OrderDetailModel> getOrderDetails(int id) async {
+  return OrderDetailModel.fromJson(await handleResponse(await buildHttpResponse('order-detail?id=$id', method: HttpMethod.GET)));
 }
 
 /// ParcelType Api
@@ -350,6 +366,14 @@ Future<LDBaseResponse> savePayment(Map request) async {
   return LDBaseResponse.fromJson(await handleResponse(await buildHttpResponse('payment-save', request: request, method: HttpMethod.POST)));
 }
 
+Future<WithDrawListModel> getWithDrawList({int? page}) async {
+  return WithDrawListModel.fromJson(await handleResponse(await buildHttpResponse('withdrawrequest-list?page=$page', method: HttpMethod.GET)));
+}
+
+Future<LDBaseResponse> saveWithDrawRequest(Map request) async {
+  return LDBaseResponse.fromJson(await handleResponse(await buildHttpResponse('save-withdrawrequest', method: HttpMethod.POST, request: request)));
+}
+
 /// Update Location
 Future updateLocation({String? userName, String? userEmail, String? latitude, String? longitude}) async {
   MultipartRequest multiPartRequest = await getMultiPartRequest('update-profile');
@@ -391,18 +415,63 @@ Future<AppSettingModel> getAppSetting() async {
 }
 
 /// Cancel AutoAssign order
-Future<LDBaseResponse> cancelAutoAssignOrder(Map request) async{
-  return LDBaseResponse.fromJson(await handleResponse(await buildHttpResponse('order-auto-assign',request: request,method: HttpMethod.POST)));
+Future<LDBaseResponse> cancelAutoAssignOrder(Map request) async {
+  return LDBaseResponse.fromJson(await handleResponse(await buildHttpResponse('order-auto-assign', request: request, method: HttpMethod.POST)));
 }
 
-Future<AutoCompletePlacesListModel> placeAutoCompleteApi({String searchText='', String countryCode = "in", String language = 'en'}) async {
-  return AutoCompletePlacesListModel.fromJson(await handleResponse(await buildHttpResponse('place-autocomplete-api?country_code=$countryCode&language=$language&search_text=$searchText', method: HttpMethod.GET)));
+Future<AutoCompletePlacesListModel> placeAutoCompleteApi({String searchText = '', String countryCode = "in", String language = 'en'}) async {
+  return AutoCompletePlacesListModel.fromJson(
+      await handleResponse(await buildHttpResponse('place-autocomplete-api?country_code=$countryCode&language=$language&search_text=$searchText', method: HttpMethod.GET)));
 }
 
-Future<PlaceIdDetailModel> getPlaceDetail({String placeId=''}) async {
+Future<PlaceIdDetailModel> getPlaceDetail({String placeId = ''}) async {
   return PlaceIdDetailModel.fromJson(await handleResponse(await buildHttpResponse('place-detail-api?placeid=$placeId', method: HttpMethod.GET)));
 }
 
+Future<LDBaseResponse> deleteUser(Map req) async {
+  return LDBaseResponse.fromJson(await handleResponse(await buildHttpResponse('delete-user', request: req, method: HttpMethod.POST)));
+}
 
+Future<LDBaseResponse> userAction(Map request) async {
+  return LDBaseResponse.fromJson(await handleResponse(await buildHttpResponse('user-action', request: request, method: HttpMethod.POST)));
+}
 
+Future<WalletListModel> getWalletList({required int page}) async {
+  return WalletListModel.fromJson(await handleResponse(await buildHttpResponse('wallet-list?page=$page', method: HttpMethod.GET)));
+}
 
+Future<LDBaseResponse> saveWallet(Map request) async {
+  return LDBaseResponse.fromJson(await handleResponse(await buildHttpResponse('save-wallet', method: HttpMethod.POST, request: request)));
+}
+
+/// Update Bank Info
+Future updateBankDetail({String? bankName, String? bankCode, String? accountName, String? accountNumber}) async {
+  MultipartRequest multiPartRequest = await getMultiPartRequest('update-profile');
+  multiPartRequest.fields['email'] = getStringAsync(USER_EMAIL).validate();
+  multiPartRequest.fields['contact_number'] = getStringAsync(USER_CONTACT_NUMBER).validate();
+  multiPartRequest.fields['username'] = getStringAsync(USER_NAME).validate();
+  multiPartRequest.fields['user_bank_account[bank_name]'] = bankName.validate();
+  multiPartRequest.fields['user_bank_account[bank_code]'] = bankCode.validate();
+  multiPartRequest.fields['user_bank_account[account_holder_name]'] = accountName.validate();
+  multiPartRequest.fields['user_bank_account[account_number]'] = accountNumber.validate();
+
+  await sendMultiPartRequest(multiPartRequest, onSuccess: (data) async {
+    if (data != null) {
+      //
+    }
+  }, onError: (error) {
+    toast(error.toString());
+  });
+}
+
+Future<LDBaseResponse> logoutApi() async {
+  return LDBaseResponse.fromJson(await handleResponse(await buildHttpResponse('logout?clear=player_id', method: HttpMethod.GET)));
+}
+
+Future<EarningList> getPaymentList({required int page}) async {
+  return EarningList.fromJson(await handleResponse(await buildHttpResponse('payment-list?page=$page&delivery_man_id=${getIntAsync(USER_ID)}&type=earning', method: HttpMethod.GET)));
+}
+
+Future<UserProfileDetailModel> getUserProfile() async {
+  return UserProfileDetailModel.fromJson(await handleResponse(await buildHttpResponse('user-profile-detail?id=${getIntAsync(USER_ID)}', method: HttpMethod.GET)));
+}

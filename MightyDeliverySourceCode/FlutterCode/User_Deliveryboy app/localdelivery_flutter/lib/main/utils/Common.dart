@@ -7,14 +7,16 @@ import 'package:geolocator/geolocator.dart';
 import 'package:html/parser.dart';
 import 'package:intl/intl.dart';
 import 'package:lottie/lottie.dart';
-import 'package:paapag/main/utils/Colors.dart';
-import 'package:paapag/main/utils/Constants.dart';
+import 'package:url_launcher/url_launcher.dart';
+import '../../main/utils/Colors.dart';
+import '../../main/utils/Constants.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
 
 import '../../main.dart';
+import 'Widgets.dart';
 
-InputDecoration commonInputDecoration({String? hintText, IconData? suffixIcon, Function()? suffixOnTap, Widget? dateTime,Widget? prefixIcon}) {
+InputDecoration commonInputDecoration({String? hintText, IconData? suffixIcon, Function()? suffixOnTap, Widget? dateTime, Widget? prefixIcon}) {
   return InputDecoration(
     contentPadding: EdgeInsets.all(12),
     filled: true,
@@ -103,9 +105,9 @@ Color paymentStatusColor(String status) {
   return color;
 }
 
-String parcelTypeIcon(String parcelType) {
+String parcelTypeIcon(String? parcelType) {
   String icon = 'assets/icons/ic_product.png';
-  switch (parcelType.toLowerCase()) {
+  switch (parcelType.validate().toLowerCase()) {
     case "documents":
       return 'assets/icons/ic_document.png';
     case "document":
@@ -131,7 +133,7 @@ String printDate(String date) {
 double calculateDistance(lat1, lon1, lat2, lon2) {
   var p = 0.017453292519943295;
   var a = 0.5 - cos((lat2 - lat1) * p) / 2 + cos(lat1 * p) * cos(lat2 * p) * (1 - cos((lon2 - lon1) * p)) / 2;
-  return (12742 * asin(sqrt(a))).toStringAsFixed(2).toDouble();
+  return (12742 * asin(sqrt(a))).toStringAsFixed(digitAfterDecimal).toDouble();
 }
 
 Widget loaderWidget() {
@@ -159,6 +161,25 @@ String orderStatus(String orderStatus) {
     return language.cancelled;
   } else if (orderStatus == ORDER_CREATE) {
     return language.create;
+  }
+  return '';
+}
+
+String transactionType(String type) {
+  if (type == TRANSACTION_ORDER_FEE) {
+    return language.orderFee;
+  } else if (type == TRANSACTION_TOPUP) {
+    return language.topup;
+  } else if (type == TRANSACTION_ORDER_CANCEL_CHARGE) {
+    return language.orderCancelCharge;
+  } else if (type == TRANSACTION_ORDER_CANCEL_REFUND) {
+    return language.orderCancelRefund;
+  } else if (type == TRANSACTION_CORRECTION) {
+    return language.correction;
+  } else if (type == TRANSACTION_COMMISSION) {
+    return language.commission;
+  } else if (type == TRANSACTION_WITHDRAW) {
+    return language.withdraw;
   }
   return '';
 }
@@ -258,9 +279,9 @@ bool get isRTL => rtlLanguage.contains(appStore.selectedLanguage);
 
 num countExtraCharge({required num totalAmount, required String chargesType, required num charges}) {
   if (chargesType == CHARGE_TYPE_PERCENTAGE) {
-    return (totalAmount * charges * 0.01).toStringAsFixed(2).toDouble();
+    return (totalAmount * charges * 0.01).toStringAsFixed(digitAfterDecimal).toDouble();
   } else {
-    return charges.toStringAsFixed(2).toDouble();
+    return charges.toStringAsFixed(digitAfterDecimal).toDouble();
   }
 }
 
@@ -293,22 +314,50 @@ String paymentType(String paymentType) {
     return language.payStack;
   } else if (paymentType.toLowerCase() == PAYMENT_TYPE_FLUTTERWAVE.toLowerCase()) {
     return language.flutterWave;
-  }else if (paymentType.toLowerCase() == PAYMENT_TYPE_MERCADOPAGO.toLowerCase()) {
+  } else if (paymentType.toLowerCase() == PAYMENT_TYPE_MERCADOPAGO.toLowerCase()) {
     return language.mercadoPago;
-  }else if (paymentType.toLowerCase() == PAYMENT_TYPE_PAYPAL.toLowerCase()) {
+  } else if (paymentType.toLowerCase() == PAYMENT_TYPE_PAYPAL.toLowerCase()) {
     return language.paypal;
-  }else if (paymentType.toLowerCase() == PAYMENT_TYPE_PAYTABS.toLowerCase()) {
+  } else if (paymentType.toLowerCase() == PAYMENT_TYPE_PAYTABS.toLowerCase()) {
     return language.payTabs;
-  }else if (paymentType.toLowerCase() == PAYMENT_TYPE_PAYTM.toLowerCase()) {
+  } else if (paymentType.toLowerCase() == PAYMENT_TYPE_PAYTM.toLowerCase()) {
     return language.paytm;
-  }else if (paymentType.toLowerCase() == PAYMENT_TYPE_MYFATOORAH.toLowerCase()) {
+  } else if (paymentType.toLowerCase() == PAYMENT_TYPE_MYFATOORAH.toLowerCase()) {
     return language.myFatoorah;
   } else if (paymentType.toLowerCase() == PAYMENT_TYPE_CASH.toLowerCase()) {
     return language.cash;
+  } else if (paymentType.toLowerCase() == PAYMENT_TYPE_WALLET.toLowerCase()) {
+    return language.wallet;
   }
   return language.cash;
 }
 
-String printAmount(num amount){
-  return appStore.currencyPosition==CURRENCY_POSITION_LEFT ? '${appStore.currencySymbol} $amount' : '$amount ${appStore.currencySymbol}';
+String printAmount(var amount) {
+  return appStore.currencyPosition == CURRENCY_POSITION_LEFT ? '${appStore.currencySymbol} ${amount.toStringAsFixed(digitAfterDecimal)}' : '${amount.toStringAsFixed(digitAfterDecimal)} ${appStore.currencySymbol}';
+}
+
+Future<void> commonLaunchUrl(String url, {bool forceWebView = false}) async {
+  log(url);
+  await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication).then((value) {}).catchError((e) {
+    toast('${language.invalidUrl}: $url');
+  });
+}
+
+cashConfirmDialog() {
+  showInDialog(
+    getContext,
+    contentPadding: EdgeInsets.all(16),
+    builder: (p0) {
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(language.balanceInsufficientCashPayment, style: primaryTextStyle(size: 16), textAlign: TextAlign.center),
+          30.height,
+          commonButton(language.ok, () {
+            finish(getContext);
+          }),
+        ],
+      );
+    },
+  );
 }

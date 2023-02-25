@@ -2,15 +2,16 @@ import 'dart:io';
 
 import 'package:country_code_picker/country_code_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:paapag/main.dart';
-import 'package:paapag/main/components/BodyCornerWidget.dart';
-import 'package:paapag/main/network/RestApis.dart';
-import 'package:paapag/main/utils/Colors.dart';
-import 'package:paapag/main/utils/Common.dart';
-import 'package:paapag/main/utils/Constants.dart';
-import 'package:paapag/main/utils/Widgets.dart';
+import '../../main.dart';
+import '../../main/components/BodyCornerWidget.dart';
+import '../../main/network/RestApis.dart';
+import '../../main/utils/Colors.dart';
+import '../../main/utils/Common.dart';
+import '../../main/utils/Constants.dart';
+import '../../main/utils/Widgets.dart';
 import 'package:nb_utils/nb_utils.dart';
 
 class EditProfileScreen extends StatefulWidget {
@@ -22,7 +23,7 @@ class EditProfileScreen extends StatefulWidget {
 
 class EditProfileScreenState extends State<EditProfileScreen> {
   GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  String countryCode = '+91';
+  String countryCode = defaultPhoneCode;
 
   TextEditingController emailController = TextEditingController();
   TextEditingController usernameController = TextEditingController();
@@ -220,11 +221,14 @@ class EditProfileScreenState extends State<EditProfileScreen> {
                           ),
                         ),
                       ),
-                      validator: (s) {
-                        if (s!.trim().isEmpty) return language.fieldRequiredMsg;
-                        if (s.trim().length > 15) return language.contactNumberValidation;
+                      validator: (value) {
+                        if (value!.trim().isEmpty) return language.fieldRequiredMsg;
+                        if (value.trim().length < minContactLength || value.trim().length > maxContactLength) return language.contactLength;
                         return null;
                       },
+                      inputFormatters: [
+                        FilteringTextInputFormatter.digitsOnly,
+                      ],
                     ),
                     16.height,
                     Text(language.address, style: primaryTextStyle()),

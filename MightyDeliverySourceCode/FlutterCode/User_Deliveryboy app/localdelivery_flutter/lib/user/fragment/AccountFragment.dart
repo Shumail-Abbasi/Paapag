@@ -1,19 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:paapag/main.dart';
-import 'package:paapag/main/network/RestApis.dart';
-import 'package:paapag/main/screens/ChangePasswordScreen.dart';
-import 'package:paapag/main/screens/EditProfileScreen.dart';
-import 'package:paapag/main/screens/LanguageScreen.dart';
-import 'package:paapag/main/screens/ThemeScreen.dart';
-import 'package:paapag/main/utils/Colors.dart';
-import 'package:paapag/main/utils/Common.dart';
-import 'package:paapag/main/utils/Constants.dart';
-import 'package:paapag/user/screens/DraftOrderListScreen.dart';
+import '../../user/screens/WalletScreen.dart';
+import '../../main.dart';
+import '../../main/network/RestApis.dart';
+import '../../main/screens/BankDetailScreen.dart';
+import '../../main/screens/ChangePasswordScreen.dart';
+import '../../main/screens/EditProfileScreen.dart';
+import '../../main/screens/LanguageScreen.dart';
+import '../../main/screens/ThemeScreen.dart';
+import '../../main/utils/Colors.dart';
+import '../../main/utils/Common.dart';
+import '../../main/utils/Constants.dart';
+import '../../user/screens/DraftOrderListScreen.dart';
 import 'package:nb_utils/nb_utils.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../main/screens/AboutUsScreen.dart';
+import '../screens/DeleteAccountScreen.dart';
 
 class AccountFragment extends StatefulWidget {
   static String tag = '/AccountFragment';
@@ -42,10 +44,10 @@ class AccountFragmentState extends State<AccountFragment> {
   Widget build(BuildContext context) {
     return Observer(
       builder: (_) => SingleChildScrollView(
-        padding: EdgeInsets.only(left: 16, right: 16, bottom: 16, top: 30),
+        padding: EdgeInsets.only(left: 16, right: 16, bottom: context.height() * 0.1, top: 30),
         child: Column(
           children: [
-            commonCachedNetworkImage(getStringAsync(USER_PROFILE_PHOTO).validate(), height: 90, width: 90, fit: BoxFit.cover,alignment: Alignment.center).cornerRadiusWithClipRRect(50),
+            commonCachedNetworkImage(getStringAsync(USER_PROFILE_PHOTO).validate(), height: 90, width: 90, fit: BoxFit.cover, alignment: Alignment.center).cornerRadiusWithClipRRect(50),
             12.height,
             Text(getStringAsync(NAME).validate(), style: boldTextStyle(size: 20)),
             6.height,
@@ -59,6 +61,12 @@ class AccountFragmentState extends State<AccountFragment> {
                 settingItemWidget(Icons.drafts_outlined, language.drafts, () {
                   DraftOrderListScreen().launch(context);
                 }),
+                settingItemWidget(Icons.wallet, language.wallet, () {
+                  WalletScreen().launch(context);
+                }),
+                settingItemWidget(Icons.account_balance, language.bankDetails, () {
+                  BankDetailScreen().launch(context);
+                }),
                 settingItemWidget(Icons.person_outline, language.editProfile, () {
                   EditProfileScreen().launch(context);
                 }),
@@ -71,17 +79,20 @@ class AccountFragmentState extends State<AccountFragment> {
                 settingItemWidget(Icons.wb_sunny_outlined, language.theme, () {
                   ThemeScreen().launch(context);
                 }),
-                settingItemWidget(Icons.assignment_outlined,language.privacyPolicy , () {
-                  launchUrl(Uri.parse(mPrivacyPolicy));
+                settingItemWidget(Icons.assignment_outlined, language.privacyPolicy, () {
+                 commonLaunchUrl(mPrivacyPolicy);
                 }),
                 settingItemWidget(Icons.help_outline, language.helpAndSupport, () {
-                  launchUrl(Uri.parse(mHelpAndSupport));
+                 commonLaunchUrl(mHelpAndSupport);
                 }),
-                settingItemWidget(Icons.assignment_outlined,language.termAndCondition , () {
-                  launchUrl(Uri.parse(mTermAndCondition));
+                settingItemWidget(Icons.assignment_outlined, language.termAndCondition, () {
+                 commonLaunchUrl(mTermAndCondition);
                 }),
                 settingItemWidget(Icons.info_outline, language.aboutUs, () {
                   AboutUsScreen().launch(context);
+                }),
+                settingItemWidget(Icons.delete_forever, language.deleteAccount, () {
+                  DeleteAccountScreen().launch(context);
                 }),
                 settingItemWidget(
                   Icons.logout,

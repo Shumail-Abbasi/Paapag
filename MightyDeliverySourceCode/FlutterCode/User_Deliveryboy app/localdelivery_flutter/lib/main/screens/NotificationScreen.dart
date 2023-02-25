@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:paapag/main/components/BodyCornerWidget.dart';
-import 'package:paapag/main/models/NotificationModel.dart';
-import 'package:paapag/main/network/RestApis.dart';
-import 'package:paapag/main/utils/Colors.dart';
-import 'package:paapag/main/utils/Common.dart';
-import 'package:paapag/user/screens/OrderDetailScreen.dart';
+import '../../main/components/BodyCornerWidget.dart';
+import '../../main/models/NotificationModel.dart';
+import '../../main/network/RestApis.dart';
+import '../../main/utils/Colors.dart';
+import '../../main/utils/Common.dart';
+import '../../user/screens/OrderDetailScreen.dart';
 import 'package:nb_utils/nb_utils.dart';
 
 import '../../main.dart';

@@ -1,10 +1,12 @@
 import 'package:country_code_picker/country_code_picker.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:paapag/main/utils/Colors.dart';
-import 'package:paapag/main/utils/Common.dart';
-import 'package:paapag/main/utils/Constants.dart';
-import 'package:paapag/main/utils/Widgets.dart';
+import '../../main/utils/Colors.dart';
+import '../../main/utils/Common.dart';
+import '../../main/utils/Constants.dart';
+import '../../main/utils/Widgets.dart';
 import 'package:nb_utils/nb_utils.dart';
 
 import '../../main.dart';
@@ -23,7 +25,7 @@ class RegisterScreen extends StatefulWidget {
 class RegisterScreenState extends State<RegisterScreen> {
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
   AuthServices authService = AuthServices();
-  String countryCode = '+92';
+  String countryCode = defaultPhoneCode;
 
   TextEditingController nameController = TextEditingController();
   TextEditingController userNameController = TextEditingController();
@@ -36,6 +38,8 @@ class RegisterScreenState extends State<RegisterScreen> {
   FocusNode emailFocus = FocusNode();
   FocusNode phoneFocus = FocusNode();
   FocusNode passFocus = FocusNode();
+
+  bool isAcceptedTc = false;
 
   @override
   void initState() {
@@ -55,26 +59,27 @@ class RegisterScreenState extends State<RegisterScreen> {
   Future<void> registerApiCall() async {
     if (formKey.currentState!.validate()) {
       formKey.currentState!.save();
-
-      appStore.setLoading(true);
-
-      appStore.setLoading(true);
-      authService
-          .signUpWithEmailPassword(context,
-              lName: nameController.text,
-              userName: userNameController.text,
-              name: nameController.text.trim(),
-              email: emailController.text.trim(),
-              password: passController.text.trim(),
-              mobileNumber: '$countryCode ${phoneController.text.trim()}',
-              userType: widget.userType)
-          .then((res) async {
-        appStore.setLoading(false);
-        //
-      }).catchError((e) {
-        appStore.setLoading(false);
-        toast(e.toString());
-      });
+      if (isAcceptedTc) {
+        appStore.setLoading(true);
+        authService
+            .signUpWithEmailPassword(context,
+                lName: nameController.text,
+                userName: userNameController.text,
+                name: nameController.text.trim(),
+                email: emailController.text.trim(),
+                password: passController.text.trim(),
+                mobileNumber: '$countryCode ${phoneController.text.trim()}',
+                userType: widget.userType)
+            .then((res) async {
+          appStore.setLoading(false);
+          //
+        }).catchError((e) {
+          appStore.setLoading(false);
+          toast(e.toString());
+        });
+      }else{
+        toast(language.acceptTermService);
+      }
     }
   }
 
@@ -197,17 +202,6 @@ class RegisterScreenState extends State<RegisterScreen> {
                                     onChanged: (c) {
                                       countryCode = c.dialCode!;
                                     },
-                                    countryList: [
-                                      {
-                                        "name": "Pakistan",
-                                        "code": "PK",
-                                        "dial_code": "+92",
-                                      }
-                                    ],
-                                    countryFilter: [
-                                      "Pakistan",
-                                      "PK"
-                                    ],
                                   ),
                                   VerticalDivider(color: Colors.grey.withOpacity(0.5)),
                                 ],
@@ -216,9 +210,12 @@ class RegisterScreenState extends State<RegisterScreen> {
                           ),
                           validator: (value) {
                             if (value!.trim().isEmpty) return language.fieldRequiredMsg;
-                            if (value.trim().length < 10 || value.trim().length > 14) return language.contactLength;
+                            if (value.trim().length < minContactLength || value.trim().length > maxContactLength) return language.contactLength;
                             return null;
                           },
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                          ],
                         ),
                         16.height,
                         Text(language.password, style: primaryTextStyle()),
@@ -230,6 +227,39 @@ class RegisterScreenState extends State<RegisterScreen> {
                           decoration: commonInputDecoration(),
                           errorThisFieldRequired: language.fieldRequiredMsg,
                           errorMinimumPasswordLength: language.passwordInvalid,
+                        ),
+                        8.height,
+                        CheckboxListTile(
+                          contentPadding: EdgeInsets.zero,
+                          controlAffinity: ListTileControlAffinity.leading,
+                          activeColor: colorPrimary,
+                          title: RichTextWidget(
+                            list: [
+                              TextSpan(text: '${language.iAgreeToThe}', style: secondaryTextStyle()),
+                              TextSpan(
+                                text: language.termOfService,
+                                style: boldTextStyle(color: colorPrimary, size: 14),
+                                recognizer: TapGestureRecognizer()
+                                  ..onTap = () {
+                                    commonLaunchUrl(mTermAndCondition);
+                                  },
+                              ),
+                              TextSpan(text: ' & ', style: secondaryTextStyle()),
+                              TextSpan(
+                                text: language.privacyPolicy,
+                                style: boldTextStyle(color: colorPrimary, size: 14),
+                                recognizer: TapGestureRecognizer()
+                                  ..onTap = () {
+                                    commonLaunchUrl(mPrivacyPolicy);
+                                  },
+                              ),
+                            ],
+                          ),
+                          value: isAcceptedTc,
+                          onChanged: (val) async {
+                            isAcceptedTc = val!;
+                            setState(() {});
+                          },
                         ),
                         30.height,
                         commonButton(language.signUp, () {

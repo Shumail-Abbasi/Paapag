@@ -546,4 +546,122 @@ abstract class BaseLanguage {
   String get orderDepartedSuccessfully;
 
   String get orderDeliveredSuccessfully;
+
+  String get deleteAccount;
+
+  String get deleteAccountMsg1;
+
+  String get deleteAccountMsg2;
+
+  String get deleteAccountConfirmMsg;
+
+  String get remark;
+
+  String get showMore;
+
+  String get showLess;
+
+  String get choosePickupAddress;
+
+  String get chooseDeliveryAddress;
+
+  String get showingAllAddress;
+
+  String get addNewAddress;
+
+  String get selectPickupLocation;
+
+  String get selectDeliveryLocation;
+
+  String get searchAddress;
+
+  String get pleaseWait;
+
+  String get confirmPickupLocation;
+
+  String get confirmDeliveryLocation;
+
+  String get addressNotInArea;
+
+  String get wallet;
+
+  String get bankDetails;
+
+  String get declined;
+
+  String get requested;
+
+  String get approved;
+
+  String get withdraw;
+
+  String get availableBalance;
+
+  String get withdrawHistory;
+
+  String get addMoney;
+
+  String get amount;
+
+  String get addAmount;
+
+  String get credentialNotMatch;
+
+  String get accountNumber;
+
+  String get nameAsPerBank;
+
+  String get ifscCode;
+
+  String get acceptTermService;
+
+  String get iAgreeToThe;
+
+  String get termOfService;
+
+  String get somethingWentWrong;
+
+  String get userNotFound;
+
+  String get balanceInsufficient;
+
+  String get add;
+
+  String get moneyDeposited;
+
+  String get moneyDebited;
+
+  String get bankNotFound;
+
+  String get internetIsConnected;
+
+  String get invalidUrl;
+
+  String get balanceInsufficientCashPayment;
+
+  String get ok;
+
+  String get orderFee;
+
+  String get topup;
+
+  String get orderCancelCharge;
+
+  String get orderCancelRefund;
+
+  String get correction;
+
+  String get commission;
+
+  String get cancelBeforePickMsg;
+
+  String get cancelAfterPickMsg;
+
+  String get cancelNote;
+
+  String get earningHistory;
+
+  String get earning;
+
+  String get adminCommission;
 }

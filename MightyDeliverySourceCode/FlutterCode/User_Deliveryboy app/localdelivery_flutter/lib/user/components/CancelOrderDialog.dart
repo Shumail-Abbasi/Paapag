@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:paapag/main/network/RestApis.dart';
-import 'package:paapag/main/utils/Common.dart';
-import 'package:paapag/main/utils/Constants.dart';
-import 'package:paapag/main/utils/DataProviders.dart';
-import 'package:paapag/main/utils/Widgets.dart';
+import '../../main/network/RestApis.dart';
+import '../../main/utils/Common.dart';
+import '../../main/utils/Constants.dart';
+import '../../main/utils/DataProviders.dart';
+import '../../main/utils/Widgets.dart';
 import 'package:nb_utils/nb_utils.dart';
 
 import '../../main.dart';

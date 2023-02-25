@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:paapag/main/models/models.dart';
-import 'package:paapag/main/utils/Colors.dart';
-import 'package:paapag/main/utils/Constants.dart';
-import 'package:paapag/main/utils/DataProviders.dart';
-import 'package:paapag/main/utils/Widgets.dart';
+import '../../main/models/models.dart';
+import '../../main/utils/Colors.dart';
+import '../../main/utils/Constants.dart';
+import '../../main/utils/DataProviders.dart';
+import '../../main/utils/Widgets.dart';
 import 'package:nb_utils/nb_utils.dart';
 
 import '../../main.dart';

@@ -1,9 +1,9 @@
 const mAppName = 'Paapag';
 const mPrivacyPolicy = 'ADD_YOUR_PRIVACY_POLICY_URL';
-const mTermAndCondition = 'ADD_YOUR_TERMS_AND_CONDITION_URL';
-const mHelpAndSupport = 'ADD_YOUR_HELP_AND_SUPPORT_URL';
-const mContactPref = 'ADD_YOUR_CONTACT_MAIL';
-const mCodeCanyonURL = 'ADD_YOUR_CODE_CANYON_URL';
+const mTermAndCondition = 'ADD_YOUR_TERM_AND_CONDITION_URL';
+const mHelpAndSupport = 'ADD_HELP_AND_SUPPORT_URL';
+const mContactPref = 'ADD_CONTACT_PREFERENCE_URL';
+const mCodeCanyonURL = 'ADD_CODE_CANYON_URL';
 
 const mBaseUrl = 'http://paapagapi.paapag.com/';
 
@@ -13,7 +13,15 @@ const mOneSignalAppId = '4d24c46a-9037-419e-8248-d49ffa2146c4';
 const mOneSignalRestKey = 'MjQ0MDRjMWEtYjVjOC00MDdkLTg5OTEtODA5NTNkMjc5YTJh';
 const mOneSignalChannelId = 'f8f160b4-1c1b-4568-85b7-2b050b76fef1';
 
+const BANK_LIST = [];
+
 const defaultLanguage = "en";
+
+const defaultPhoneCode = '+92';
+
+const minContactLength = 10;
+const maxContactLength = 14;
+const digitAfterDecimal = 2;
 
 // font size
 const headingSize = 24;
@@ -39,6 +47,7 @@ const PLAYER_ID = 'PLAYER_ID';
 const FILTER_DATA = 'FILTER_DATA';
 const UID = 'UID';
 const IS_VERIFIED_DELIVERY_MAN = 'IS_VERIFIED_DELIVERY_MAN';
+const RECENT_ADDRESS_LIST = 'RECENT_ADDRESS_LIST';
 
 const COUNTRY_ID = 'COUNTRY_ID';
 const COUNTRY_DATA = 'COUNTRY_DATA';
@@ -62,6 +71,7 @@ const PAYMENT_TYPE_MERCADOPAGO = 'mercadopago';
 const PAYMENT_TYPE_PAYTM = 'paytm';
 const PAYMENT_TYPE_MYFATOORAH = 'myfatoorah';
 const PAYMENT_TYPE_CASH = 'cash';
+const PAYMENT_TYPE_WALLET = 'wallet';
 
 const PAYMENT_PENDING = 'pending';
 const PAYMENT_FAILED = 'failed';
@@ -73,6 +83,10 @@ const PAYMENT_ON_PICKUP = "on_pickup";
 const RESTORE = 'restore';
 const FORCE_DELETE = 'forcedelete';
 const DELETE_USER = 'deleted_at';
+
+const DECLINE = 'decline';
+const REQUESTED = 'requested';
+const APPROVED = 'approved';
 
 // OrderStatus
 const COURIER_ASSIGNED = 'courier_assigned';
@@ -88,6 +102,14 @@ const ORDER_PICKED_UP = 'courier_picked_up';
 const ORDER_COMPLETED = 'completed';
 const ORDER_DRAFT = 'draft';
 const ORDER_DEPARTED = 'courier_departed';
+
+const TRANSACTION_ORDER_FEE = "order_fee";
+const TRANSACTION_TOPUP = "topup";
+const TRANSACTION_ORDER_CANCEL_CHARGE = "order_cancel_charge";
+const TRANSACTION_ORDER_CANCEL_REFUND = "order_cancel_refund";
+const TRANSACTION_CORRECTION = "correction";
+const TRANSACTION_COMMISSION = "commission";
+const TRANSACTION_WITHDRAW = "withdraw";
 
 const stripeURL = 'https://api.stripe.com/v1/payment_intents';
 
@@ -128,6 +150,8 @@ const PER_WEIGHT_CHARGE = "per_weight_charges";
 // Currency Position
 const CURRENCY_POSITION_LEFT = 'left';
 const CURRENCY_POSITION_RIGHT = 'right';
+
+const CREDIT = 'credit';
 
 //chat
 List<String> rtlLanguage = ['ar', 'ur'];

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:paapag/main.dart';
-import 'package:paapag/main/utils/Colors.dart';
+import '../../main.dart';
+import '../../main/utils/Colors.dart';
 import 'package:nb_utils/nb_utils.dart';
 
 class BodyCornerWidget extends StatelessWidget {

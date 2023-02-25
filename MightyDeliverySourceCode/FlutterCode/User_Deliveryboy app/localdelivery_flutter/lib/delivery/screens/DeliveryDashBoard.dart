@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:paapag/delivery/fragment/DProfileFragment.dart';
-import 'package:paapag/delivery/screens/CreateTabScreen.dart';
-import 'package:paapag/main/components/BodyCornerWidget.dart';
-import 'package:paapag/main/screens/NotificationScreen.dart';
-import 'package:paapag/main/utils/Colors.dart';
-import 'package:paapag/main/utils/Common.dart';
-import 'package:paapag/main/utils/Constants.dart';
+import '../../delivery/fragment/DProfileFragment.dart';
+import '../../delivery/screens/CreateTabScreen.dart';
+import '../../main/components/BodyCornerWidget.dart';
+import '../../main/screens/NotificationScreen.dart';
+import '../../main/utils/Colors.dart';
+import '../../main/utils/Common.dart';
+import '../../main/utils/Constants.dart';
 import 'package:nb_utils/nb_utils.dart';
 
 import '../../main.dart';
@@ -36,7 +36,13 @@ class DeliveryDashBoardState extends State<DeliveryDashBoard> {
       setState(() {});
     });
     if (await checkPermission()) {
-      await updateLatLong();
+      positionStream = Geolocator.getPositionStream().listen((event) async {
+        await updateLocation(latitude: event.latitude.toString(), longitude: event.longitude.toString()).then((value) {
+          log('Location updated:$event');
+        }).catchError((error) {
+          log(error);
+        });
+      });
     }
     await getAppSetting().then((value) {
       appStore.setOtpVerifyOnPickupDelivery(value.otpVerifyOnPickupDelivery == 1);
@@ -45,15 +51,6 @@ class DeliveryDashBoardState extends State<DeliveryDashBoard> {
       appStore.setCurrencyPosition(value.currencyPosition ?? CURRENCY_POSITION_LEFT);
     }).catchError((error) {
       log(error.toString());
-    });
-  }
-
-  updateLatLong() async {
-    Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
-    await updateLocation(latitude: position.latitude.toString(), longitude: position.longitude.toString()).then((value) {
-      //
-    }).catchError((error) {
-      log(error);
     });
   }
 
@@ -85,10 +82,7 @@ class DeliveryDashBoardState extends State<DeliveryDashBoard> {
                       height: 20,
                       width: 20,
                       alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        color: Colors.orange,
-                        shape: BoxShape.circle,
-                      ),
+                      decoration: BoxDecoration(color: Colors.orange, shape: BoxShape.circle),
                       child: Text('${appStore.allUnreadCount < 99 ? appStore.allUnreadCount : '99+'}', style: primaryTextStyle(size: appStore.allUnreadCount < 99 ? 12 : 8, color: Colors.white)),
                     ),
                   ).visible(appStore.allUnreadCount != 0);

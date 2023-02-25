@@ -1,22 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:intl/intl.dart';
-import 'package:paapag/main.dart';
-import 'package:paapag/main/Chat/ChatScreen.dart';
-import 'package:paapag/main/components/BodyCornerWidget.dart';
-import 'package:paapag/main/models/CountryListModel.dart';
-import 'package:paapag/main/models/ExtraChargeRequestModel.dart';
-import 'package:paapag/main/models/LoginResponse.dart';
-import 'package:paapag/main/models/OrderListModel.dart';
-import 'package:paapag/main/network/RestApis.dart';
-import 'package:paapag/main/utils/Colors.dart';
-import 'package:paapag/main/utils/Common.dart';
-import 'package:paapag/main/utils/Constants.dart';
-import 'package:paapag/main/utils/Widgets.dart';
-import 'package:paapag/user/components/CancelOrderDialog.dart';
-import 'package:paapag/user/screens/ReturnOrderScreen.dart';
+import '../../main.dart';
+import '../../main/Chat/ChatScreen.dart';
+import '../../main/components/BodyCornerWidget.dart';
+import '../../main/models/CountryListModel.dart';
+import '../../main/models/ExtraChargeRequestModel.dart';
+import '../../main/models/LoginResponse.dart';
+import '../../main/models/OrderListModel.dart';
+import '../../main/network/RestApis.dart';
+import '../../main/utils/Colors.dart';
+import '../../main/utils/Common.dart';
+import '../../main/utils/Constants.dart';
+import '../../main/utils/Widgets.dart';
+import '../../user/components/CancelOrderDialog.dart';
+import '../../user/screens/ReturnOrderScreen.dart';
 import 'package:nb_utils/nb_utils.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../main/components/OrderSummeryWidget.dart';
 import '../../main/models/OrderDetailModel.dart';
@@ -38,6 +37,7 @@ class OrderDetailScreenState extends State<OrderDetailScreen> {
 
   OrderData? orderData;
   List<OrderHistory>? orderHistory;
+  Payment? payment;
   List<ExtraChargeRequestModel> list = [];
 
   @override
@@ -58,7 +58,8 @@ class OrderDetailScreenState extends State<OrderDetailScreen> {
       appStore.setLoading(false);
       orderData = value.data!;
       orderHistory = value.orderHistory!;
-      if(orderData!.extraCharges.runtimeType == List<dynamic>){
+      payment = value.payment?? Payment();
+      if (orderData!.extraCharges.runtimeType == List<dynamic>) {
         (orderData!.extraCharges as List<dynamic>).forEach((element) {
           list.add(ExtraChargeRequestModel.fromJson(element));
         });
@@ -133,7 +134,7 @@ class OrderDetailScreenState extends State<OrderDetailScreen> {
                                 children: [
                                   Row(
                                     children: [
-                                      ImageIcon(AssetImage('assets/icons/ic_pick_location.png'),size: 24,color: colorPrimary),
+                                      ImageIcon(AssetImage('assets/icons/ic_pick_location.png'), size: 24, color: colorPrimary),
                                       16.width,
                                       Column(
                                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -144,7 +145,7 @@ class OrderDetailScreenState extends State<OrderDetailScreen> {
                                             Row(
                                               children: [
                                                 Icon(Icons.call, color: Colors.green, size: 18).onTap(() {
-                                                  launchUrl(Uri.parse('tel:${orderData!.pickupPoint!.contactNumber}'));
+                                                  commonLaunchUrl('tel:${orderData!.pickupPoint!.contactNumber}');
                                                 }),
                                                 8.width,
                                                 Text('${orderData!.pickupPoint!.contactNumber}', style: secondaryTextStyle()),
@@ -154,6 +155,19 @@ class OrderDetailScreenState extends State<OrderDetailScreen> {
                                             Text('${language.note} ${language.courierWillPickupAt} ${DateFormat('dd MMM yyyy').format(DateTime.parse(orderData!.pickupPoint!.startTime!).toLocal())} ${language.from} ${DateFormat('hh:mm').format(DateTime.parse(orderData!.pickupPoint!.startTime!).toLocal())} ${language.to} ${DateFormat('hh:mm').format(DateTime.parse(orderData!.pickupPoint!.endTime!).toLocal())}',
                                                     style: secondaryTextStyle())
                                                 .paddingOnly(top: 8),
+                                          if (orderData!.pickupPoint!.description.validate().isNotEmpty)
+                                            Padding(
+                                              padding: EdgeInsets.only(top: 8.0),
+                                              child: ReadMoreText(
+                                                '${language.remark}: ${orderData!.pickupPoint!.description.validate()}',
+                                                trimLines: 3,
+                                                style: primaryTextStyle(size: 14),
+                                                colorClickableText: colorPrimary,
+                                                trimMode: TrimMode.Line,
+                                                trimCollapsedText: language.showMore,
+                                                trimExpandedText: language.showLess,
+                                              ),
+                                            ),
                                         ],
                                       ).expand(),
                                     ],
@@ -172,7 +186,7 @@ class OrderDetailScreenState extends State<OrderDetailScreen> {
                                             Row(
                                               children: [
                                                 Icon(Icons.call, color: Colors.green, size: 18).onTap(() {
-                                                  launchUrl(Uri.parse('tel:${orderData!.deliveryPoint!.contactNumber}'));
+                                                  commonLaunchUrl('tel:${orderData!.deliveryPoint!.contactNumber}');
                                                 }),
                                                 8.width,
                                                 Text('${orderData!.deliveryPoint!.contactNumber}', style: secondaryTextStyle()),
@@ -182,6 +196,19 @@ class OrderDetailScreenState extends State<OrderDetailScreen> {
                                             Text('${language.note} ${language.courierWillDeliverAt}${DateFormat('dd MMM yyyy').format(DateTime.parse(orderData!.deliveryPoint!.startTime!).toLocal())} ${language.from} ${DateFormat('hh:mm').format(DateTime.parse(orderData!.deliveryPoint!.startTime!).toLocal())} ${language.to} ${DateFormat('hh:mm').format(DateTime.parse(orderData!.deliveryPoint!.endTime!).toLocal())}',
                                                     style: secondaryTextStyle())
                                                 .paddingOnly(top: 8),
+                                          if (orderData!.deliveryPoint!.description.validate().isNotEmpty)
+                                            Padding(
+                                              padding: EdgeInsets.only(top: 8.0),
+                                              child: ReadMoreText(
+                                                '${language.remark}: ${orderData!.deliveryPoint!.description.validate()}',
+                                                trimLines: 3,
+                                                style: primaryTextStyle(size: 14),
+                                                colorClickableText: colorPrimary,
+                                                trimMode: TrimMode.Line,
+                                                trimCollapsedText: language.showMore,
+                                                trimExpandedText: language.showLess,
+                                              ),
+                                            ),
                                         ],
                                       ).expand(),
                                     ],
@@ -309,7 +336,7 @@ class OrderDetailScreenState extends State<OrderDetailScreen> {
                                                   Text('${userData!.name.validate()}', style: boldTextStyle()),
                                                   userData!.contactNumber != null
                                                       ? Text('${userData!.contactNumber}', style: secondaryTextStyle()).paddingOnly(top: 4).onTap(() {
-                                                          launchUrl(Uri.parse('tel:${userData!.contactNumber}'));
+                                                          commonLaunchUrl('tel:${userData!.contactNumber}');
                                                         })
                                                       : SizedBox()
                                                 ],
@@ -369,11 +396,13 @@ class OrderDetailScreenState extends State<OrderDetailScreen> {
                               (orderData!.extraCharges!.runtimeType == List<dynamic>)
                                   ? OrderSummeryWidget(
                                       extraChargesList: list,
-                                      totalDistance: orderData!.totalDistance.validate(),
+                                      totalDistance: orderData!.totalDistance,
                                       totalWeight: orderData!.totalWeight.validate(),
                                       distanceCharge: orderData!.distanceCharge.validate(),
                                       weightCharge: orderData!.weightCharge.validate(),
-                                      totalAmount: orderData!.totalAmount.validate(),
+                                      totalAmount: orderData!.totalAmount,
+                                      payment: payment,
+                                      status: orderData!.status,
                                     )
                                   : Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -450,11 +479,58 @@ class OrderDetailScreenState extends State<OrderDetailScreen> {
                                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                           children: [
                                             Text(language.total, style: boldTextStyle(size: 20)),
-                                            Text('${printAmount(orderData!.totalAmount.validate())}', style: boldTextStyle(size: 20, color: colorPrimary)),
+                                            (orderData!.status == ORDER_CANCELLED && payment != null && payment!.deliveryManFee == 0)
+                                                ? Row(
+                                                    mainAxisSize: MainAxisSize.min,
+                                                    children: [
+                                                      Text('${printAmount(orderData!.totalAmount.validate())}', style: secondaryTextStyle(size: 16, decoration: TextDecoration.lineThrough)),
+                                                      8.width,
+                                                      Text('${printAmount(payment!.cancelCharges.validate())}', style: boldTextStyle(size: 20)),
+                                                    ],
+                                                  )
+                                                : Text('${printAmount(orderData!.totalAmount.validate())}', style: boldTextStyle(size: 20)),
                                           ],
                                         ),
                                       ],
                                     ),
+                              16.height,
+                              if (orderData!.status == ORDER_CANCELLED && payment != null)
+                                Container(
+                                  width: context.width(),
+                                  decoration: BoxDecoration(color: appStore.isDarkMode ? scaffoldSecondaryDark : colorPrimary.withOpacity(0.1), borderRadius: BorderRadius.circular(8)),
+                                  padding: EdgeInsets.all(12),
+                                  child: Text(
+                                      '${language.note} ${payment!.deliveryManFee == 0 ? language.cancelBeforePickMsg : language.cancelAfterPickMsg}',
+                                      style: secondaryTextStyle(color: Colors.red)),
+                                ),
+                              Align(
+                                alignment: Alignment.bottomCenter,
+                                child: Column(
+                                  children: [
+                                    commonButton(language.cancelOrder, () {
+                                      showInDialog(
+                                        context,
+                                        contentPadding: EdgeInsets.all(16),
+                                        builder: (p0) {
+                                          return CancelOrderDialog(
+                                              orderId: orderData!.id.validate(),
+                                              onUpdate: () {
+                                                orderDetailApiCall();
+                                                LiveStream().emit('UpdateOrderData');
+                                              });
+                                        },
+                                      );
+                                    }, width: context.width()),
+                                    8.height,
+                                    Container(
+                                      width: context.width(),
+                                      decoration: BoxDecoration(color: appStore.isDarkMode ? scaffoldSecondaryDark : colorPrimary.withOpacity(0.1), borderRadius: BorderRadius.circular(8)),
+                                      padding: EdgeInsets.all(12),
+                                      child: Text(language.cancelNote, style: secondaryTextStyle()),
+                                    ),
+                                  ],
+                                ),
+                              ).visible(getStringAsync(USER_TYPE) == CLIENT && orderData!.status != ORDER_COMPLETED && orderData!.status != ORDER_CANCELLED)
                             ],
                           ),
                         ),
@@ -465,24 +541,6 @@ class OrderDetailScreenState extends State<OrderDetailScreen> {
                           }, width: context.width())
                               .paddingAll(16),
                         ).visible(orderData!.status == ORDER_COMPLETED && !orderData!.returnOrderId! && getStringAsync(USER_TYPE) == CLIENT),
-                        Align(
-                          alignment: Alignment.bottomCenter,
-                          child: commonButton(language.cancelOrder, () {
-                            showInDialog(
-                              context,
-                              contentPadding: EdgeInsets.all(16),
-                              builder: (p0) {
-                                return CancelOrderDialog(
-                                    orderId: orderData!.id.validate(),
-                                    onUpdate: () {
-                                      orderDetailApiCall();
-                                      LiveStream().emit('UpdateOrderData');
-                                    });
-                              },
-                            );
-                          }, width: context.width())
-                              .paddingAll(16),
-                        ).visible(orderData!.status == ORDER_CREATE && getStringAsync(USER_TYPE) == CLIENT)
                       ],
                     )
                   : SizedBox(),
