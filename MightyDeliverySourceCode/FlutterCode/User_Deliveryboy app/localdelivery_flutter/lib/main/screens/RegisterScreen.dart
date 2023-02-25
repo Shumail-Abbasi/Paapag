@@ -202,6 +202,17 @@ class RegisterScreenState extends State<RegisterScreen> {
                                     onChanged: (c) {
                                       countryCode = c.dialCode!;
                                     },
+                                    countryList: [
+                                      {
+                                        "name": "Pakistan",
+                                        "code": "PK",
+                                        "dial_code": "+92",
+                                      }
+                                    ],
+                                    countryFilter: [
+                                      "Pakistan",
+                                      "PK"
+                                    ],
                                   ),
                                   VerticalDivider(color: Colors.grey.withOpacity(0.5)),
                                 ],
