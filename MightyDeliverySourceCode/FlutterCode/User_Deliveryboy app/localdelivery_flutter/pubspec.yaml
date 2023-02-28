@@ -81,6 +81,7 @@ dependencies:
 
   flutter_localizations:
     sdk: flutter
+  dio: ^5.0.1
 
 dev_dependencies:
   flutter_test:

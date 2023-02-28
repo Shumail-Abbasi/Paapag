@@ -1,8 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
-
-import 'package:http/http.dart';
-import 'package:http/http.dart' as http;
+import 'package:dio/dio.dart';
+import 'package:paapag/main/network/dio_wrapper.dart';
 import '../../main/utils/Common.dart';
 import '../../main/utils/Constants.dart';
 import 'package:nb_utils/nb_utils.dart';
@@ -10,6 +9,7 @@ import 'package:nb_utils/nb_utils.dart';
 import '../../main.dart';
 import 'RestApis.dart';
 
+@deprecated
 Map<String, String> buildHeaderTokens() {
   Map<String, String> header = {
     HttpHeaders.contentTypeHeader: 'application/json; charset=utf-8',
@@ -35,9 +35,8 @@ Uri buildBaseUrl(String endPoint) {
   return url;
 }
 
-Future<Response> buildHttpResponse(String endPoint, {HttpMethod method = HttpMethod.GET, Map? request}) async {
+Future<Response> buildHttpResponse(String endPoint, {HttpMethod method = HttpMethod.GET, Map? request, FormData? formData}) async {
   if (await isNetworkAvailable()) {
-    var headers = buildHeaderTokens();
     Uri url = buildBaseUrl(endPoint);
 
     try {
@@ -46,16 +45,18 @@ Future<Response> buildHttpResponse(String endPoint, {HttpMethod method = HttpMet
       if (method == HttpMethod.POST) {
         log('Request: $request');
 
-        response = await http.post(url, body: jsonEncode(request), headers: headers).timeout(20.seconds, onTimeout: () => throw 'Timeout');
+        response = await DioWrapper.dio.post(url.path, data: jsonEncode(request));
+      } else if (method == HttpMethod.POST_FORM) {
+        response = await DioWrapper.dio.post(url.path, data: formData);
       } else if (method == HttpMethod.DELETE) {
-        response = await delete(url, headers: headers).timeout(20.seconds, onTimeout: () => throw 'Timeout');
+        response = await DioWrapper.dio.delete(url.path);
       } else if (method == HttpMethod.PUT) {
-        response = await put(url, body: jsonEncode(request), headers: headers).timeout(20.seconds, onTimeout: () => throw 'Timeout');
+        response = await DioWrapper.dio.put(url.path, data: jsonEncode(request));
       } else {
-        response = await get(url, headers: headers).timeout(20.seconds, onTimeout: () => throw 'Timeout');
+        response = await DioWrapper.dio.get(url.path);
       }
 
-      log('Response ($method): ${url.toString()} ${response.statusCode} ${response.body}');
+      log('Response ($method): ${url.toString()} ${response.statusCode} ${response.data}');
 
       return response;
     } catch (e) {
@@ -90,10 +91,10 @@ Future handleResponse(Response response, [bool? avoidTokenError]) async {
   }
 
   if (response.statusCode.isSuccessful()) {
-    return jsonDecode(response.body);
+    return jsonDecode(response.data);
   } else {
     try {
-      var body = jsonDecode(response.body);
+      var body = jsonDecode(response.data);
       throw parseHtmlString(body['message']);
     } on Exception catch (e) {
       log(e);
@@ -101,7 +102,7 @@ Future handleResponse(Response response, [bool? avoidTokenError]) async {
     }
   }
 }
-enum HttpMethod { GET, POST, DELETE, PUT }
+enum HttpMethod { GET, POST, DELETE, PUT, POST_FORM }
 
 class TokenException implements Exception {
   final String message;

@@ -1,9 +1,9 @@
 import 'dart:io';
 
+import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:http/http.dart';
 import '../../main/components/BodyCornerWidget.dart';
 import '../../main/models/DeliveryDocumentListModel.dart';
 import '../../main/models/DocumentListModel.dart';
@@ -101,33 +101,34 @@ class VerifyDeliveryPersonScreenState extends State<VerifyDeliveryPersonScreen> 
 
   /// Add Documents
   addDocument(int? docId, {int? updateId}) async {
-    MultipartRequest multiPartRequest = await getMultiPartRequest('delivery-man-document-save');
-    multiPartRequest.fields["id"] = updateId != null ? updateId.toString() : '';
-    multiPartRequest.fields["delivery_man_id"] = getIntAsync(USER_ID).toString();
-    multiPartRequest.fields["document_id"] = docId.toString();
-    multiPartRequest.fields["is_verified"] = '0';
-    if (imageFiles != null) {
-      multiPartRequest.files.add(await MultipartFile.fromPath("delivery_man_document", imageFiles!.first.path));
-    }
-    log(multiPartRequest);
-    multiPartRequest.headers.addAll(buildHeaderTokens());
-    appStore.setLoading(true);
-    sendMultiPartRequest(
-      multiPartRequest,
-      onSuccess: (data) async {
-        appStore.setLoading(false);
+    final url = 'delivery-man-document-save';
+    final multiPartRequest = FormData();
 
-        deliveryPersonDocuments.clear();
-        getDeliveryDocListApiCall();
-      },
-      onError: (error) {
-        toast(error.toString(), print: true);
-        appStore.setLoading(false);
-      },
-    ).catchError((e) {
+    multiPartRequest.fields
+      ..add(MapEntry('id', updateId != null ? updateId.toString() : ''))
+      ..add(MapEntry('delivery_man_id', getIntAsync(USER_ID).toString()))
+      ..add(MapEntry('document_id', docId.toString()))
+      ..add(MapEntry('is_verified', '0'));
+
+    if (imageFiles != null) {
+      multiPartRequest.files.add(MapEntry('delivery_man_document', await MultipartFile.fromFile(imageFiles!.first.path)));
+    }
+    final response = await buildHttpResponse(url, method: HttpMethod.POST_FORM, formData: multiPartRequest).catchError((e) {
       appStore.setLoading(false);
       toast(e.toString());
     });
+
+    try {
+      await handleResponse(response);
+      deliveryPersonDocuments.clear();
+      getDeliveryDocListApiCall();
+    } catch (error) {
+      toast(error.toString(), print: true);
+      appStore.setLoading(false);
+    }
+
+    log(multiPartRequest);
+    appStore.setLoading(true);
   }
 
   /// Delete Documents
@@ -177,7 +178,7 @@ class VerifyDeliveryPersonScreenState extends State<VerifyDeliveryPersonScreen> 
                                 return DropdownMenuItem<DocumentData>(
                                     value: e,
                                     child: Text(
-                                      e.name! + '${e.isRequired==1 ? '*' : ''}',
+                                      e.name! + '${e.isRequired == 1 ? '*' : ''}',
                                       style: primaryTextStyle(),
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
@@ -257,10 +258,12 @@ class VerifyDeliveryPersonScreenState extends State<VerifyDeliveryPersonScreen> 
                                     decoration: boxDecorationWithRoundedCorners(backgroundColor: Colors.grey.withOpacity(0.2)),
                                     child: Text(deliveryPersonDocuments[index].deliveryManDocument!.split('/').last, style: primaryTextStyle()),
                                   ).onTap(() {
-                                   commonLaunchUrl(deliveryPersonDocuments[index].deliveryManDocument.validate());
+                                    commonLaunchUrl(deliveryPersonDocuments[index].deliveryManDocument.validate());
                                   })
-                                : commonCachedNetworkImage(deliveryPersonDocuments[index].deliveryManDocument!, height: 200, width: context.width(), fit: BoxFit.cover).cornerRadiusWithClipRRect(8).onTap(() {
-                                   commonLaunchUrl(deliveryPersonDocuments[index].deliveryManDocument!.validate());
+                                : commonCachedNetworkImage(deliveryPersonDocuments[index].deliveryManDocument!, height: 200, width: context.width(), fit: BoxFit.cover)
+                                    .cornerRadiusWithClipRRect(8)
+                                    .onTap(() {
+                                    commonLaunchUrl(deliveryPersonDocuments[index].deliveryManDocument!.validate());
                                   }),
                           ],
                         );

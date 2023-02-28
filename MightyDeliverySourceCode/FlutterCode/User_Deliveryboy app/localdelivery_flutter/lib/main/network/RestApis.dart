@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart';
 import 'package:intl/intl.dart';
 import '../../main/models/ChangePasswordResponse.dart';
 import '../../main/models/CityDetailModel.dart';
@@ -35,12 +35,10 @@ Future<LoginResponse> signUpApi(Map request) async {
   Response response = await buildHttpResponse('register', request: request, method: HttpMethod.POST);
 
   if (!response.statusCode.isSuccessful()) {
-    if (response.body.isJson()) {
-      var json = jsonDecode(response.body);
+    var json = jsonDecode(response.data);
 
-      if (json.containsKey('code') && json['code'].toString().contains('invalid_username')) {
-        throw 'invalid_username';
-      }
+    if (json.containsKey('code') && json['code'].toString().contains('invalid_username')) {
+      throw 'invalid_username';
     }
   }
 
@@ -76,12 +74,10 @@ Future<LoginResponse> signUpApi(Map request) async {
 Future<LoginResponse> logInApi(Map request, {bool isSocialLogin = false}) async {
   Response response = await buildHttpResponse('login', request: request, method: HttpMethod.POST);
   if (!response.statusCode.isSuccessful()) {
-    if (response.body.isJson()) {
-      var json = jsonDecode(response.body);
+    var json = jsonDecode(response.data);
 
-      if (json.containsKey('code') && json['code'].toString().contains('invalid_username')) {
-        throw 'invalid_username';
-      }
+    if (json.containsKey('code') && json['code'].toString().contains('invalid_username')) {
+      throw 'invalid_username';
     }
   }
 
@@ -133,7 +129,7 @@ Future<LoginResponse> logInApi(Map request, {bool isSocialLogin = false}) async 
   });
 }
 
-Future<void> logout(BuildContext context, {bool isFromLogin = false,bool isDeleteAccount=false}) async {
+Future<void> logout(BuildContext context, {bool isFromLogin = false, bool isDeleteAccount = false}) async {
   clearData() async {
     await removeKey(USER_ID);
     await removeKey(NAME);
@@ -187,51 +183,145 @@ Future<ChangePasswordResponseModel> forgotPassword(Map req) async {
   return ChangePasswordResponseModel.fromJson(await handleResponse(await buildHttpResponse('forget-password', request: req, method: HttpMethod.POST)));
 }
 
-Future<MultipartRequest> getMultiPartRequest(String endPoint, {String? baseUrl}) async {
-  String url = '${baseUrl ?? buildBaseUrl(endPoint).toString()}';
-  log(url);
-  return MultipartRequest('POST', Uri.parse(url));
-}
-
-Future sendMultiPartRequest(MultipartRequest multiPartRequest, {Function(dynamic)? onSuccess, Function(dynamic)? onError}) async {
-  multiPartRequest.headers.addAll(buildHeaderTokens());
-
-  await multiPartRequest.send().then((res) {
-    log(res.statusCode);
-    res.stream.transform(utf8.decoder).listen((value) {
-      log(value);
-      onSuccess?.call(jsonDecode(value));
-    });
-  }).catchError((error) {
-    onError?.call(error.toString());
-  });
-}
-
 /// Profile Update
 Future updateProfile({String? userName, String? name, String? userEmail, String? address, String? contactNumber, File? file}) async {
-  MultipartRequest multiPartRequest = await getMultiPartRequest('update-profile');
-  multiPartRequest.fields['username'] = userName.validate();
-  multiPartRequest.fields['email'] = userEmail ?? appStore.userEmail;
-  multiPartRequest.fields['name'] = name.validate();
-  multiPartRequest.fields['contact_number'] = contactNumber.validate();
-  multiPartRequest.fields['address'] = address.validate();
+  final url = 'update-profile';
+  final multiPartRequest = FormData();
+  multiPartRequest.fields
+    ..add(MapEntry('username', userName.validate()))
+    ..add(MapEntry('email', userEmail ?? appStore.userEmail))
+    ..add(MapEntry('name', name.validate()))
+    ..add(MapEntry('contact_number', contactNumber.validate()))
+    ..add(MapEntry('address', address.validate()));
 
-  if (file != null) multiPartRequest.files.add(await MultipartFile.fromPath('profile_image', file.path));
+  if (file != null) multiPartRequest.files.add(MapEntry('profile_image', await MultipartFile.fromFile(file.path)));
 
-  await sendMultiPartRequest(multiPartRequest, onSuccess: (data) async {
-    if (data != null) {
-      LoginResponse res = LoginResponse.fromJson(data);
+  try {
+    final response = await buildHttpResponse(url, method: HttpMethod.POST_FORM, formData: multiPartRequest);
+    final Map<String, dynamic> data = await handleResponse(response);
+    LoginResponse res = LoginResponse.fromJson(data);
 
-      await setValue(NAME, res.data!.name.validate());
-      await setValue(USER_PROFILE_PHOTO, res.data!.profileImage.validate());
-      await setValue(USER_NAME, res.data!.username.validate());
-      await setValue(USER_ADDRESS, res.data!.address.validate());
-      await setValue(USER_CONTACT_NUMBER, res.data!.contactNumber.validate());
-      await appStore.setUserEmail(res.data!.email.validate());
-    }
-  }, onError: (error) {
+    await setValue(NAME, res.data!.name.validate());
+    await setValue(USER_PROFILE_PHOTO, res.data!.profileImage.validate());
+    await setValue(USER_NAME, res.data!.username.validate());
+    await setValue(USER_ADDRESS, res.data!.address.validate());
+    await setValue(USER_CONTACT_NUMBER, res.data!.contactNumber.validate());
+    await appStore.setUserEmail(res.data!.email.validate());
+  } catch (e) {
+    toast(e.toString());
+  }
+}
+
+/// update order
+Future updateOrder({
+  String? pickupDatetime,
+  String? deliveryDatetime,
+  String? clientName,
+  String? deliveryman,
+  String? orderStatus,
+  String? reason,
+  int? orderId,
+  File? picUpSignature,
+  File? deliverySignature,
+}) async {
+  final url = 'order-update/$orderId';
+  final multiPartRequest = FormData();
+
+  if (pickupDatetime != null) multiPartRequest.fields.add(MapEntry('pickup_datetime', pickupDatetime));
+  if (deliveryDatetime != null) multiPartRequest.fields.add(MapEntry('delivery_datetime', deliveryDatetime));
+  if (clientName != null) multiPartRequest.fields.add(MapEntry('pickup_confirm_by_client', clientName));
+  if (deliveryman != null) multiPartRequest.fields.add(MapEntry('pickup_confirm_by_delivery_man', deliveryman));
+  if (reason != null) multiPartRequest.fields.add(MapEntry('reason', reason));
+  if (orderStatus != null) multiPartRequest.fields.add(MapEntry('status', orderStatus));
+
+  if (picUpSignature != null) multiPartRequest.files.add(MapEntry('pickup_time_signature', await MultipartFile.fromFile(picUpSignature.path)));
+  if (deliverySignature != null) multiPartRequest.files.add(MapEntry('delivery_time_signature', await MultipartFile.fromFile(deliverySignature.path)));
+
+  try {
+    final response = await buildHttpResponse(url, method: HttpMethod.POST_FORM, formData: multiPartRequest);
+
+    await handleResponse(response);
+  } catch (error) {
     toast(error.toString());
-  });
+  }
+}
+
+/// Update Bank Info
+Future updateBankDetail({String? bankName, String? bankCode, String? accountName, String? accountNumber}) async {
+  final url = 'update-profile';
+  final multiPartRequest = FormData();
+  multiPartRequest.fields
+    ..add(MapEntry('email', getStringAsync(USER_EMAIL).validate()))
+    ..add(MapEntry('contact_number', getStringAsync(USER_CONTACT_NUMBER).validate()))
+    ..add(MapEntry('username', getStringAsync(USER_NAME).validate()))
+    ..add(MapEntry('user_bank_account[bank_name]', bankName.validate()))
+    ..add(MapEntry('user_bank_account[bank_code]', bankCode.validate()))
+    ..add(MapEntry('user_bank_account[account_holder_name]', accountName.validate()))
+    ..add(MapEntry('user_bank_account[account_number]', accountNumber.validate()));
+
+  try {
+    final response = await buildHttpResponse(url, method: HttpMethod.POST_FORM, formData: multiPartRequest);
+    await handleResponse(response);
+  } catch (error) {
+    toast(error.toString());
+  }
+}
+
+/// Country
+Future updateCountryCity({int? countryId, int? cityId}) async {
+  final url = 'update-profile';
+  final multiPartRequest = FormData();
+
+  multiPartRequest.fields
+    ..add(MapEntry('city_id', cityId.toString()))
+    ..add(MapEntry('country_id', countryId.toString()));
+
+
+  try {
+    final response = await buildHttpResponse(url, method: HttpMethod.POST_FORM, formData: multiPartRequest);
+    final Map<String, dynamic> data = await handleResponse(response);
+    LoginResponse res = LoginResponse.fromJson(data);
+
+    await setValue(COUNTRY_ID, res.data!.countryId.validate());
+    await setValue(CITY_ID, res.data!.cityId.validate());
+  } catch (e) {
+    toast(e.toString());
+  }
+}
+
+/// update status
+Future updateStatus({String? orderStatus, int? orderId}) async {
+  final url = 'order-update/$orderId';
+  final multiPartRequest = FormData();
+
+  multiPartRequest.fields..add(MapEntry('status', orderStatus.validate()));
+
+
+  try {
+    final response = await buildHttpResponse(url, method: HttpMethod.POST_FORM, formData: multiPartRequest);
+    await handleResponse(response);
+  } catch (e) {
+    toast(e.toString());
+  }
+}
+
+/// Update Location
+Future updateLocation({String? userName, String? userEmail, String? latitude, String? longitude}) async {
+  final url = 'update-profile';
+  final multiPartRequest = FormData();
+
+  multiPartRequest.fields
+    ..add(MapEntry('id', getIntAsync(USER_ID).toString()))
+    ..add(MapEntry('latitude', latitude!))
+    ..add(MapEntry('longitude', longitude!));
+
+
+  try {
+    final response = await buildHttpResponse(url, method: HttpMethod.POST_FORM, formData: multiPartRequest);
+    await handleResponse(response);
+  } catch (e) {
+    toast(e.toString());
+  }
 }
 
 Future<UserData> getUserDetail(int id) async {
@@ -273,24 +363,6 @@ Future<CityDetailModel> getCityDetail(int id) async {
   return CityDetailModel.fromJson(await handleResponse(await buildHttpResponse('city-detail?id=$id', method: HttpMethod.GET)));
 }
 
-/// Country
-Future updateCountryCity({int? countryId, int? cityId}) async {
-  MultipartRequest multiPartRequest = await getMultiPartRequest('update-profile');
-  multiPartRequest.fields['city_id'] = cityId.toString();
-  multiPartRequest.fields['country_id'] = countryId.toString();
-
-  await sendMultiPartRequest(multiPartRequest, onSuccess: (data) async {
-    if (data != null) {
-      LoginResponse res = LoginResponse.fromJson(data);
-
-      await setValue(COUNTRY_ID, res.data!.countryId.validate());
-      await setValue(CITY_ID, res.data!.cityId.validate());
-    }
-  }, onError: (error) {
-    toast(error.toString());
-  });
-}
-
 /// get OrderList
 Future<OrderListModel> getOrderList({required int page, String? orderStatus, String? fromDate, String? toDate}) async {
   String endPoint = 'order-list?client_id=${getIntAsync(USER_ID)}&city_id=${getIntAsync(CITY_ID)}&page=$page';
@@ -312,52 +384,6 @@ Future<OrderListModel> getDeliveryBoyOrderList({required int page, required int 
       await handleResponse(await buildHttpResponse('order-list?delivery_man_id=$deliveryBoyID&page=$page&city_id=$cityId&country_id=$countryId&status=$orderStatus', method: HttpMethod.GET)));
 }
 
-/// update status
-Future updateStatus({String? orderStatus, int? orderId}) async {
-  MultipartRequest multiPartRequest = await getMultiPartRequest('order-update/$orderId');
-  multiPartRequest.fields['status'] = orderStatus.validate();
-
-  await sendMultiPartRequest(multiPartRequest, onSuccess: (data) async {
-    if (data != null) {
-      //
-    }
-  }, onError: (error) {
-    toast(error.toString());
-  });
-}
-
-/// update order
-Future updateOrder({
-  String? pickupDatetime,
-  String? deliveryDatetime,
-  String? clientName,
-  String? deliveryman,
-  String? orderStatus,
-  String? reason,
-  int? orderId,
-  File? picUpSignature,
-  File? deliverySignature,
-}) async {
-  MultipartRequest multiPartRequest = await getMultiPartRequest('order-update/$orderId');
-  if (pickupDatetime != null) multiPartRequest.fields['pickup_datetime'] = pickupDatetime;
-  if (deliveryDatetime != null) multiPartRequest.fields['delivery_datetime'] = deliveryDatetime;
-  if (clientName != null) multiPartRequest.fields['pickup_confirm_by_client'] = clientName;
-  if (deliveryman != null) multiPartRequest.fields['pickup_confirm_by_delivery_man'] = deliveryman;
-  if (reason != null) multiPartRequest.fields['reason'] = reason;
-  if (orderStatus != null) multiPartRequest.fields['status'] = orderStatus;
-
-  if (picUpSignature != null) multiPartRequest.files.add(await MultipartFile.fromPath('pickup_time_signature', picUpSignature.path));
-  if (deliverySignature != null) multiPartRequest.files.add(await MultipartFile.fromPath('delivery_time_signature', deliverySignature.path));
-
-  await sendMultiPartRequest(multiPartRequest, onSuccess: (data) async {
-    if (data != null) {
-      //
-    }
-  }, onError: (error) {
-    toast(error.toString());
-  });
-}
-
 Future<PaymentGatewayListModel> getPaymentGatewayList() async {
   return PaymentGatewayListModel.fromJson(await handleResponse(await buildHttpResponse('paymentgateway-list?status=1', method: HttpMethod.GET)));
 }
@@ -372,22 +398,6 @@ Future<WithDrawListModel> getWithDrawList({int? page}) async {
 
 Future<LDBaseResponse> saveWithDrawRequest(Map request) async {
   return LDBaseResponse.fromJson(await handleResponse(await buildHttpResponse('save-withdrawrequest', method: HttpMethod.POST, request: request)));
-}
-
-/// Update Location
-Future updateLocation({String? userName, String? userEmail, String? latitude, String? longitude}) async {
-  MultipartRequest multiPartRequest = await getMultiPartRequest('update-profile');
-  multiPartRequest.fields['id'] = getIntAsync(USER_ID).toString();
-  multiPartRequest.fields['latitude'] = latitude!;
-  multiPartRequest.fields['longitude'] = longitude!;
-
-  await sendMultiPartRequest(multiPartRequest, onSuccess: (data) async {
-    if (data != null) {
-      //
-    }
-  }, onError: (error) {
-    toast(error.toString());
-  });
 }
 
 /// Get Notification List
@@ -442,26 +452,6 @@ Future<WalletListModel> getWalletList({required int page}) async {
 
 Future<LDBaseResponse> saveWallet(Map request) async {
   return LDBaseResponse.fromJson(await handleResponse(await buildHttpResponse('save-wallet', method: HttpMethod.POST, request: request)));
-}
-
-/// Update Bank Info
-Future updateBankDetail({String? bankName, String? bankCode, String? accountName, String? accountNumber}) async {
-  MultipartRequest multiPartRequest = await getMultiPartRequest('update-profile');
-  multiPartRequest.fields['email'] = getStringAsync(USER_EMAIL).validate();
-  multiPartRequest.fields['contact_number'] = getStringAsync(USER_CONTACT_NUMBER).validate();
-  multiPartRequest.fields['username'] = getStringAsync(USER_NAME).validate();
-  multiPartRequest.fields['user_bank_account[bank_name]'] = bankName.validate();
-  multiPartRequest.fields['user_bank_account[bank_code]'] = bankCode.validate();
-  multiPartRequest.fields['user_bank_account[account_holder_name]'] = accountName.validate();
-  multiPartRequest.fields['user_bank_account[account_number]'] = accountNumber.validate();
-
-  await sendMultiPartRequest(multiPartRequest, onSuccess: (data) async {
-    if (data != null) {
-      //
-    }
-  }, onError: (error) {
-    toast(error.toString());
-  });
 }
 
 Future<LDBaseResponse> logoutApi() async {
