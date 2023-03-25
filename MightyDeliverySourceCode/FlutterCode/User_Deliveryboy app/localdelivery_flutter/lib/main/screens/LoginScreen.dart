@@ -80,9 +80,9 @@ class LoginScreenState extends State<LoginScreen> {
       authService.signInWithEmailPassword(context, email: emailController.text, password: passController.text).then((value) async {
         await logInApi(req).then((value) async {
           appStore.setLoading(false);
-          if(value.data!.userType!=CLIENT && value.data!.userType!=DELIVERY_MAN){
-            await logout(context,isFromLogin: true);
-          }else {
+          if (value.data!.userType != CLIENT && value.data!.userType != DELIVERY_MAN) {
+            await logout(context, isFromLogin: true);
+          } else {
             if (getIntAsync(STATUS) == 1) {
               if (value.data!.countryId != null && value.data!.cityId != null) {
                 await getCountryDetailApiCall(value.data!.countryId.validate());
@@ -134,8 +134,12 @@ class LoginScreenState extends State<LoginScreen> {
             children: [
               Container(
                 height: context.height() * 0.25,
-                child:
-                    Container(height: 90, width: 90, alignment: Alignment.center, decoration: BoxDecoration(color: Colors.white, shape: BoxShape.circle), child: Image.asset('assets/app_logo_primary.png', height: 70, width: 70)),
+                child: Container(
+                    height: 90,
+                    width: 90,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+                    child: Image.asset('assets/app_logo_primary.png', height: 70, width: 70)),
               ),
               Container(
                 width: context.width(),
@@ -210,7 +214,11 @@ class LoginScreenState extends State<LoginScreen> {
                             Text(language.doNotHaveAccount, style: primaryTextStyle()),
                             4.width,
                             Text(language.signUp, style: boldTextStyle(color: colorPrimary)).onTap(() {
-                              RegisterScreen().launch(context, duration: Duration(milliseconds: 500), pageRouteAnimation: PageRouteAnimation.Slide);
+                              RegisterScreen(userType: CLIENT).launch(
+                                context,
+                                duration: Duration(milliseconds: 500),
+                                pageRouteAnimation: PageRouteAnimation.Slide,
+                              );
                             }),
                           ],
                         ),

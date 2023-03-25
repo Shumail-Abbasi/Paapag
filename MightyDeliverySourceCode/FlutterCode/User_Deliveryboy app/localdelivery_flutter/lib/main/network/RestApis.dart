@@ -44,18 +44,18 @@ Future<LoginResponse> signUpApi(Map request) async {
   return await handleResponse(response).then((json) async {
     var loginResponse = LoginResponse.fromJson(json);
 
-    await setValue(USER_ID, loginResponse.data!.id.validate());
-    await setValue(NAME, loginResponse.data!.name.validate());
-    await setValue(USER_EMAIL, loginResponse.data!.email.validate());
-    await setValue(USER_TOKEN, loginResponse.data!.apiToken.validate());
-    await setValue(USER_CONTACT_NUMBER, loginResponse.data!.contactNumber.validate());
-    await setValue(USER_PROFILE_PHOTO, loginResponse.data!.profileImage.validate());
-    await setValue(USER_TYPE, loginResponse.data!.userType.validate());
-    await setValue(USER_NAME, loginResponse.data!.username.validate());
-    await setValue(USER_ADDRESS, loginResponse.data!.address.validate());
-    await setValue(COUNTRY_ID, loginResponse.data!.countryId.validate());
-    await setValue(CITY_ID, loginResponse.data!.cityId.validate());
-    await setValue(UID, loginResponse.data!.uid.validate());
+    await setValue(USER_ID, loginResponse.data?.id.validate());
+    await setValue(NAME, loginResponse.data?.name.validate());
+    await setValue(USER_EMAIL, loginResponse.data?.email.validate());
+    await setValue(USER_TOKEN, loginResponse.data?.apiToken.validate());
+    await setValue(USER_CONTACT_NUMBER, loginResponse.data?.contactNumber.validate());
+    await setValue(USER_PROFILE_PHOTO, loginResponse.data?.profileImage.validate());
+    await setValue(USER_TYPE, loginResponse.data?.userType.validate());
+    await setValue(USER_NAME, loginResponse.data?.username.validate());
+    await setValue(USER_ADDRESS, loginResponse.data?.address.validate());
+    await setValue(COUNTRY_ID, loginResponse.data?.countryId.validate());
+    await setValue(CITY_ID, loginResponse.data?.cityId.validate());
+    await setValue(UID, loginResponse.data?.uid.validate());
     await setValue(IS_VERIFIED_DELIVERY_MAN, loginResponse.data!.isVerifiedDeliveryMan == 1);
 
     await appStore.setUserEmail(loginResponse.data!.email.validate());
@@ -97,26 +97,26 @@ Future<LoginResponse> logInApi(Map request, {bool isSocialLogin = false}) async 
     await setValue(DOB, loginResponse.userData!.dob.validate());
 */
 
-    await setValue(USER_ID, loginResponse.data!.id.validate());
-    await setValue(NAME, loginResponse.data!.name.validate());
-    await setValue(USER_EMAIL, loginResponse.data!.email.validate());
-    await setValue(USER_TOKEN, loginResponse.data!.apiToken.validate());
-    await setValue(USER_CONTACT_NUMBER, loginResponse.data!.contactNumber.validate());
-    await setValue(USER_PROFILE_PHOTO, loginResponse.data!.profileImage.validate());
-    await setValue(USER_TYPE, loginResponse.data!.userType.validate());
-    await setValue(USER_NAME, loginResponse.data!.username.validate());
-    await setValue(STATUS, loginResponse.data!.status.validate());
-    await setValue(USER_ADDRESS, loginResponse.data!.address.validate());
-    await setValue(COUNTRY_ID, loginResponse.data!.countryId.validate());
-    await setValue(CITY_ID, loginResponse.data!.cityId.validate());
-    await setValue(UID, loginResponse.data!.uid.validate());
-    await setValue(IS_VERIFIED_DELIVERY_MAN,loginResponse.data!.isVerifiedDeliveryMan == 1);
+    await setValue(USER_ID, loginResponse.data?.id.validate() ?? 0);
+    await setValue(NAME, loginResponse.data?.name.validate() ?? '');
+    await setValue(USER_EMAIL, loginResponse.data?.email.validate() ?? '');
+    await setValue(USER_TOKEN, loginResponse.data?.apiToken.validate() ?? '');
+    await setValue(USER_CONTACT_NUMBER, loginResponse.data?.contactNumber.validate() ?? '');
+    await setValue(USER_PROFILE_PHOTO, loginResponse.data?.profileImage.validate() ?? '');
+    await setValue(USER_TYPE, loginResponse.data?.userType.validate() ?? '');
+    await setValue(USER_NAME, loginResponse.data?.username.validate() ?? '');
+    await setValue(STATUS, loginResponse.data?.status.validate() ?? 0);
+    await setValue(USER_ADDRESS, loginResponse.data?.address.validate() ?? '');
+    await setValue(COUNTRY_ID, loginResponse.data?.countryId.validate() ?? 0);
+    await setValue(CITY_ID, loginResponse.data?.cityId.validate() ?? 0);
+    await setValue(UID, loginResponse.data?.uid.validate() ?? '');
+    await setValue(IS_VERIFIED_DELIVERY_MAN,loginResponse.data?.isVerifiedDeliveryMan == 1);
 
     /* await appStore.setUserName(loginResponse.userData!.username.validate());
     await appStore.setRole(loginResponse.userData!.user_type.validate());
     await appStore.setToken(loginResponse.userData!.api_token.validate());
     await appStore.setUserID(loginResponse.userData!.id.validate());*/
-    await appStore.setUserEmail(loginResponse.data!.email.validate());
+    await appStore.setUserEmail(loginResponse.data?.email.validate() ?? '');
     if(getIntAsync(STATUS) == 1){
       await appStore.setLogin(true);
     }else{
