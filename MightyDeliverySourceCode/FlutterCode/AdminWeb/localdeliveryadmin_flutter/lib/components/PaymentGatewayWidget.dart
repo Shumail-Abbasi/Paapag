@@ -3,24 +3,32 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:http/http.dart';
-import 'package:paapag_admin/models/LDBaseResponse.dart';
-import 'package:paapag_admin/models/PaymentGatewayListModel.dart';
-import 'package:paapag_admin/network/NetworkUtils.dart';
-import 'package:paapag_admin/network/RestApis.dart';
-import 'package:paapag_admin/screens/PaymentSetupScreen.dart';
-import 'package:paapag_admin/utils/Colors.dart';
-import 'package:paapag_admin/utils/Common.dart';
-import 'package:paapag_admin/utils/Constants.dart';
-import 'package:paapag_admin/utils/Extensions/app_common.dart';
+import '../components/BodyCornerWidget.dart';
+import '../utils/Extensions/shared_pref.dart';
+import '../models/LDBaseResponse.dart';
+import '../models/PaymentGatewayListModel.dart';
+import '../network/NetworkUtils.dart';
+import '../network/RestApis.dart';
+import '../utils/Colors.dart';
+import '../utils/Common.dart';
+import '../utils/Constants.dart';
+import '../utils/Extensions/ResponsiveWidget.dart';
 
 import '../main.dart';
+import '../utils/Extensions/common.dart';
+import '../utils/Extensions/constants.dart';
+import '../utils/Extensions/text_styles.dart';
 
 class PaymentGatewayWidget extends StatefulWidget {
+  static String route = '/admin/paymentGateway';
+
   @override
   PaymentGatewayWidgetState createState() => PaymentGatewayWidgetState();
 }
 
 class PaymentGatewayWidgetState extends State<PaymentGatewayWidget> {
+  ScrollController horizontalScrollController = ScrollController();
+
   int currentIndex = 0;
   int currentPage = 1;
 
@@ -33,10 +41,8 @@ class PaymentGatewayWidgetState extends State<PaymentGatewayWidget> {
   }
 
   void init() async {
-    afterBuildCreated(() {
-      appStore.setLoading(true);
-      getPaymentGatewayListApiCall();
-    });
+    appStore.setSelectedMenuIndex(PAYMENT_GATEWAY_INDEX);
+    getPaymentGatewayListApiCall();
   }
 
   getPaymentGatewayListApiCall() async {
@@ -45,6 +51,7 @@ class PaymentGatewayWidgetState extends State<PaymentGatewayWidget> {
       appStore.setLoading(false);
       paymentGatewayList.clear();
       paymentGatewayList.addAll(value.data!);
+      setValue(PAYMENT_GATEWAY_LIST, value.data!.map((e) => jsonEncode(e.toJson())).toList());
       setState(() {});
     }).catchError((error) {
       appStore.setLoading(false);
@@ -66,7 +73,7 @@ class PaymentGatewayWidgetState extends State<PaymentGatewayWidget> {
       onSuccess: (data) async {
         appStore.setLoading(false);
         if (data != null) {
-          LDBaseResponse res = LDBaseResponse.fromJson(jsonDecode(data));
+          LDBaseResponse res = LDBaseResponse.fromJson(data);
           toast(res.message.toString());
           getPaymentGatewayListApiCall();
         }
@@ -88,131 +95,146 @@ class PaymentGatewayWidgetState extends State<PaymentGatewayWidget> {
 
   @override
   Widget build(BuildContext context) {
+
+    Widget addPaymentButton() {
+      return GestureDetector(
+        child: Container(
+          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          decoration: BoxDecoration(color: primaryColor, borderRadius: BorderRadius.circular(defaultRadius)),
+          child: Text(language.setup, style: boldTextStyle(color: Colors.white)),
+        ),
+        onTap: () async {
+          // var res = await Navigator.pushNamed(context, PaymentSetupScreen.route);
+          // if (res!=null) {
+          //   getPaymentGatewayListApiCall();
+          // }
+        },
+      );
+    }
+
     return Observer(builder: (context) {
-      return Stack(
-        fit: StackFit.expand,
-        children: [
-          SingleChildScrollView(
-            padding: EdgeInsets.all(16),
-            controller: ScrollController(),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(language.payment_gateway, style: boldTextStyle(size: 20, color: primaryColor)),
-                    GestureDetector(
-                      child: Container(
-                        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                        decoration: BoxDecoration(color: primaryColor, borderRadius: BorderRadius.circular(defaultRadius)),
-                        child: Text(language.setup, style: boldTextStyle(color: Colors.white)),
-                      ),
-                      onTap: () {
-                        launchScreen(
-                            context,
-                            PaymentSetupScreen(
-                              paymentGatewayList: paymentGatewayList,
-                              onUpdate: () {
-                                getPaymentGatewayListApiCall();
-                              },
-                            ));
-                      },
-                    ),
-                  ],
-                ),
-                SizedBox(height: 16),
-                paymentGatewayList.isNotEmpty
-                    ? Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      padding: EdgeInsets.all(16),
-                      decoration: BoxDecoration(color: appStore.isDarkMode ? scaffoldColorDark : Colors.white, borderRadius: BorderRadius.circular(defaultRadius), boxShadow: commonBoxShadow()),
-                      child: SingleChildScrollView(
-                        controller: ScrollController(),
-                        scrollDirection: Axis.horizontal,
-                        child: ConstrainedBox(
-                          constraints: BoxConstraints(minWidth: getBodyWidth(context) - 48),
-                          child: DataTable(
-                            dataRowHeight: 60,
-                            headingRowHeight: 45,
-                            horizontalMargin: 16,
-                            headingRowColor: MaterialStateColor.resolveWith((states) => primaryColor.withOpacity(0.1)),
-                            showCheckboxColumn: false,
-                            dataTextStyle: primaryTextStyle(size: 14),
-                            headingTextStyle: boldTextStyle(),
-                            columns: [
-                              DataColumn(label: Text(language.id)),
-                              DataColumn(label: Text(language.payment_method)),
-                              DataColumn(label: Text(language.image)),
-                              DataColumn(label: Text(language.mode)),
-                              DataColumn(label: Text(language.status)),
-                              DataColumn(label: Text(language.actions)),
-                            ],
-                            rows: paymentGatewayList.map((mData) {
-                              return DataRow(cells: [
-                                DataCell(Text('${mData.id ?? ""}')),
-                                DataCell(Text('${mData.title ?? ""}')),
-                                DataCell(
-                                  Padding(
-                                    padding: EdgeInsets.all(8.0),
-                                    child: commonCachedNetworkImage('${mData.gatewayLogo!}', fit: BoxFit.fitHeight, height: 60, width: 60),
-                                  ),
-                                ),
-                                DataCell(Text(mData.isTest == 1 ? language.test : language.live)),
-                                DataCell(
-                                  TextButton(
-                                    child: Text(
-                                      '${mData.status == 1 ? language.enable : language.disable}',
-                                      style: primaryTextStyle(color: mData.status == 1 ? primaryColor : Colors.red),
-                                    ),
-                                    onPressed: () {
-                                      commonConfirmationDialog(context, mData.status == 1 ? DIALOG_TYPE_DISABLE : DIALOG_TYPE_ENABLE, () {
-                                        if (shared_pref.getString(USER_TYPE) == DEMO_ADMIN) {
-                                          toast(language.demo_admin_msg);
-                                        } else {
-                                          Navigator.pop(context);
-                                          updateStatusApiCall(mData);
-                                        }
-                                      },
-                                          title: mData.status != 1 ? language.enable_payment : language.disable_payment,
-                                          subtitle: mData.status != 1 ? language.do_you_want_to_enable_this_payment : language.do_you_want_to_disable_this_payment);
-                                    },
-                                  ),
-                                ),
-                                DataCell(
-                                  outlineActionIcon(Icons.edit, Colors.green, language.edit, () async {
-                                    await launchScreen(
-                                        context,
-                                        PaymentSetupScreen(
-                                          paymentGatewayList: paymentGatewayList,
-                                          paymentType: mData.type,
-                                          onUpdate: () {
-                                            getPaymentGatewayListApiCall();
-                                          },
-                                        ));
-                                  }),
-                                ),
-                              ]);
-                            }).toList(),
-                          ),
+      return BodyCornerWidget(
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            SingleChildScrollView(
+              padding: EdgeInsets.all(16),
+              controller: ScrollController(),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  ResponsiveWidget.isSmallScreen(context) && appStore.isMenuExpanded
+                      ? Wrap(
+                          spacing: 16,
+                          runSpacing: 16,
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          children: [
+                            Text(language.payment_gateway, style: boldTextStyle(size: 20, color: primaryColor)),
+                            addPaymentButton(),
+                          ],
+                        )
+                      : Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(language.payment_gateway, style: boldTextStyle(size: 20, color: primaryColor)),
+                            addPaymentButton(),
+                          ],
                         ),
-                      ),
-                    ),
-                    SizedBox(height: 80),
-                  ],
-                )
-                    : SizedBox(),
-              ],
+                  SizedBox(height: 16),
+                  paymentGatewayList.isNotEmpty
+                      ? Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            RawScrollbar(
+                              scrollbarOrientation: ScrollbarOrientation.bottom,
+                              controller: horizontalScrollController,
+                              thumbVisibility: true,
+                              thumbColor: appStore.isDarkMode ? Colors.white12 : Colors.black12,
+                              radius: Radius.circular(defaultRadius),
+                              child: Container(
+                                padding: EdgeInsets.all(16),
+                                decoration: BoxDecoration(color: appStore.isDarkMode ? scaffoldColorDark : Colors.white, borderRadius: BorderRadius.circular(defaultRadius), boxShadow: commonBoxShadow()),
+                                child: SingleChildScrollView(
+                                  controller: horizontalScrollController,
+                                  scrollDirection: Axis.horizontal,
+                                  child: ConstrainedBox(
+                                    constraints: BoxConstraints(minWidth: getBodyWidth(context) - 48),
+                                    child: DataTable(
+                                      dataRowHeight: 60,
+                                      headingRowHeight: 45,
+                                      horizontalMargin: 16,
+                                      headingRowColor: MaterialStateColor.resolveWith((states) => primaryColor.withOpacity(0.1)),
+                                      showCheckboxColumn: false,
+                                      dataTextStyle: primaryTextStyle(size: 14),
+                                      headingTextStyle: boldTextStyle(),
+                                      columns: [
+                                        DataColumn(label: Text(language.id)),
+                                        DataColumn(label: Text(language.payment_method)),
+                                        DataColumn(label: Text(language.image)),
+                                        DataColumn(label: Text(language.mode)),
+                                        DataColumn(label: Text(language.status)),
+                                        DataColumn(label: Text(language.actions)),
+                                      ],
+                                      rows: paymentGatewayList.map((mData) {
+                                        return DataRow(cells: [
+                                          DataCell(Text('${mData.id ?? ""}')),
+                                          DataCell(Text('${mData.title ?? ""}')),
+                                          DataCell(
+                                            Padding(
+                                              padding: EdgeInsets.all(8.0),
+                                              child: commonCachedNetworkImage('${mData.gatewayLogo!}', fit: BoxFit.fitHeight, height: 60, width: 60),
+                                            ),
+                                          ),
+                                          DataCell(Text(mData.isTest == 1 ? language.test : language.live)),
+                                          DataCell(
+                                            TextButton(
+                                              child: Text(
+                                                '${mData.status == 1 ? language.enable : language.disable}',
+                                                style: primaryTextStyle(color: mData.status == 1 ? primaryColor : Colors.red),
+                                              ),
+                                              onPressed: () {
+                                                commonConfirmationDialog(context, mData.status == 1 ? DIALOG_TYPE_DISABLE : DIALOG_TYPE_ENABLE, () {
+                                                  if (getStringAsync(USER_TYPE) == DEMO_ADMIN) {
+                                                    toast(language.demo_admin_msg);
+                                                  } else {
+                                                    Navigator.pop(context);
+                                                    updateStatusApiCall(mData);
+                                                  }
+                                                },
+                                                    title: mData.status != 1 ? language.enable_payment : language.disable_payment,
+                                                    subtitle: mData.status != 1 ? language.do_you_want_to_enable_this_payment : language.do_you_want_to_disable_this_payment);
+                                              },
+                                            ),
+                                          ),
+                                          DataCell(
+                                            outlineActionIcon(Icons.edit, Colors.green, language.edit, () async {
+                                              // var res = await Navigator.pushNamed(context, PaymentSetupScreen.route+"?payment_type=${mData.type}");
+                                              // if (res!=null) {
+                                              //   getPaymentGatewayListApiCall();
+                                              // }
+                                            }),
+                                          ),
+                                        ]);
+                                      }).toList(),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            SizedBox(height: 80),
+                          ],
+                        )
+                      : SizedBox(),
+                ],
+              ),
             ),
-          ),
-          appStore.isLoading
-              ? loaderWidget()
-              : paymentGatewayList.isEmpty
-              ? emptyWidget()
-              : SizedBox(),
-        ],
+            appStore.isLoading
+                ? loaderWidget()
+                : paymentGatewayList.isEmpty
+                    ? emptyWidget()
+                    : SizedBox(),
+          ],
+        ),
       );
     });
   }

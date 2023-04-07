@@ -1,7 +1,6 @@
-import 'dart:typed_data';
-
 import 'package:country_code_picker/country_code_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -10,8 +9,11 @@ import '../network/RestApis.dart';
 import '../utils/Colors.dart';
 import '../utils/Common.dart';
 import '../utils/Constants.dart';
-import '../utils/Extensions/app_common.dart';
 import '../utils/Extensions/app_textfield.dart';
+import '../utils/Extensions/common.dart';
+import '../utils/Extensions/constants.dart';
+import '../utils/Extensions/shared_pref.dart';
+import '../utils/Extensions/text_styles.dart';
 
 class EditProfileDialog extends StatefulWidget {
   static String tag = '/EditProfileDialog';
@@ -22,7 +24,7 @@ class EditProfileDialog extends StatefulWidget {
 
 class EditProfileDialogState extends State<EditProfileDialog> {
   GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  String countryCode = '+91';
+  String countryCode = defaultPhoneCode;
 
   TextEditingController emailController = TextEditingController();
   TextEditingController usernameController = TextEditingController();
@@ -46,17 +48,17 @@ class EditProfileDialogState extends State<EditProfileDialog> {
   }
 
   Future<void> init() async {
-    String phoneNum = shared_pref.getString(USER_CONTACT_NUMBER) ?? "";
-    emailController.text = shared_pref.getString(USER_EMAIL) ?? "";
-    usernameController.text = shared_pref.getString(USER_NAME) ?? "";
-    nameController.text = shared_pref.getString(NAME) ?? "";
+    String phoneNum = getStringAsync(USER_CONTACT_NUMBER);
+    emailController.text = getStringAsync(USER_EMAIL);
+    usernameController.text = getStringAsync(USER_NAME);
+    nameController.text = getStringAsync(NAME);
     if (phoneNum.split(" ").length == 1) {
       contactNumberController.text = phoneNum.split(" ").last;
     } else {
       countryCode = phoneNum.split(" ").first;
       contactNumberController.text = phoneNum.split(" ").last;
     }
-    addressController.text = shared_pref.getString(USER_ADDRESS) ?? "";
+    addressController.text = getStringAsync(USER_ADDRESS);
   }
 
   Widget profileImage() {
@@ -85,7 +87,7 @@ class EditProfileDialogState extends State<EditProfileDialog> {
     appStore.setLoading(true);
     await updateProfile(
       image: image,
-      fileName: imageProfile != null ? imageProfile!.path.split('/').last : shared_pref.getString(USER_PROFILE_PHOTO)!.split('/').last,
+      fileName: imageProfile != null ? imageProfile!.path.split('/').last : getStringAsync(USER_PROFILE_PHOTO).split('/').last,
       name: nameController.text,
       userName: usernameController.text,
       userEmail: emailController.text,
@@ -182,24 +184,25 @@ class EditProfileDialogState extends State<EditProfileDialog> {
                         ),
                         SizedBox(width: 16),
                         Expanded(
-                            child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(language.username, style: primaryTextStyle()),
-                            SizedBox(height: 8),
-                            AppTextField(
-                              readOnly: true,
-                              controller: usernameController,
-                              textFieldType: TextFieldType.USERNAME,
-                              focus: usernameFocus,
-                              nextFocus: nameFocus,
-                              decoration: commonInputDecoration(),
-                              onTap: () {
-                                toast(language.youCannotChangeUsername);
-                              },
-                            ),
-                          ],
-                        )),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(language.username, style: primaryTextStyle()),
+                              SizedBox(height: 8),
+                              AppTextField(
+                                readOnly: true,
+                                controller: usernameController,
+                                textFieldType: TextFieldType.USERNAME,
+                                focus: usernameFocus,
+                                nextFocus: nameFocus,
+                                decoration: commonInputDecoration(),
+                                onTap: () {
+                                  toast(language.youCannotChangeUsername);
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
                       ],
                     ),
                     SizedBox(height: 16),
@@ -224,19 +227,20 @@ class EditProfileDialogState extends State<EditProfileDialog> {
                         ),
                         SizedBox(width: 16),
                         Expanded(
-                            child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(language.address, style: primaryTextStyle()),
-                            SizedBox(height: 8),
-                            AppTextField(
-                              controller: addressController,
-                              textFieldType: TextFieldType.OTHER,
-                              focus: addressFocus,
-                              decoration: commonInputDecoration(),
-                            ),
-                          ],
-                        )),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(language.address, style: primaryTextStyle()),
+                              SizedBox(height: 8),
+                              AppTextField(
+                                controller: addressController,
+                                textFieldType: TextFieldType.OTHER,
+                                focus: addressFocus,
+                                decoration: commonInputDecoration(),
+                              ),
+                            ],
+                          ),
+                        ),
                       ],
                     ),
                     SizedBox(height: 16),
@@ -282,10 +286,13 @@ class EditProfileDialogState extends State<EditProfileDialog> {
                         ),
                       ),
                       validator: (s) {
-                        if (s!.trim().isEmpty) return language.field_required_msg;
-                        if (s.trim().length < 10 && s.trim().length > 14) return language.contact_length_validation;
+                        if (s!.trim().isEmpty) return errorThisFieldRequired;
+                        if (s.trim().length < minContactLength || s.trim().length > maxContactLength) return language.contact_length_validation;
                         return null;
                       },
+                      inputFormatters: [
+                        FilteringTextInputFormatter.digitsOnly,
+                      ],
                     ),
                   ],
                 ),
@@ -302,7 +309,11 @@ class EditProfileDialogState extends State<EditProfileDialog> {
         SizedBox(width: 4),
         dialogPrimaryButton(language.save, () {
           if (_formKey.currentState!.validate()) {
-            save();
+            if (getStringAsync(USER_TYPE) == DEMO_ADMIN) {
+              toast(language.demo_admin_msg);
+            } else {
+              save();
+            }
           }
         }),
       ],

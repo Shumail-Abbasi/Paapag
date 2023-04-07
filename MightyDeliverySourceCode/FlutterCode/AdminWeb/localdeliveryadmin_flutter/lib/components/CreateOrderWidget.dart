@@ -4,10 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:intl/intl.dart';
-import 'package:paapag_admin/models/AutoCompletePlacesListModel.dart';
-import 'package:paapag_admin/models/CountryListModel.dart';
-import 'package:paapag_admin/utils/Constants.dart';
-import 'package:paapag_admin/utils/Extensions/StringExtensions.dart';
+import '../components/OrderWidget.dart';
+import '../utils/Extensions/ResponsiveWidget.dart';
+import '../utils/Extensions/shared_pref.dart';
+import '../models/AutoCompletePlacesListModel.dart';
+import '../models/CountryListModel.dart';
+import '../utils/Constants.dart';
+import '../utils/Extensions/StringExtensions.dart';
 import '../main.dart';
 import '../models/CityListModel.dart';
 import '../models/ExtraChargeRequestModel.dart';
@@ -16,11 +19,16 @@ import '../models/PlaceIdDetailModel.dart';
 import '../network/RestApis.dart';
 import '../utils/Colors.dart';
 import '../utils/Common.dart';
-import '../utils/Extensions/app_common.dart';
 import '../utils/Extensions/app_textfield.dart';
+import '../utils/Extensions/common.dart';
+import '../utils/Extensions/constants.dart';
+import '../utils/Extensions/text_styles.dart';
+import 'BodyCornerWidget.dart';
 import 'CreateOrderConfirmationDialog.dart';
 
 class CreateOrderWidget extends StatefulWidget {
+  static String route = '/admin/createOrder';
+
   @override
   CreateOrderWidgetState createState() => CreateOrderWidgetState();
 }
@@ -51,8 +59,8 @@ class CreateOrderWidgetState extends State<CreateOrderWidget> {
   TextEditingController deliverFromTimeController = TextEditingController();
   TextEditingController deliverToTimeController = TextEditingController();
 
-  String deliverCountryCode = '+91';
-  String pickupCountryCode = '+91';
+  String deliverCountryCode = defaultPhoneCode;
+  String pickupCountryCode = defaultPhoneCode;
 
   DateTime? pickFromDateTime, pickToDateTime, deliverFromDateTime, deliverToDateTime;
   DateTime? pickDate, deliverDate;
@@ -89,6 +97,7 @@ class CreateOrderWidgetState extends State<CreateOrderWidget> {
   }
 
   void init() async {
+    appStore.setSelectedMenuIndex(CREATE_ORDER_INDEX);
     await getParcelTypeListApiCall();
     await getCountryApiCall();
   }
@@ -164,12 +173,12 @@ class CreateOrderWidgetState extends State<CreateOrderWidget> {
 
     /// calculate weight Charge
     if (double.tryParse(weightController.text)! > cityData!.minWeight!) {
-      weightCharge = double.parse(((double.tryParse(weightController.text)! - cityData!.minWeight!) * cityData!.perWeightCharges!).toStringAsFixed(2));
+      weightCharge = double.parse(((double.tryParse(weightController.text)! - cityData!.minWeight!) * cityData!.perWeightCharges!).toStringAsFixed(digitAfterDecimal));
     }
 
     /// calculate distance Charge
     if (totalDistance > cityData!.minDistance!) {
-      distanceCharge = double.parse(((totalDistance - cityData!.minDistance!) * cityData!.perDistanceCharges!).toStringAsFixed(2));
+      distanceCharge = double.parse(((totalDistance - cityData!.minDistance!) * cityData!.perDistanceCharges!).toStringAsFixed(digitAfterDecimal));
     }
 
     /// total amount
@@ -181,7 +190,7 @@ class CreateOrderWidgetState extends State<CreateOrderWidget> {
     });
 
     /// All Charges
-    totalAmount = double.parse((totalAmount + totalExtraCharge).toStringAsFixed(2));
+    totalAmount = double.parse((totalAmount + totalExtraCharge).toStringAsFixed(digitAfterDecimal));
   }
 
   extraChargesList() {
@@ -199,13 +208,13 @@ class CreateOrderWidgetState extends State<CreateOrderWidget> {
   createOrderApiCall(String orderStatus) async {
     Map req = {
       "id": "",
-      "client_id": shared_pref.getInt(USER_ID).toString(),
+      "client_id": getIntAsync(USER_ID).toString(),
       "date": DateTime.now().toString(),
       "country_id": selectedCountry.toString(),
       "city_id": selectedCity.toString(),
       "pickup_point": {
-        "start_time": !isDeliverNow ? pickFromDateTime.toString() : DateTime.now().toString(),
-        "end_time": !isDeliverNow ? pickToDateTime.toString() : null,
+        "start_time": (!isDeliverNow && pickFromDateTime != null) ? pickFromDateTime.toString() : DateTime.now().toString(),
+        "end_time": (!isDeliverNow && pickToDateTime != null) ? pickToDateTime.toString() : null,
         "address": pickAddressCont.text,
         "latitude": pickLat,
         "longitude": pickLong,
@@ -213,8 +222,8 @@ class CreateOrderWidgetState extends State<CreateOrderWidget> {
         "contact_number": '$pickupCountryCode ${pickPhoneCont.text.trim()}'
       },
       "delivery_point": {
-        "start_time": !isDeliverNow ? deliverFromDateTime.toString() : null,
-        "end_time": !isDeliverNow ? deliverToDateTime.toString() : null,
+        "start_time": (!isDeliverNow && deliverFromDateTime != null) ? deliverFromDateTime.toString() : null,
+        "end_time": (!isDeliverNow && deliverToDateTime != null) ? deliverToDateTime.toString() : null,
         "address": deliverAddressCont.text,
         "latitude": deliverLat,
         "longitude": deliverLong,
@@ -224,7 +233,7 @@ class CreateOrderWidgetState extends State<CreateOrderWidget> {
       "extra_charges": extraChargeList,
       "parcel_type": parcelTypeCont.text,
       "total_weight": double.tryParse(weightController.text),
-      "total_distance": totalDistance.toStringAsFixed(2),
+      "total_distance": totalDistance.toStringAsFixed(digitAfterDecimal),
       "payment_collect_from": paymentCollectFrom,
       "status": orderStatus,
       "payment_type": PAYMENT_TYPE_CASH,
@@ -240,7 +249,7 @@ class CreateOrderWidgetState extends State<CreateOrderWidget> {
     await createOrder(req).then((value) {
       appStore.setLoading(false);
       toast(value.message);
-      appStore.setSelectedMenuIndex(ORDER_INDEX);
+      Navigator.pushNamed(context, OrderWidget.route);
     }).catchError((error) {
       appStore.setLoading(false);
       toast(error.toString());
@@ -269,587 +278,762 @@ class CreateOrderWidgetState extends State<CreateOrderWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        SingleChildScrollView(
-          padding: EdgeInsets.only(left: 16, top: 16, right: 16, bottom: 100),
-          controller: ScrollController(),
-          child: Form(
-            key: _formKey,
+    Widget pickTimeWidget() {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(language.pick_time, style: boldTextStyle()),
+          SizedBox(height: 16),
+          Container(
+            padding: EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              border: Border.all(color: Theme.of(context).dividerColor),
+              borderRadius: BorderRadius.circular(defaultRadius),
+            ),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                DateTimePicker(
+                  controller: pickDateController,
+                  type: DateTimePickerType.date,
+                  firstDate: DateTime.now(),
+                  lastDate: DateTime(2050),
+                  onChanged: (value) {
+                    pickDate = DateTime.parse(value);
+                    deliverDate = null;
+                    deliverDateController.clear();
+                    setState(() {});
+                  },
+                  validator: (value) {
+                    if (value!.isEmpty) return errorThisFieldRequired;
+                    return null;
+                  },
+                  decoration: commonInputDecoration(suffixIcon: Icons.calendar_today, hintText: "Date"),
+                ),
+                SizedBox(height: 16),
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(language.crete_order, style: boldTextStyle(size: 20, color: primaryColor)),
-                    GestureDetector(
-                      child: Container(
-                        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                        decoration: BoxDecoration(color: primaryColor, borderRadius: BorderRadius.circular(defaultRadius)),
-                        child: Text(language.save, style: boldTextStyle(color: Colors.white)),
+                    Expanded(
+                      child: DateTimePicker(
+                        controller: pickFromTimeController,
+                        type: DateTimePickerType.time,
+                        onChanged: (value) {
+                          pickFromTime = TimeOfDay.fromDateTime(DateFormat('hh:mm').parse(value));
+                          setState(() {});
+                        },
+                        validator: (value) {
+                          if (value!.isEmpty) return errorThisFieldRequired;
+                          return null;
+                        },
+                        decoration: commonInputDecoration(suffixIcon: Icons.access_time, hintText: language.from),
                       ),
-                      onTap: () async {
-                        pickMsg = '';
-                        deliverMsg = '';
-                        setState(() {});
-                        if (_formKey.currentState!.validate()) {
-                          Duration difference = Duration();
-                          Duration differenceCurrentTime = Duration();
-                          if (!isDeliverNow) {
-                            pickFromDateTime = pickDate!.add(Duration(hours: pickFromTime!.hour, minutes: pickFromTime!.minute));
-                            pickToDateTime = pickDate!.add(Duration(hours: pickToTime!.hour, minutes: pickToTime!.minute));
-                            deliverFromDateTime = deliverDate!.add(Duration(hours: deliverFromTime!.hour, minutes: deliverFromTime!.minute));
-                            deliverToDateTime = deliverDate!.add(Duration(hours: deliverToTime!.hour, minutes: deliverToTime!.minute));
-                            difference = pickFromDateTime!.difference(deliverFromDateTime!);
-                            differenceCurrentTime = DateTime.now().difference(pickFromDateTime!);
+                    ),
+                    SizedBox(width: 16),
+                    Expanded(
+                      child: DateTimePicker(
+                        controller: pickToTimeController,
+                        type: DateTimePickerType.time,
+                        onChanged: (value) {
+                          pickToTime = TimeOfDay.fromDateTime(DateFormat('hh:mm').parse(value));
+                          setState(() {});
+                        },
+                        validator: (value) {
+                          if (value!.isEmpty) return errorThisFieldRequired;
+                          double fromTimeInHour = pickFromTime!.hour + pickFromTime!.minute / 60;
+                          double toTimeInHour = pickToTime!.hour + pickToTime!.minute / 60;
+                          double difference = toTimeInHour - fromTimeInHour;
+                          if (difference <= 0) {
+                            return language.end_start_time_validation_msg;
                           }
-                          if (differenceCurrentTime.inMinutes > 0) return toast(language.pickup_current_validation_msg);
-                          if (difference.inMinutes > 0) return toast(language.pickup_deliver_validation_msg);
-                          extraChargesList();
-                          getTotalAmount();
-                          showDialog(
-                              context: context,
-                              builder: (context) => CreateOrderConfirmationDialog(
-                                  extraChargesList: extraChargeList,
-                                  totalDistance: totalDistance,
-                                  totalWeight: double.parse(weightController.text),
-                                  distanceCharge: distanceCharge,
-                                  weightCharge: weightCharge,
-                                  totalAmount: totalAmount,
-                                  onAccept: () async {
-                                    await createOrderApiCall(ORDER_CREATE);
-                                  }));
-                        }
-                      },
+                          return null;
+                        },
+                        decoration: commonInputDecoration(suffixIcon: Icons.access_time, hintText: language.to),
+                      ),
                     ),
                   ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      );
+    }
+
+    Widget deliverTimeWidget() {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(language.deliver_time, style: boldTextStyle()),
+          SizedBox(height: 16),
+          Container(
+            padding: EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              border: Border.all(color: Theme.of(context).dividerColor),
+              borderRadius: BorderRadius.circular(defaultRadius),
+            ),
+            child: Column(
+              children: [
+                DateTimePicker(
+                  controller: deliverDateController,
+                  type: DateTimePickerType.date,
+                  initialDate: pickDate ?? DateTime.now(),
+                  firstDate: pickDate ?? DateTime.now(),
+                  lastDate: DateTime(2050),
+                  onChanged: (value) {
+                    deliverDate = DateTime.parse(value);
+                    setState(() {});
+                  },
+                  validator: (value) {
+                    if (value!.isEmpty) return errorThisFieldRequired;
+                    return null;
+                  },
+                  decoration: commonInputDecoration(suffixIcon: Icons.calendar_today, hintText: language.date),
                 ),
                 SizedBox(height: 16),
                 Row(
                   children: [
-                    scheduleOptionWidget(
-                        context: context,
-                        isSelected: isDeliverNow,
-                        imagePath: 'assets/icons/ic_clock.png',
-                        title: language.deliver_now,
-                        onTap: () {
-                          isDeliverNow = true;
+                    Expanded(
+                      child: DateTimePicker(
+                        controller: deliverFromTimeController,
+                        type: DateTimePickerType.time,
+                        onChanged: (value) {
+                          deliverFromTime = TimeOfDay.fromDateTime(DateFormat('hh:mm').parse(value));
                           setState(() {});
-                        }),
+                        },
+                        validator: (value) {
+                          if (value!.isEmpty) return errorThisFieldRequired;
+                          return null;
+                        },
+                        decoration: commonInputDecoration(suffixIcon: Icons.access_time, hintText: language.from),
+                      ),
+                    ),
                     SizedBox(width: 16),
-                    scheduleOptionWidget(
-                        context: context,
-                        isSelected: !isDeliverNow,
-                        imagePath: 'assets/icons/ic_schedule.png',
-                        title: language.schedule,
-                        onTap: () {
-                          isDeliverNow = false;
+                    Expanded(
+                      child: DateTimePicker(
+                        controller: deliverToTimeController,
+                        type: DateTimePickerType.time,
+                        onChanged: (value) {
+                          deliverToTime = TimeOfDay.fromDateTime(DateFormat('hh:mm').parse(value));
                           setState(() {});
-                        }),
+                        },
+                        validator: (value) {
+                          if (value!.isEmpty) return errorThisFieldRequired;
+                          double fromTimeInHour = deliverFromTime!.hour + deliverFromTime!.minute / 60;
+                          double toTimeInHour = deliverToTime!.hour + deliverToTime!.minute / 60;
+                          double difference = toTimeInHour - fromTimeInHour;
+                          if (difference < 0) {
+                            return language.end_start_time_validation_msg;
+                          }
+                          return null;
+                        },
+                        decoration: commonInputDecoration(suffixIcon: Icons.access_time, hintText: language.to),
+                      ),
+                    ),
                   ],
                 ),
-                if (!isDeliverNow)
-                  Padding(
-                    padding: EdgeInsets.only(top: 16),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(language.pick_time, style: boldTextStyle()),
-                              SizedBox(height: 16),
-                              Container(
-                                padding: EdgeInsets.all(16),
-                                decoration: BoxDecoration(
-                                  border: Border.all(color: Theme.of(context).dividerColor),
-                                  borderRadius: BorderRadius.circular(defaultRadius),
-                                ),
-                                child: Column(
-                                  children: [
-                                    DateTimePicker(
-                                      controller: pickDateController,
-                                      type: DateTimePickerType.date,
-                                      firstDate: DateTime.now(),
-                                      lastDate: DateTime(2050),
-                                      onChanged: (value) {
-                                        pickDate = DateTime.parse(value);
-                                        deliverDate = null;
-                                        deliverDateController.clear();
-                                        setState(() {});
-                                      },
-                                      validator: (value) {
-                                        if (value!.isEmpty) return errorThisFieldRequired;
-                                        return null;
-                                      },
-                                      decoration: commonInputDecoration(suffixIcon: Icons.calendar_today, hintText: "Date"),
-                                    ),
-                                    SizedBox(height: 16),
-                                    Row(
-                                      children: [
-                                        Expanded(
-                                          child: DateTimePicker(
-                                            controller: pickFromTimeController,
-                                            type: DateTimePickerType.time,
-                                            onChanged: (value) {
-                                              pickFromTime = TimeOfDay.fromDateTime(DateFormat('hh:mm').parse(value));
-                                              setState(() {});
-                                            },
-                                            validator: (value) {
-                                              if (value!.isEmpty) return errorThisFieldRequired;
-                                              return null;
-                                            },
-                                            decoration: commonInputDecoration(suffixIcon: Icons.access_time, hintText: language.from),
-                                          ),
-                                        ),
-                                        SizedBox(width: 16),
-                                        Expanded(
-                                          child: DateTimePicker(
-                                            controller: pickToTimeController,
-                                            type: DateTimePickerType.time,
-                                            onChanged: (value) {
-                                              pickToTime = TimeOfDay.fromDateTime(DateFormat('hh:mm').parse(value));
-                                              setState(() {});
-                                            },
-                                            validator: (value) {
-                                              if (value!.isEmpty) return errorThisFieldRequired;
-                                              double fromTimeInHour = pickFromTime!.hour + pickFromTime!.minute / 60;
-                                              double toTimeInHour = pickToTime!.hour + pickToTime!.minute / 60;
-                                              double difference = toTimeInHour - fromTimeInHour;
-                                              if (difference <= 0) {
-                                                return language.end_start_time_validation_msg;
-                                              }
-                                              return null;
-                                            },
-                                            decoration: commonInputDecoration(suffixIcon: Icons.access_time, hintText: language.to),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(language.deliver_time, style: boldTextStyle()),
-                              SizedBox(height: 16),
-                              Container(
-                                padding: EdgeInsets.all(16),
-                                decoration: BoxDecoration(
-                                  border: Border.all(color: Theme.of(context).dividerColor),
-                                  borderRadius: BorderRadius.circular(defaultRadius),
-                                ),
-                                child: Column(
-                                  children: [
-                                    DateTimePicker(
-                                      controller: deliverDateController,
-                                      type: DateTimePickerType.date,
-                                      initialDate: pickDate ?? DateTime.now(),
-                                      firstDate: pickDate ?? DateTime.now(),
-                                      lastDate: DateTime(2050),
-                                      onChanged: (value) {
-                                        deliverDate = DateTime.parse(value);
-                                        setState(() {});
-                                      },
-                                      validator: (value) {
-                                        if (value!.isEmpty) return errorThisFieldRequired;
-                                        return null;
-                                      },
-                                      decoration: commonInputDecoration(suffixIcon: Icons.calendar_today, hintText: language.date),
-                                    ),
-                                    SizedBox(height: 16),
-                                    Row(
-                                      children: [
-                                        Expanded(
-                                          child: DateTimePicker(
-                                            controller: deliverFromTimeController,
-                                            type: DateTimePickerType.time,
-                                            onChanged: (value) {
-                                              deliverFromTime = TimeOfDay.fromDateTime(DateFormat('hh:mm').parse(value));
-                                              setState(() {});
-                                            },
-                                            validator: (value) {
-                                              if (value!.isEmpty) return errorThisFieldRequired;
-                                              return null;
-                                            },
-                                            decoration: commonInputDecoration(suffixIcon: Icons.access_time, hintText: language.from),
-                                          ),
-                                        ),
-                                        SizedBox(width: 16),
-                                        Expanded(
-                                          child: DateTimePicker(
-                                            controller: deliverToTimeController,
-                                            type: DateTimePickerType.time,
-                                            onChanged: (value) {
-                                              deliverToTime = TimeOfDay.fromDateTime(DateFormat('hh:mm').parse(value));
-                                              setState(() {});
-                                            },
-                                            validator: (value) {
-                                              if (value!.isEmpty) return errorThisFieldRequired;
-                                              double fromTimeInHour = deliverFromTime!.hour + deliverFromTime!.minute / 60;
-                                              double toTimeInHour = deliverToTime!.hour + deliverToTime!.minute / 60;
-                                              double difference = toTimeInHour - fromTimeInHour;
-                                              if (difference < 0) {
-                                                return language.end_start_time_validation_msg;
-                                              }
-                                              return null;
-                                            },
-                                            decoration: commonInputDecoration(suffixIcon: Icons.access_time, hintText: language.to),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
+              ],
+            ),
+          ),
+        ],
+      );
+    }
+
+    Widget saveOrderButton() {
+      return GestureDetector(
+        child: Container(
+          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          decoration: BoxDecoration(color: primaryColor, borderRadius: BorderRadius.circular(defaultRadius)),
+          child: Text(language.save, style: boldTextStyle(color: Colors.white)),
+        ),
+        onTap: () async {
+          pickMsg = '';
+          deliverMsg = '';
+          setState(() {});
+          if (_formKey.currentState!.validate()) {
+            Duration difference = Duration();
+            Duration differenceCurrentTime = Duration();
+            if (!isDeliverNow) {
+              pickFromDateTime = pickDate!.add(Duration(hours: pickFromTime!.hour, minutes: pickFromTime!.minute));
+              pickToDateTime = pickDate!.add(Duration(hours: pickToTime!.hour, minutes: pickToTime!.minute));
+              deliverFromDateTime = deliverDate!.add(Duration(hours: deliverFromTime!.hour, minutes: deliverFromTime!.minute));
+              deliverToDateTime = deliverDate!.add(Duration(hours: deliverToTime!.hour, minutes: deliverToTime!.minute));
+              difference = pickFromDateTime!.difference(deliverFromDateTime!);
+              differenceCurrentTime = DateTime.now().difference(pickFromDateTime!);
+            }
+            if (differenceCurrentTime.inMinutes > 0) return toast(language.pickup_current_validation_msg);
+            if (difference.inMinutes > 0) return toast(language.pickup_deliver_validation_msg);
+            extraChargesList();
+            getTotalAmount();
+            showDialog(
+                context: context,
+                builder: (context) => CreateOrderConfirmationDialog(
+                    extraChargesList: extraChargeList,
+                    totalDistance: totalDistance,
+                    totalWeight: double.parse(weightController.text),
+                    distanceCharge: distanceCharge,
+                    weightCharge: weightCharge,
+                    totalAmount: totalAmount,
+                    onAccept: () async {
+                      await createOrderApiCall(ORDER_CREATE);
+                    }));
+          }
+        },
+      );
+    }
+
+    return BodyCornerWidget(
+      child: Stack(
+        children: [
+          SingleChildScrollView(
+            padding: EdgeInsets.only(left: 16, top: 16, right: 16, bottom: 100),
+            controller: ScrollController(),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  ResponsiveWidget.isSmallScreen(context) && appStore.isMenuExpanded
+                      ? Wrap(
+                          spacing: 16,
+                          runSpacing: 16,
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          children: [
+                            Text(language.crete_order, style: boldTextStyle(size: 20, color: primaryColor)),
+                            saveOrderButton(),
+                          ],
                         )
-                      ],
-                    ),
-                  ),
-                SizedBox(height: 16),
-                Row(
-                  children: [
-                    Container(
-                      width: MediaQuery.of(context).size.width * 0.30,
-                      decoration: BoxDecoration(border: Border.all(color: Theme.of(context).dividerColor), borderRadius: BorderRadius.circular(defaultRadius)),
-                      child: IntrinsicHeight(
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
+                      : Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Expanded(
-                              child: Padding(
-                                padding: EdgeInsets.all(12.0),
-                                child: Text(language.weight, style: primaryTextStyle()),
-                              ),
-                            ),
-                            VerticalDivider(thickness: 1),
-                            GestureDetector(
-                              child: Padding(
-                                padding: const EdgeInsets.all(12),
-                                child: Icon(Icons.remove, color: appStore.isDarkMode ? Colors.white : Colors.grey),
-                              ),
-                              onTap: () {
-                                if (double.parse(weightController.text) > 1) {
-                                  weightController.text = (double.parse(weightController.text) - 1).toString();
-                                }
-                              },
-                            ),
-                            VerticalDivider(thickness: 1),
-                            Container(
-                              width: 50,
-                              child: AppTextField(
-                                controller: weightController,
-                                textAlign: TextAlign.center,
-                                maxLength: 5,
-                                textFieldType: TextFieldType.PHONE,
-                                inputFormatters: [
-                                  FilteringTextInputFormatter.allow(RegExp('[0-9 .]')),
-                                ],
-                                decoration: InputDecoration(
-                                  counterText: '',
-                                  focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: primaryColor)),
-                                  border: InputBorder.none,
-                                ),
-                              ),
-                            ),
-                            VerticalDivider(thickness: 1),
-                            GestureDetector(
-                              child: Padding(
-                                padding: const EdgeInsets.all(12.0),
-                                child: Icon(Icons.add, color: appStore.isDarkMode ? Colors.white : Colors.grey),
-                              ),
-                              onTap: () {
-                                weightController.text = (double.parse(weightController.text) + 1).toString();
-                              },
-                            ),
+                            Text(language.crete_order, style: boldTextStyle(size: 20, color: primaryColor)),
+                            saveOrderButton(),
                           ],
                         ),
-                      ),
-                    ),
-                    SizedBox(width: 16),
-                    Container(
-                      width: MediaQuery.of(context).size.width * 0.30,
-                      decoration: BoxDecoration(border: Border.all(color: Theme.of(context).dividerColor), borderRadius: BorderRadius.circular(defaultRadius)),
-                      child: IntrinsicHeight(
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Expanded(
-                              child: Padding(
-                                padding: EdgeInsets.all(12.0),
-                                child: Text(language.number_of_parcels, style: primaryTextStyle()),
-                              ),
-                            ),
-                            VerticalDivider(thickness: 1),
-                            GestureDetector(
-                              child: Padding(
-                                padding: const EdgeInsets.all(12),
-                                child: Icon(Icons.remove, color: appStore.isDarkMode ? Colors.white : Colors.grey),
-                              ),
-                              onTap: () {
-                                if (int.parse(totalParcelController.text) > 1) {
-                                  totalParcelController.text = (int.parse(totalParcelController.text) - 1).toString();
-                                }
-                              },
-                            ),
-                            VerticalDivider(thickness: 1),
-                            Container(
-                              width: 50,
-                              child: AppTextField(
-                                controller: totalParcelController,
-                                textAlign: TextAlign.center,
-                                maxLength: 2,
-                                textFieldType: TextFieldType.PHONE,
-                                decoration: InputDecoration(
-                                  counterText: '',
-                                  focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: primaryColor)),
-                                  border: InputBorder.none,
-                                ),
-                                inputFormatters: [
-                                  FilteringTextInputFormatter.digitsOnly,
-                                ],
-                              ),
-                            ),
-                            VerticalDivider(thickness: 1),
-                            GestureDetector(
-                              child: Padding(
-                                padding: const EdgeInsets.all(12.0),
-                                child: Icon(Icons.add, color: appStore.isDarkMode ? Colors.white : Colors.grey),
-                              ),
-                              onTap: () {
-                                totalParcelController.text = (int.parse(totalParcelController.text) + 1).toString();
-                              },
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 16),
-                Text(language.parcel_type, style: boldTextStyle()),
-                SizedBox(height: 8),
-                SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.40,
-                  child: AppTextField(
-                    controller: parcelTypeCont,
-                    textFieldType: TextFieldType.OTHER,
-                    decoration: commonInputDecoration(),
-                    validator: (value) {
-                      if (value!.isEmpty) return errorThisFieldRequired;
-                      return null;
-                    },
-                  ),
-                ),
-                SizedBox(height: 16),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 0,
-                  children: parcelTypeList.map((item) {
-                    return GestureDetector(
-                      child: Chip(
-                        backgroundColor: Theme.of(context).cardColor,
-                        label: Text(item.label!),
-                        elevation: 0,
-                        labelStyle: primaryTextStyle(color: Colors.grey),
-                        padding: EdgeInsets.zero,
-                        labelPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 0),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(defaultRadius),
-                          side: BorderSide(color: Theme.of(context).dividerColor),
-                        ),
-                      ),
-                      onTap: () {
-                        parcelTypeCont.text = item.label!;
-                        setState(() {});
-                      },
-                    );
-                  }).toList(),
-                ),
-                SizedBox(height: 16),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(language.country, style: boldTextStyle()),
-                          SizedBox(height: 8),
-                          DropdownButtonFormField<int>(
-                            value: selectedCountry,
-                            decoration: commonInputDecoration(),
-                            dropdownColor: Theme.of(context).cardColor,
-                            style: primaryTextStyle(),
-                            items: countryList.map<DropdownMenuItem<int>>((item) {
-                              return DropdownMenuItem(
-                                value: item.id,
-                                child: Text(item.name ?? ''),
-                              );
-                            }).toList(),
-                            onChanged: (value) {
-                              selectedCountry = value!;
-                              selectedCity = null;
-                              cityData = null;
-                              pickAddressCont.clear();
-                              pickLat = null;
-                              pickLong = null;
-                              deliverAddressCont.clear();
-                              deliverLat = null;
-                              deliverLong = null;
-                              pickPredictionList = [];
-                              deliverPredictionList = [];
-                              getCityApiCall();
-                              setState(() {});
-                            },
-                            validator: (value) {
-                              if (selectedCountry == null) return errorThisFieldRequired;
-                              return null;
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
-                    SizedBox(width: 16),
-                    Expanded(
-                        child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(language.city, style: boldTextStyle()),
-                        SizedBox(height: 8),
-                        DropdownButtonFormField<int>(
-                          value: selectedCity,
-                          decoration: commonInputDecoration(),
-                          dropdownColor: Theme.of(context).cardColor,
-                          style: primaryTextStyle(),
-                          items: cityList.map<DropdownMenuItem<int>>((item) {
-                            return DropdownMenuItem(
-                              value: item.id,
-                              child: Text(item.name ?? ''),
-                            );
-                          }).toList(),
-                          onChanged: (value) {
-                            selectedCity = value!;
-                            getCityDetailApiCall();
+                  SizedBox(height: 16),
+                  Wrap(
+                    spacing: 16,
+                    runSpacing: 16,
+                    children: [
+                      scheduleOptionWidget(
+                          context: context,
+                          isSelected: isDeliverNow,
+                          imagePath: 'assets/icons/ic_clock.png',
+                          title: language.deliver_now,
+                          onTap: () {
+                            isDeliverNow = true;
                             setState(() {});
-                          },
-                          validator: (value) {
-                            if (selectedCity == null) return errorThisFieldRequired;
-                            return null;
-                          },
-                        ),
-                      ],
-                    )),
-                    SizedBox(width: 16),
-                    Spacer(),
-                  ],
-                ),
-                SizedBox(height: 16),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(language.pickup_info, style: boldTextStyle()),
-                          SizedBox(height: 8),
-                          Container(
-                            padding: EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              border: Border.all(color: Theme.of(context).dividerColor),
-                              borderRadius: BorderRadius.circular(defaultRadius),
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                          }),
+                      scheduleOptionWidget(
+                          context: context,
+                          isSelected: !isDeliverNow,
+                          imagePath: 'assets/icons/ic_schedule.png',
+                          title: language.schedule,
+                          onTap: () {
+                            isDeliverNow = false;
+                            setState(() {});
+                          }),
+                    ],
+                  ),
+                  if (!isDeliverNow)
+                    Padding(
+                      padding: EdgeInsets.only(top: 16),
+                      child: ResponsiveWidget.isSmallScreen(context)
+                          ? Column(
                               children: [
-                                Text(language.pickup_location, style: primaryTextStyle()),
-                                SizedBox(height: 8),
-                                AppTextField(
-                                  controller: pickAddressCont,
-                                  textInputAction: TextInputAction.next,
-                                  textFieldType: TextFieldType.ADDRESS,
-                                  decoration: commonInputDecoration(suffixIcon: Icons.location_on_outlined),
-                                  validator: (value) {
-                                    if (value!.isEmpty) return errorThisFieldRequired;
-                                    if (pickLat == null || pickLong == null) return language.pleaseSelectValidAddress;
-                                    return null;
-                                  },
-                                  onChanged: (val) async {
-                                    pickMsg = '';
-                                    pickLat = null;
-                                    pickLong = null;
-                                    if (val.isNotEmpty) {
-                                      if (val.length < 3) {
-                                        pickMsg = language.selectedAddressValidation;
+                                pickTimeWidget(),
+                                SizedBox(height: 16),
+                                deliverTimeWidget(),
+                              ],
+                            )
+                          : Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [Expanded(child: pickTimeWidget()), SizedBox(width: 16), Expanded(child: deliverTimeWidget())],
+                            ),
+                    ),
+                  SizedBox(height: 16),
+                  Wrap(
+                    spacing: 16,
+                    runSpacing: 16,
+                    children: [
+                      Container(
+                        width: ResponsiveWidget.isSmallScreen(context) ? MediaQuery.of(context).size.width : MediaQuery.of(context).size.width * 0.30,
+                        decoration: BoxDecoration(border: Border.all(color: Theme.of(context).dividerColor), borderRadius: BorderRadius.circular(defaultRadius)),
+                        child: IntrinsicHeight(
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Expanded(
+                                child: Padding(
+                                  padding: EdgeInsets.all(12.0),
+                                  child: Text(language.weight, style: primaryTextStyle()),
+                                ),
+                              ),
+                              VerticalDivider(thickness: 1),
+                              GestureDetector(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(12),
+                                  child: Icon(Icons.remove, color: appStore.isDarkMode ? Colors.white : Colors.grey),
+                                ),
+                                onTap: () {
+                                  if (double.parse(weightController.text) > 1) {
+                                    weightController.text = (double.parse(weightController.text) - 1).toString();
+                                  }
+                                },
+                              ),
+                              VerticalDivider(thickness: 1),
+                              Container(
+                                width: 50,
+                                child: AppTextField(
+                                  controller: weightController,
+                                  textAlign: TextAlign.center,
+                                  maxLength: 10,
+                                  textFieldType: TextFieldType.PHONE,
+                                  inputFormatters: [
+                                    FilteringTextInputFormatter.allow(RegExp('[0-9 .]')),
+                                  ],
+                                  decoration: InputDecoration(
+                                    counterText: '',
+                                    focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: primaryColor)),
+                                    border: InputBorder.none,
+                                  ),
+                                ),
+                              ),
+                              VerticalDivider(thickness: 1),
+                              GestureDetector(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(12.0),
+                                  child: Icon(Icons.add, color: appStore.isDarkMode ? Colors.white : Colors.grey),
+                                ),
+                                onTap: () {
+                                  weightController.text = (double.parse(weightController.text) + 1).toString();
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      Container(
+                        width: ResponsiveWidget.isSmallScreen(context) ? MediaQuery.of(context).size.width : MediaQuery.of(context).size.width * 0.30,
+                        decoration: BoxDecoration(border: Border.all(color: Theme.of(context).dividerColor), borderRadius: BorderRadius.circular(defaultRadius)),
+                        child: IntrinsicHeight(
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Expanded(
+                                child: Padding(
+                                  padding: EdgeInsets.all(12.0),
+                                  child: Text(language.number_of_parcels, style: primaryTextStyle()),
+                                ),
+                              ),
+                              VerticalDivider(thickness: 1),
+                              GestureDetector(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(12),
+                                  child: Icon(Icons.remove, color: appStore.isDarkMode ? Colors.white : Colors.grey),
+                                ),
+                                onTap: () {
+                                  if (int.parse(totalParcelController.text) > 1) {
+                                    totalParcelController.text = (int.parse(totalParcelController.text) - 1).toString();
+                                  }
+                                },
+                              ),
+                              VerticalDivider(thickness: 1),
+                              Container(
+                                width: 50,
+                                child: AppTextField(
+                                  controller: totalParcelController,
+                                  textAlign: TextAlign.center,
+                                  maxLength: 2,
+                                  textFieldType: TextFieldType.PHONE,
+                                  decoration: InputDecoration(
+                                    counterText: '',
+                                    focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: primaryColor)),
+                                    border: InputBorder.none,
+                                  ),
+                                  inputFormatters: [
+                                    FilteringTextInputFormatter.digitsOnly,
+                                  ],
+                                ),
+                              ),
+                              VerticalDivider(thickness: 1),
+                              GestureDetector(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(12.0),
+                                  child: Icon(Icons.add, color: appStore.isDarkMode ? Colors.white : Colors.grey),
+                                ),
+                                onTap: () {
+                                  totalParcelController.text = (int.parse(totalParcelController.text) + 1).toString();
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 16),
+                  Text(language.parcel_type, style: boldTextStyle()),
+                  SizedBox(height: 8),
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width * 0.40,
+                    child: AppTextField(
+                      controller: parcelTypeCont,
+                      textFieldType: TextFieldType.OTHER,
+                      decoration: commonInputDecoration(),
+                      validator: (value) {
+                        if (value!.isEmpty) return errorThisFieldRequired;
+                        return null;
+                      },
+                    ),
+                  ),
+                  SizedBox(height: 16),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: parcelTypeList.map((item) {
+                      return GestureDetector(
+                        child: Chip(
+                          backgroundColor: Theme.of(context).cardColor,
+                          label: Text(item.label!),
+                          elevation: 0,
+                          labelStyle: primaryTextStyle(color: Colors.grey),
+                          padding: EdgeInsets.zero,
+                          labelPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 0),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(defaultRadius),
+                            side: BorderSide(color: Theme.of(context).dividerColor),
+                          ),
+                        ),
+                        onTap: () {
+                          parcelTypeCont.text = item.label!;
+                          setState(() {});
+                        },
+                      );
+                    }).toList(),
+                  ),
+                  SizedBox(height: 16),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(language.country, style: boldTextStyle()),
+                            SizedBox(height: 8),
+                            DropdownButtonFormField<int>(
+                              isExpanded: true,
+                              value: selectedCountry,
+                              decoration: commonInputDecoration(),
+                              dropdownColor: Theme.of(context).cardColor,
+                              style: primaryTextStyle(),
+                              items: countryList.map<DropdownMenuItem<int>>((item) {
+                                return DropdownMenuItem(
+                                  value: item.id,
+                                  child: Text(item.name ?? ''),
+                                );
+                              }).toList(),
+                              onChanged: (value) {
+                                selectedCountry = value!;
+                                selectedCity = null;
+                                cityData = null;
+                                pickAddressCont.clear();
+                                pickLat = null;
+                                pickLong = null;
+                                deliverAddressCont.clear();
+                                deliverLat = null;
+                                deliverLong = null;
+                                pickPredictionList = [];
+                                deliverPredictionList = [];
+                                getCityApiCall();
+                                setState(() {});
+                              },
+                              validator: (value) {
+                                if (selectedCountry == null) return errorThisFieldRequired;
+                                return null;
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(language.city, style: boldTextStyle()),
+                            SizedBox(height: 8),
+                            DropdownButtonFormField<int>(
+                              isExpanded: true,
+                              value: selectedCity,
+                              decoration: commonInputDecoration(),
+                              dropdownColor: Theme.of(context).cardColor,
+                              style: primaryTextStyle(),
+                              items: cityList.map<DropdownMenuItem<int>>((item) {
+                                return DropdownMenuItem(
+                                  value: item.id,
+                                  child: Text(item.name ?? ''),
+                                );
+                              }).toList(),
+                              onChanged: (value) {
+                                selectedCity = value!;
+                                getCityDetailApiCall();
+                                setState(() {});
+                              },
+                              validator: (value) {
+                                if (selectedCity == null) return errorThisFieldRequired;
+                                return null;
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(width: 16),
+                      if (!ResponsiveWidget.isSmallScreen(context)) Spacer(),
+                    ],
+                  ),
+                  SizedBox(height: 16),
+                  Wrap(
+                    spacing: 16,
+                    runSpacing: 16,
+                    children: [
+                      SizedBox(
+                        width: ResponsiveWidget.isSmallScreen(context) ? getBodyWidth(context) : (getBodyWidth(context) - 48) * 0.5,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(language.pickup_info, style: boldTextStyle()),
+                            SizedBox(height: 8),
+                            Container(
+                              padding: EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                border: Border.all(color: Theme.of(context).dividerColor),
+                                borderRadius: BorderRadius.circular(defaultRadius),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(language.pickup_location, style: primaryTextStyle()),
+                                  SizedBox(height: 8),
+                                  AppTextField(
+                                    controller: pickAddressCont,
+                                    textInputAction: TextInputAction.next,
+                                    textFieldType: TextFieldType.ADDRESS,
+                                    decoration: commonInputDecoration(suffixIcon: Icons.location_on_outlined),
+                                    validator: (value) {
+                                      if (value!.isEmpty) return errorThisFieldRequired;
+                                      if (pickLat == null || pickLong == null) return language.pleaseSelectValidAddress;
+                                      return null;
+                                    },
+                                    onChanged: (val) async {
+                                      pickMsg = '';
+                                      pickLat = null;
+                                      pickLong = null;
+                                      if (val.isNotEmpty) {
+                                        if (val.length < 3) {
+                                          pickMsg = language.selectedAddressValidation;
+                                          pickPredictionList.clear();
+                                          setState(() {});
+                                        } else {
+                                          pickPredictionList = await getPlaceAutoCompleteApiCall(val);
+                                          setState(() {});
+                                        }
+                                      } else {
                                         pickPredictionList.clear();
                                         setState(() {});
+                                      }
+                                    },
+                                  ),
+                                  if (!pickMsg.isEmptyOrNull)
+                                    Padding(
+                                        padding: EdgeInsets.only(top: 8, left: 8),
+                                        child: Text(
+                                          pickMsg.validate(),
+                                          style: secondaryTextStyle(color: Colors.red),
+                                        )),
+                                  if (pickPredictionList.isNotEmpty)
+                                    ListView.builder(
+                                        physics: NeverScrollableScrollPhysics(),
+                                        controller: ScrollController(),
+                                        padding: EdgeInsets.only(top: 16, bottom: 16),
+                                        shrinkWrap: true,
+                                        itemCount: pickPredictionList.length,
+                                        itemBuilder: (context, index) {
+                                          Predictions mData = pickPredictionList[index];
+                                          return ListTile(
+                                            leading: Icon(Icons.location_pin, color: primaryColor),
+                                            title: Text(mData.description ?? ""),
+                                            onTap: () async {
+                                              PlaceIdDetailModel? response = await getPlaceIdDetailApiCall(placeId: mData.placeId!);
+                                              if (response != null) {
+                                                pickAddressCont.text = mData.description ?? "";
+                                                pickLat = response.result!.geometry!.location!.lat.toString();
+                                                pickLong = response.result!.geometry!.location!.lng.toString();
+                                                pickPredictionList.clear();
+                                                setState(() {});
+                                              }
+                                            },
+                                          );
+                                        }),
+                                  SizedBox(height: 16),
+                                  Text(language.pickup_contact_number, style: primaryTextStyle()),
+                                  SizedBox(height: 8),
+                                  AppTextField(
+                                    controller: pickPhoneCont,
+                                    textInputAction: TextInputAction.next,
+                                    textFieldType: TextFieldType.PHONE,
+                                    decoration: commonInputDecoration(
+                                        suffixIcon: Icons.phone,
+                                        prefixIcon: IntrinsicHeight(
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              CountryCodePicker(
+                                                initialSelection: pickupCountryCode,
+                                                showCountryOnly: false,
+                                                showFlag: true,
+                                                showFlagDialog: true,
+                                                showOnlyCountryWhenClosed: false,
+                                                alignLeft: false,
+                                                textStyle: primaryTextStyle(),
+                                                dialogBackgroundColor: Theme.of(context).cardColor,
+                                                barrierColor: Colors.black12,
+                                                dialogTextStyle: primaryTextStyle(),
+                                                searchDecoration: InputDecoration(
+                                                  iconColor: Theme.of(context).dividerColor,
+                                                  enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Theme.of(context).dividerColor)),
+                                                  focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: primaryColor)),
+                                                ),
+                                                searchStyle: primaryTextStyle(),
+                                                onInit: (c) {
+                                                  pickupCountryCode = c!.dialCode!;
+                                                },
+                                                onChanged: (c) {
+                                                  pickupCountryCode = c.dialCode!;
+                                                },
+                                              ),
+                                              VerticalDivider(color: Colors.grey.withOpacity(0.5)),
+                                            ],
+                                          ),
+                                        )),
+                                    validator: (value) {
+                                      if (value!.trim().isEmpty) return errorThisFieldRequired;
+                                      if (value.trim().length < minContactLength || value.trim().length > maxContactLength) return language.contact_length_validation;
+                                      return null;
+                                    },
+                                    inputFormatters: [
+                                      FilteringTextInputFormatter.digitsOnly,
+                                    ],
+                                  ),
+                                  SizedBox(height: 16),
+                                  Text(language.pickup_description, style: primaryTextStyle()),
+                                  SizedBox(height: 8),
+                                  TextField(
+                                    controller: pickDesCont,
+                                    decoration: commonInputDecoration(suffixIcon: Icons.notes),
+                                    textInputAction: TextInputAction.newline,
+                                    maxLines: 3,
+                                    minLines: 3,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(
+                        width: ResponsiveWidget.isSmallScreen(context) ? getBodyWidth(context) : (getBodyWidth(context) - 48) * 0.5,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(language.delivery_information, style: boldTextStyle()),
+                            SizedBox(height: 8),
+                            Container(
+                              padding: EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                border: Border.all(color: Theme.of(context).dividerColor),
+                                borderRadius: BorderRadius.circular(defaultRadius),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(language.delivery_location, style: primaryTextStyle()),
+                                  SizedBox(height: 8),
+                                  AppTextField(
+                                    controller: deliverAddressCont,
+                                    textInputAction: TextInputAction.next,
+                                    textFieldType: TextFieldType.ADDRESS,
+                                    decoration: commonInputDecoration(suffixIcon: Icons.location_on_outlined),
+                                    validator: (value) {
+                                      if (value!.isEmpty) return errorThisFieldRequired;
+                                      if (deliverLat == null || deliverLong == null) return language.pleaseSelectValidAddress;
+                                      return null;
+                                    },
+                                    onChanged: (val) async {
+                                      deliverMsg = '';
+                                      deliverLat = null;
+                                      deliverLong = null;
+                                      if (val.isNotEmpty) {
+                                        if (val.length < 3) {
+                                          deliverMsg = language.selectedAddressValidation;
+                                          deliverPredictionList.clear();
+                                          setState(() {});
+                                        } else {
+                                          deliverPredictionList = await getPlaceAutoCompleteApiCall(val);
+                                          setState(() {});
+                                        }
                                       } else {
-                                        pickPredictionList = await getPlaceAutoCompleteApiCall(val);
+                                        deliverPredictionList.clear();
                                         setState(() {});
                                       }
-                                    } else {
-                                      pickPredictionList.clear();
-                                      setState(() {});
-                                    }
-                                  },
-                                ),
-                                if (!pickMsg.isEmptyOrNull)
-                                  Padding(
-                                      padding: EdgeInsets.only(top: 8, left: 8),
-                                      child: Text(
-                                        pickMsg.validate(),
-                                        style: secondaryTextStyle(color: Colors.red),
-                                      )),
-                                if (pickPredictionList.isNotEmpty)
-                                  ListView.builder(
+                                    },
+                                  ),
+                                  if (!deliverMsg.isEmptyOrNull)
+                                    Padding(
+                                        padding: EdgeInsets.only(top: 8, left: 8),
+                                        child: Text(
+                                          deliverMsg.validate(),
+                                          style: secondaryTextStyle(color: Colors.red),
+                                        )),
+                                  if (deliverPredictionList.isNotEmpty)
+                                    ListView.builder(
                                       physics: NeverScrollableScrollPhysics(),
                                       controller: ScrollController(),
                                       padding: EdgeInsets.only(top: 16, bottom: 16),
                                       shrinkWrap: true,
-                                      itemCount: pickPredictionList.length,
+                                      itemCount: deliverPredictionList.length,
                                       itemBuilder: (context, index) {
-                                        Predictions mData = pickPredictionList[index];
+                                        Predictions mData = deliverPredictionList[index];
                                         return ListTile(
                                           leading: Icon(Icons.location_pin, color: primaryColor),
                                           title: Text(mData.description ?? ""),
                                           onTap: () async {
                                             PlaceIdDetailModel? response = await getPlaceIdDetailApiCall(placeId: mData.placeId!);
                                             if (response != null) {
-                                              pickAddressCont.text = mData.description ?? "";
-                                              pickLat = response.result!.geometry!.location!.lat.toString();
-                                              pickLong = response.result!.geometry!.location!.lng.toString();
-                                              pickPredictionList.clear();
+                                              deliverAddressCont.text = mData.description ?? "";
+                                              deliverLat = response.result!.geometry!.location!.lat.toString();
+                                              deliverLong = response.result!.geometry!.location!.lng.toString();
+                                              deliverPredictionList.clear();
                                               setState(() {});
                                             }
                                           },
                                         );
-                                      }),
-                                SizedBox(height: 16),
-                                Text(language.pickup_contact_number, style: primaryTextStyle()),
-                                SizedBox(height: 8),
-                                AppTextField(
-                                  controller: pickPhoneCont,
-                                  textInputAction: TextInputAction.next,
-                                  textFieldType: TextFieldType.PHONE,
-                                  decoration: commonInputDecoration(
+                                      },
+                                    ),
+                                  SizedBox(height: 16),
+                                  Text(language.delivery_contact_number, style: primaryTextStyle()),
+                                  SizedBox(height: 8),
+                                  AppTextField(
+                                    controller: deliverPhoneCont,
+                                    textInputAction: TextInputAction.next,
+                                    textFieldType: TextFieldType.PHONE,
+                                    decoration: commonInputDecoration(
                                       suffixIcon: Icons.phone,
                                       prefixIcon: IntrinsicHeight(
                                         child: Row(
                                           mainAxisSize: MainAxisSize.min,
                                           children: [
                                             CountryCodePicker(
-                                              initialSelection: pickupCountryCode,
+                                              initialSelection: deliverCountryCode,
                                               showCountryOnly: false,
                                               showFlag: true,
                                               showFlagDialog: true,
@@ -866,218 +1050,74 @@ class CreateOrderWidgetState extends State<CreateOrderWidget> {
                                               ),
                                               searchStyle: primaryTextStyle(),
                                               onInit: (c) {
-                                                pickupCountryCode = c!.dialCode!;
+                                                deliverCountryCode = c!.dialCode!;
                                               },
                                               onChanged: (c) {
-                                                pickupCountryCode = c.dialCode!;
+                                                deliverCountryCode = c.dialCode!;
                                               },
                                             ),
                                             VerticalDivider(color: Colors.grey.withOpacity(0.5)),
                                           ],
                                         ),
-                                      )),
-                                  validator: (value) {
-                                    if (value!.trim().isEmpty) return errorThisFieldRequired;
-                                    if (value.trim().length < 10 || value.trim().length > 14) return language.contact_length_validation;
-                                    return null;
-                                  },
-                                  inputFormatters: [
-                                    FilteringTextInputFormatter.digitsOnly,
-                                  ],
-                                ),
-                                SizedBox(height: 16),
-                                Text(language.pickup_description, style: primaryTextStyle()),
-                                SizedBox(height: 8),
-                                TextField(
-                                  controller: pickDesCont,
-                                  decoration: commonInputDecoration(suffixIcon: Icons.notes),
-                                  textInputAction: TextInputAction.newline,
-                                  maxLines: 3,
-                                  minLines: 3,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(language.delivery_information, style: boldTextStyle()),
-                          SizedBox(height: 8),
-                          Container(
-                            padding: EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              border: Border.all(color: Theme.of(context).dividerColor),
-                              borderRadius: BorderRadius.circular(defaultRadius),
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(language.delivery_location, style: primaryTextStyle()),
-                                SizedBox(height: 8),
-                                AppTextField(
-                                  controller: deliverAddressCont,
-                                  textInputAction: TextInputAction.next,
-                                  textFieldType: TextFieldType.ADDRESS,
-                                  decoration: commonInputDecoration(suffixIcon: Icons.location_on_outlined),
-                                  validator: (value) {
-                                    if (value!.isEmpty) return errorThisFieldRequired;
-                                    if (deliverLat == null || deliverLong == null) return language.pleaseSelectValidAddress;
-                                    return null;
-                                  },
-                                  onChanged: (val) async {
-                                    deliverMsg = '';
-                                    deliverLat = null;
-                                    deliverLong = null;
-                                    if (val.isNotEmpty) {
-                                      if (val.length < 3) {
-                                        deliverMsg = language.selectedAddressValidation;
-                                        deliverPredictionList.clear();
-                                        setState(() {});
-                                      } else {
-                                        deliverPredictionList = await getPlaceAutoCompleteApiCall(val);
-                                        setState(() {});
-                                      }
-                                    } else {
-                                      deliverPredictionList.clear();
-                                      setState(() {});
-                                    }
-                                  },
-                                ),
-                                if (!deliverMsg.isEmptyOrNull)
-                                  Padding(
-                                      padding: EdgeInsets.only(top: 8, left: 8),
-                                      child: Text(
-                                        deliverMsg.validate(),
-                                        style: secondaryTextStyle(color: Colors.red),
-                                      )),
-                                if (deliverPredictionList.isNotEmpty)
-                                  ListView.builder(
-                                    physics: NeverScrollableScrollPhysics(),
-                                    controller: ScrollController(),
-                                    padding: EdgeInsets.only(top: 16, bottom: 16),
-                                    shrinkWrap: true,
-                                    itemCount: deliverPredictionList.length,
-                                    itemBuilder: (context, index) {
-                                      Predictions mData = deliverPredictionList[index];
-                                      return ListTile(
-                                        leading: Icon(Icons.location_pin, color: primaryColor),
-                                        title: Text(mData.description ?? ""),
-                                        onTap: () async {
-                                          PlaceIdDetailModel? response = await getPlaceIdDetailApiCall(placeId: mData.placeId!);
-                                          if (response != null) {
-                                            deliverAddressCont.text = mData.description ?? "";
-                                            deliverLat = response.result!.geometry!.location!.lat.toString();
-                                            deliverLong = response.result!.geometry!.location!.lng.toString();
-                                            deliverPredictionList.clear();
-                                            setState(() {});
-                                          }
-                                        },
-                                      );
-                                    },
-                                  ),
-                                SizedBox(height: 16),
-                                Text(language.delivery_contact_number, style: primaryTextStyle()),
-                                SizedBox(height: 8),
-                                AppTextField(
-                                  controller: deliverPhoneCont,
-                                  textInputAction: TextInputAction.next,
-                                  textFieldType: TextFieldType.PHONE,
-                                  decoration: commonInputDecoration(
-                                    suffixIcon: Icons.phone,
-                                    prefixIcon: IntrinsicHeight(
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          CountryCodePicker(
-                                            initialSelection: deliverCountryCode,
-                                            showCountryOnly: false,
-                                            showFlag: true,
-                                            showFlagDialog: true,
-                                            showOnlyCountryWhenClosed: false,
-                                            alignLeft: false,
-                                            textStyle: primaryTextStyle(),
-                                            dialogBackgroundColor: Theme.of(context).cardColor,
-                                            barrierColor: Colors.black12,
-                                            dialogTextStyle: primaryTextStyle(),
-                                            searchDecoration: InputDecoration(
-                                              iconColor: Theme.of(context).dividerColor,
-                                              enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Theme.of(context).dividerColor)),
-                                              focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: primaryColor)),
-                                            ),
-                                            searchStyle: primaryTextStyle(),
-                                            onInit: (c) {
-                                              deliverCountryCode = c!.dialCode!;
-                                            },
-                                            onChanged: (c) {
-                                              deliverCountryCode = c.dialCode!;
-                                            },
-                                          ),
-                                          VerticalDivider(color: Colors.grey.withOpacity(0.5)),
-                                        ],
                                       ),
                                     ),
+                                    validator: (value) {
+                                      if (value!.trim().isEmpty) return errorThisFieldRequired;
+                                      if (value.trim().length < minContactLength || value.trim().length > maxContactLength) return language.contact_length_validation;
+                                      return null;
+                                    },
+                                    inputFormatters: [
+                                      FilteringTextInputFormatter.digitsOnly,
+                                    ],
                                   ),
-                                  validator: (value) {
-                                    if (value!.trim().isEmpty) return errorThisFieldRequired;
-                                    if (value.trim().length < 10 || value.trim().length > 14) return language.contact_length_validation;
-                                    return null;
-                                  },
-                                  inputFormatters: [
-                                    FilteringTextInputFormatter.digitsOnly,
-                                  ],
-                                ),
-                                SizedBox(height: 16),
-                                Text(language.delivery_description, style: primaryTextStyle()),
-                                SizedBox(height: 8),
-                                TextField(
-                                  controller: deliverDesCont,
-                                  decoration: commonInputDecoration(suffixIcon: Icons.notes),
-                                  textInputAction: TextInputAction.newline,
-                                  maxLines: 3,
-                                  minLines: 3,
-                                ),
-                              ],
+                                  SizedBox(height: 16),
+                                  Text(language.delivery_description, style: primaryTextStyle()),
+                                  SizedBox(height: 8),
+                                  TextField(
+                                    controller: deliverDesCont,
+                                    decoration: commonInputDecoration(suffixIcon: Icons.notes),
+                                    textInputAction: TextInputAction.newline,
+                                    maxLines: 3,
+                                    minLines: 3,
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 16),
-                Text(language.payment_collect_form, style: boldTextStyle()),
-                SizedBox(height: 8),
-                SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.25,
-                  child: DropdownButtonFormField<String>(
-                    isExpanded: true,
-                    value: paymentCollectFrom,
-                    dropdownColor: Theme.of(context).cardColor,
-                    style: primaryTextStyle(),
-                    decoration: commonInputDecoration(),
-                    items: [
-                      DropdownMenuItem(value: PAYMENT_ON_PICKUP, child: Text(language.pickup_location, style: primaryTextStyle(), maxLines: 1)),
-                      DropdownMenuItem(value: PAYMENT_ON_DELIVERY, child: Text(language.delivery_location, style: primaryTextStyle(), maxLines: 1)),
                     ],
-                    onChanged: (value) {
-                      paymentCollectFrom = value!;
-                      setState(() {});
-                    },
                   ),
-                ),
-              ],
+                  SizedBox(height: 16),
+                  Text(language.payment_collect_form, style: boldTextStyle()),
+                  SizedBox(height: 8),
+                  SizedBox(
+                    width: ResponsiveWidget.isSmallScreen(context) ? getBodyWidth(context) : MediaQuery.of(context).size.width * 0.25,
+                    child: DropdownButtonFormField<String>(
+                      isExpanded: true,
+                      value: paymentCollectFrom,
+                      dropdownColor: Theme.of(context).cardColor,
+                      style: primaryTextStyle(),
+                      decoration: commonInputDecoration(),
+                      items: [
+                        DropdownMenuItem(value: PAYMENT_ON_PICKUP, child: Text(language.pickup_location, style: primaryTextStyle(), maxLines: 1)),
+                        DropdownMenuItem(value: PAYMENT_ON_DELIVERY, child: Text(language.delivery_location, style: primaryTextStyle(), maxLines: 1)),
+                      ],
+                      onChanged: (value) {
+                        paymentCollectFrom = value!;
+                        setState(() {});
+                      },
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
-        ),
-        Observer(builder: (context) {
-          return Visibility(visible: appStore.isLoading, child: Positioned.fill(child: loaderWidget()));
-        }),
-      ],
+          Observer(builder: (context) {
+            return Visibility(visible: appStore.isLoading, child: Positioned.fill(child: loaderWidget()));
+          }),
+        ],
+      ),
     );
   }
 }

@@ -1,13 +1,16 @@
 import 'package:country_code_picker/country_code_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:paapag_admin/models/CountryListModel.dart';
-import 'package:paapag_admin/network/RestApis.dart';
-import 'package:paapag_admin/utils/Colors.dart';
-import 'package:paapag_admin/utils/Common.dart';
-import 'package:paapag_admin/utils/Constants.dart';
-import 'package:paapag_admin/utils/Extensions/app_common.dart';
-import 'package:paapag_admin/utils/country_list.dart';
+import '../models/CountryListModel.dart';
+import '../network/RestApis.dart';
+import '../utils/Colors.dart';
+import '../utils/Common.dart';
+import '../utils/Constants.dart';
+import '../utils/Extensions/common.dart';
+import '../utils/Extensions/constants.dart';
+import '../utils/Extensions/shared_pref.dart';
+import '../utils/Extensions/text_styles.dart';
+import '../utils/country_list.dart';
 
 import '../main.dart';
 
@@ -56,7 +59,7 @@ class AddCountryDialogState extends State<AddCountryDialog> {
     }
   }
 
-  addCountryApiCall() async {
+  AddCountryApiCall() async {
     if (_formKey.currentState!.validate()) {
       Navigator.pop(context);
       Map req = {
@@ -156,10 +159,7 @@ class AddCountryDialogState extends State<AddCountryDialog> {
                               value: selectedDistanceType,
                               decoration: commonInputDecoration(),
                               items: distanceTypeList.map<DropdownMenuItem<String>>((item) {
-                                return DropdownMenuItem(
-                                  value: item,
-                                  child: Text(item, style: primaryTextStyle()),
-                                );
+                                return DropdownMenuItem(value: item, child: Text(item, style: primaryTextStyle()));
                               }).toList(),
                               onChanged: (value) {
                                 selectedDistanceType = value;
@@ -185,10 +185,7 @@ class AddCountryDialogState extends State<AddCountryDialog> {
                               value: selectedWeightType,
                               decoration: commonInputDecoration(),
                               items: weightTypeList.map<DropdownMenuItem<String>>((item) {
-                                return DropdownMenuItem(
-                                  value: item,
-                                  child: Text(item, style: primaryTextStyle()),
-                                );
+                                return DropdownMenuItem(value: item, child: Text(item, style: primaryTextStyle()));
                               }).toList(),
                               onChanged: (value) {
                                 selectedWeightType = value;
@@ -217,10 +214,10 @@ class AddCountryDialogState extends State<AddCountryDialog> {
         }),
         SizedBox(width: 4),
         dialogPrimaryButton(isUpdate ? language.update : language.add, () {
-          if (shared_pref.getString(USER_TYPE) == DEMO_ADMIN) {
+          if (getStringAsync(USER_TYPE) == DEMO_ADMIN) {
             toast(language.demo_admin_msg);
           } else {
-            addCountryApiCall();
+            AddCountryApiCall();
           }
         }),
       ],

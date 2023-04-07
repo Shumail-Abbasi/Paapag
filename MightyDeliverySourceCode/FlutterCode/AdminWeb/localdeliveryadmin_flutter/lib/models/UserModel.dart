@@ -25,6 +25,10 @@ class UserModel {
   String? loginType;
   int? isVerifiedDeliveryMan;
   String? fcmToken;
+  String? latitude;
+  String? longitude;
+  UserBankAccount? userBankAccount;
+  String? uid;
 
   UserModel({
     this.id,
@@ -53,6 +57,10 @@ class UserModel {
     this.loginType,
     this.isVerifiedDeliveryMan,
     this.fcmToken,
+    this.latitude,
+    this.longitude,
+    this.userBankAccount,
+    this.uid,
   });
 
   UserModel.fromJson(Map<String, dynamic> json) {
@@ -82,6 +90,10 @@ class UserModel {
     loginType = json['login_type'];
     isVerifiedDeliveryMan = json['is_verified_delivery_man'];
     fcmToken = json['fcm_token'];
+    latitude = json['latitude'];
+    longitude = json['longitude'];
+    userBankAccount = json['user_bank_account'] != null ? new UserBankAccount.fromJson(json['user_bank_account']) : null;
+    uid = json['uid'];
   }
 
   Map<String, dynamic> toJson() {
@@ -112,6 +124,52 @@ class UserModel {
     data['login_type'] = this.loginType;
     data['is_verified_delivery_man'] = this.isVerifiedDeliveryMan;
     data['fcm_token'] = this.fcmToken;
+    data['latitude'] = this.latitude;
+    data['longitude'] = this.longitude;
+    if (this.userBankAccount != null) {
+      data['user_bank_account'] = this.userBankAccount!.toJson();
+    }
+    data['uid'] = this.uid;
+    return data;
+  }
+}
+
+class UserBankAccount {
+  int? id;
+  int? userId;
+  String? bankName;
+  String? bankCode;
+  String? accountHolderName;
+  String? accountNumber;
+  String? createdAt;
+  String? updatedAt;
+  String? deletedAt;
+
+  UserBankAccount({this.id, this.userId, this.bankName, this.bankCode, this.accountHolderName, this.accountNumber, this.createdAt, this.updatedAt, this.deletedAt});
+
+  UserBankAccount.fromJson(Map<String, dynamic> json) {
+    id = json['id'];
+    userId = json['user_id'];
+    bankName = json['bank_name'];
+    bankCode = json['bank_code'];
+    accountHolderName = json['account_holder_name'];
+    accountNumber = json['account_number'];
+    createdAt = json['created_at'];
+    updatedAt = json['updated_at'];
+    deletedAt = json['deleted_at'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['id'] = this.id;
+    data['user_id'] = this.userId;
+    data['bank_name'] = this.bankName;
+    data['bank_code'] = this.bankCode;
+    data['account_holder_name'] = this.accountHolderName;
+    data['account_number'] = this.accountNumber;
+    data['created_at'] = this.createdAt;
+    data['updated_at'] = this.updatedAt;
+    data['deleted_at'] = this.deletedAt;
     return data;
   }
 }

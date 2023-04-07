@@ -65,8 +65,8 @@ class CreateOrderScreenState extends State<CreateOrderScreen> {
   FocusNode deliverPhoneFocus = FocusNode();
   FocusNode deliverDesFocus = FocusNode();
 
-  String deliverCountryCode = '+91';
-  String pickupCountryCode = '+91';
+  String deliverCountryCode = '+92';
+  String pickupCountryCode = '+92';
 
   DateTime? pickFromDateTime, pickToDateTime, deliverFromDateTime, deliverToDateTime;
   DateTime? pickDate, deliverDate;
@@ -143,14 +143,16 @@ class CreateOrderScreenState extends State<CreateOrderScreen> {
 
   extraChargesList() {
     extraChargeList.clear();
-    extraChargeList.add(ExtraChargeRequestModel(key: FIXED_CHARGES, value: cityData!.fixedCharges, valueType: ""));
-    extraChargeList.add(ExtraChargeRequestModel(key: MIN_DISTANCE, value: cityData!.minDistance, valueType: ""));
-    extraChargeList.add(ExtraChargeRequestModel(key: MIN_WEIGHT, value: cityData!.minWeight, valueType: ""));
-    extraChargeList.add(ExtraChargeRequestModel(key: PER_DISTANCE_CHARGE, value: cityData!.perDistanceCharges, valueType: ""));
-    extraChargeList.add(ExtraChargeRequestModel(key: PER_WEIGHT_CHARGE, value: cityData!.perWeightCharges, valueType: ""));
-    cityData!.extraCharges!.forEach((element) {
-      extraChargeList.add(ExtraChargeRequestModel(key: element.title!.toLowerCase().replaceAll(' ', "_"), value: element.charges, valueType: element.chargesType));
-    });
+    extraChargeList.add(ExtraChargeRequestModel(key: FIXED_CHARGES, value: cityData?.fixedCharges ?? 0, valueType: ""));
+    extraChargeList.add(ExtraChargeRequestModel(key: MIN_DISTANCE, value: cityData?.minDistance ?? 0, valueType: ""));
+    extraChargeList.add(ExtraChargeRequestModel(key: MIN_WEIGHT, value: cityData?.minWeight ?? 0, valueType: ""));
+    extraChargeList.add(ExtraChargeRequestModel(key: PER_DISTANCE_CHARGE, value: cityData?.perDistanceCharges ?? 0, valueType: ""));
+    extraChargeList.add(ExtraChargeRequestModel(key: PER_WEIGHT_CHARGE, value: cityData?.perWeightCharges ?? 0, valueType: ""));
+    if(cityData != null) {
+      cityData!.extraCharges!.forEach((element) {
+        extraChargeList.add(ExtraChargeRequestModel(key: element.title!.toLowerCase().replaceAll(' ', "_"), value: element.charges, valueType: element.chargesType));
+      });
+    }
   }
 
   getCityDetailApiCall(int cityId) async {
@@ -229,7 +231,7 @@ class CreateOrderScreenState extends State<CreateOrderScreen> {
         "description": deliverDesCont.text,
         "contact_number": '$deliverCountryCode ${deliverPhoneCont.text.trim()}',
       },
-      "extra_charges": extraChargeList,
+      "extra_charges": extraChargeList.map((e) => e.toJson()).toList(),
       "parcel_type": parcelTypeCont.text,
       "total_weight": weightController.text.toDouble(),
       "total_distance": totalDistance.toStringAsFixed(2).validate(),
@@ -237,19 +239,20 @@ class CreateOrderScreenState extends State<CreateOrderScreen> {
       "status": orderStatus,
       "payment_type": "",
       "payment_status": "",
-      "fixed_charges": cityData!.fixedCharges.toString(),
+      "fixed_charges": cityData?.fixedCharges.toString(),
       "parent_order_id": "",
       "total_amount": totalAmount,
       "weight_charge": weightCharge,
       "distance_charge": distanceCharge,
       "total_parcel": totalParcelController.text.toInt(),
     };
+    print(req);
     await createOrder(req).then((value) {
       appStore.setLoading(false);
       toast(value.message);
       finish(context);
       if (!isCashPayment) {
-       // PaymentScreen(orderId: value.orderId.validate(), totalAmount: totalAmount).launch(context);
+        // PaymentScreen(orderId: value.orderId.validate(), totalAmount: totalAmount).launch(context);
       } else {
         DashboardScreen().launch(context, isNewTask: true);
       }
@@ -261,7 +264,7 @@ class CreateOrderScreenState extends State<CreateOrderScreen> {
 
   Future<List<Predictions>> getPlaceAutoCompleteApiCall(String text) async {
     List<Predictions> list = [];
-    await placeAutoCompleteApi(searchText: text, language: appStore.selectedLanguage, countryCode: CountryModel.fromJson(getJSONAsync(COUNTRY_DATA)).code.validate(value: 'IN')).then((value) {
+    await placeAutoCompleteApi(searchText: text, language: appStore.selectedLanguage, countryCode: CountryModel.fromJson(getJSONAsync(COUNTRY_DATA)).code.validate(value: 'pk')).then((value) {
       list = value.predictions ?? [];
     }).catchError((e) {
       throw e.toString();
@@ -917,7 +920,13 @@ class CreateOrderScreenState extends State<CreateOrderScreen> {
           ),
         ),
         Divider(height: 30),
-        OrderSummeryWidget(extraChargesList: extraChargeList, totalDistance: totalDistance, totalWeight: weightController.text.toDouble(), distanceCharge: distanceCharge, weightCharge: weightCharge, totalAmount: totalAmount),
+        OrderSummeryWidget(
+            extraChargesList: extraChargeList,
+            totalDistance: totalDistance,
+            totalWeight: weightController.text.toDouble(),
+            distanceCharge: distanceCharge,
+            weightCharge: weightCharge,
+            totalAmount: totalAmount),
         16.height,
         Text(language.payment, style: boldTextStyle()),
         16.height,

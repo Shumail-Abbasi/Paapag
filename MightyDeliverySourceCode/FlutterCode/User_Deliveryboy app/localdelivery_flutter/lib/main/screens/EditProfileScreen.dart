@@ -22,7 +22,7 @@ class EditProfileScreen extends StatefulWidget {
 
 class EditProfileScreenState extends State<EditProfileScreen> {
   GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  String countryCode = '+91';
+  String countryCode = '+92';
 
   TextEditingController emailController = TextEditingController();
   TextEditingController usernameController = TextEditingController();

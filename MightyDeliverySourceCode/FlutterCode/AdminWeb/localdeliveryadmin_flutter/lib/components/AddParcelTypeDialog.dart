@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:paapag_admin/models/ParcelTypeListModel.dart';
-import 'package:paapag_admin/network/RestApis.dart';
-import 'package:paapag_admin/utils/Colors.dart';
-import 'package:paapag_admin/utils/Common.dart';
-import 'package:paapag_admin/utils/Extensions/app_common.dart';
-import 'package:paapag_admin/utils/Extensions/app_textfield.dart';
-
+import '../models/ParcelTypeListModel.dart';
+import '../network/RestApis.dart';
+import '../utils/Colors.dart';
+import '../utils/Common.dart';
+import '../utils/Extensions/app_textfield.dart';
 import '../main.dart';
 import '../utils/Constants.dart';
+import '../utils/Extensions/common.dart';
+import '../utils/Extensions/shared_pref.dart';
+import '../utils/Extensions/text_styles.dart';
 
 class AddParcelTypeDialog extends StatefulWidget {
   static String tag = '/AddParcelTypeDialog';
@@ -24,7 +25,6 @@ class AddParcelTypeDialogState extends State<AddParcelTypeDialog> {
   GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   TextEditingController labelController = TextEditingController();
-  TextEditingController valueController = TextEditingController();
 
   bool isUpdate = false;
 
@@ -38,18 +38,16 @@ class AddParcelTypeDialogState extends State<AddParcelTypeDialog> {
     isUpdate = widget.parcelTypeData != null;
     if (isUpdate) {
       labelController.text = widget.parcelTypeData!.label!;
-      valueController.text = widget.parcelTypeData!.value!;
     }
   }
 
-  addParcelTypeApiCall() async {
+  AddParcelTypeApiCall() async {
     if (_formKey.currentState!.validate()) {
       Navigator.pop(context);
       Map req = {
         "id": isUpdate ? widget.parcelTypeData!.id : "",
         "type": "parcel_type",
         "label": labelController.text,
-        "value": valueController.text,
       };
       appStore.setLoading(true);
       await addParcelType(req).then((value) {
@@ -106,19 +104,6 @@ class AddParcelTypeDialogState extends State<AddParcelTypeDialog> {
                     return null;
                   },
                 ),
-                SizedBox(height: 16),
-                Text(language.value, style: primaryTextStyle()),
-                SizedBox(height: 8),
-                AppTextField(
-                  controller: valueController,
-                  textFieldType: TextFieldType.NAME,
-                  decoration: commonInputDecoration(),
-                  textInputAction: TextInputAction.next,
-                  validator: (s) {
-                    if (s!.trim().isEmpty) return language.field_required_msg;
-                    return null;
-                  },
-                ),
               ],
             ),
           ),
@@ -130,10 +115,10 @@ class AddParcelTypeDialogState extends State<AddParcelTypeDialog> {
         }),
         SizedBox(width: 4),
         dialogPrimaryButton(isUpdate ? language.update : language.add, () {
-          if (shared_pref.getString(USER_TYPE) == DEMO_ADMIN) {
+          if (getStringAsync(USER_TYPE) == DEMO_ADMIN) {
             toast(language.demo_admin_msg);
           } else {
-            addParcelTypeApiCall();
+            AddParcelTypeApiCall();
           }
         }),
       ],

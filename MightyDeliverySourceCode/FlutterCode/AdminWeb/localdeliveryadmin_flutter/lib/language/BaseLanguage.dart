@@ -706,4 +706,268 @@ abstract class BaseLanguage {
   String get pick;
 
   String get perPage;
+
+  String get remark;
+
+  String get showMore;
+
+  String get showLess;
+
+  String get locationNotExist;
+
+  String get sunday;
+
+  String get monday;
+
+  String get tuesday;
+
+  String get wednesday;
+
+  String get thursday;
+
+  String get friday;
+
+  String get saturday;
+
+  String get commissionType;
+
+  String get adminCommission;
+
+  String get userUpdated;
+
+  String get userAdded;
+
+  String get editUser;
+
+  String get addUser;
+
+  String get editDeliveryPerson;
+
+  String get addDeliveryPerson;
+
+  String get bankName;
+
+  String get accountHolderName;
+
+  String get accountNumber;
+
+  String get ifscCode;
+
+  String get cancelledReason;
+
+  String get withdrawReqList;
+
+  String get amount;
+
+  String get availableBalance;
+
+  String get bankDetails;
+
+  String get accept;
+
+  String get withdrawRequest;
+
+  String get acceptConfirmation;
+
+  String get declinedConfirmation;
+
+  String get somethingWentWrong;
+
+  String get internetNotWorking;
+
+  String get tryAgain;
+
+  String get credentialNotMatch;
+
+  String get wallet;
+
+  String get declined;
+
+  String get approved;
+
+  String get requested;
+
+  String get deliveredTo;
+
+  String get invoiceNo;
+
+  String get invoiceDate;
+
+  String get orderedDate;
+
+  String get invoiceCapital;
+
+  String get product;
+
+  String get price;
+
+  String get subTotal;
+
+  String get description;
+
+  String get accountSettings;
+
+  String get deleteAccText;
+
+  String get deleteAcc;
+
+  String get deleteAccount;
+
+  String get saveChanges;
+
+  String get writeMsg;
+
+  String get contactUs;
+
+  String get visitUs;
+
+  String get updateSuccessfully;
+
+  String get forgotPassText;
+
+  String get cancelOrder;
+
+  String get returnOrder;
+
+  String get returnedReason;
+
+  String get privacyPolicy;
+
+  String get logOutText;
+
+  String get lessAmountBal;
+
+  String get waitYorAdmin;
+
+  String get acceptTermsAndCondition;
+
+  String get signIn;
+
+  String get signInCredential;
+
+  String get agreeText;
+
+  String get termsOfService;
+
+  String get dontHaveAcc;
+
+  String get signUp;
+
+  String get signUpYourAcc;
+
+  String get usernameErrorText;
+
+  String get alreadyAcc;
+
+  String get selectCity;
+
+  String get withdraw;
+
+  String get addMoney;
+
+  String get bankNotFound;
+
+  String get createReview;
+
+  String get socialMedia;
+
+  String get selectReason;
+
+  String get filter;
+
+  String get reset;
+
+  String get close;
+
+  String get dateAfterDate;
+
+  String get applyFilter;
+
+  String get admin;
+
+  String get deliveryMan;
+
+  String get yourOrder;
+
+  String get assignTo;
+
+  String get transferTo;
+
+  String get paymentCollectFrom;
+
+  String get writeHereReason;
+
+  String get orderList;
+
+  String get cancelOrder1;
+
+  String get cancelOrder2;
+
+  String get cancelOrder3;
+
+  String get cancelOrder4;
+
+  String get cancelOrder5;
+
+  String get cancelOrder6;
+
+  String get cancelOrder7;
+
+  String get returnOrder1;
+
+  String get returnOrder2;
+
+  String get returnOrder3;
+
+  String get returnOrder4;
+
+  String get returnOrder5;
+
+  String get balLessOrderCreateCash;
+
+  String get ok;
+
+  String get orderFee;
+
+  String get topUp;
+
+  String get orderCancelCharge;
+
+  String get orderCancelRefund;
+
+  String get correction;
+
+  String get commission;
+
+  String get viewUser;
+
+  String get viewDeliveryPerson;
+
+  String get walletTotalBalance;
+
+  String get totalWithdrawal;
+
+  String get paidOrder;
+
+  String get walletHistory;
+
+  String get transactionType;
+
+  String get earningHistory;
+
+  String get earning;
+
+  String get loginAsAdmin;
+
+  String get viewSite;
+
+  String get location;
+
+  String get pickUpInformation;
+
+  String get pickUpLocation;
+
+  String get sendPackages;
+
+  String get demandlocalcourier;
 }

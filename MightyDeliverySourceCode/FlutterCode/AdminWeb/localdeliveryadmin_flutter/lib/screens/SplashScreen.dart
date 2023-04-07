@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:paapag_admin/utils/Constants.dart';
-import 'package:paapag_admin/utils/Extensions/app_common.dart';
-
+import '../components/HomeWidget.dart';
 import '../main.dart';
-import 'DashboardScreen.dart';
-import 'LoginScreen.dart';
+import '../utils/Extensions/constants.dart';
+import '../utils/Extensions/text_styles.dart';
+import 'AdminLoginScreen.dart';
 
 class SplashScreen extends StatefulWidget {
-  static String tag = '/SplashScreen';
+  static String route = 'admin/splash';
 
   @override
   SplashScreenState createState() => SplashScreenState();
@@ -25,9 +24,9 @@ class SplashScreenState extends State<SplashScreen> {
       Duration(seconds: 2),
       () {
         if (appStore.isLoggedIn) {
-          launchScreen(context, DashboardScreen(), isNewTask: true);
+          Navigator.pushNamedAndRemoveUntil(context, AdminHomeWidget.route, (route) { return true;});
         } else {
-          launchScreen(context, LoginScreen(), isNewTask: true);
+          Navigator.pushNamedAndRemoveUntil(context, AdminLoginScreen.route, (route) { return true;});
         }
       },
     );

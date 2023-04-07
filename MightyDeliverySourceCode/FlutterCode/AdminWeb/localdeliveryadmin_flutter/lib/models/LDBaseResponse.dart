@@ -1,16 +1,18 @@
 class LDBaseResponse {
+  int? orderId;
   bool? status;
   String? message;
   String? url;
   Data? data;
 
-  LDBaseResponse({this.status, this.message, this.url, this.data});
+  LDBaseResponse({this.status, this.message, this.url, this.data,this.orderId});
 
   LDBaseResponse.fromJson(Map<String, dynamic> json) {
     status = json['status'];
     message = json['message'];
     url = json['url'];
     data = json['data'] != null ? new Data.fromJson(json['data']) : null;
+    orderId = json['order_id'];
   }
 
   Map<String, dynamic> toJson() {
@@ -21,6 +23,7 @@ class LDBaseResponse {
     if (this.data != null) {
       data['data'] = this.data!.toJson();
     }
+    data['order_id'] = this.orderId;
     return data;
   }
 }

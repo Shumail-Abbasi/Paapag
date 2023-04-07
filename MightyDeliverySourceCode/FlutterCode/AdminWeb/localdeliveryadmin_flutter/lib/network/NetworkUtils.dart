@@ -3,11 +3,12 @@ import 'dart:io';
 
 import 'package:http/http.dart';
 import 'package:http/http.dart' as http;
-import 'package:paapag_admin/main.dart';
-import 'package:paapag_admin/utils/Common.dart';
-import 'package:paapag_admin/utils/Constants.dart';
-import 'package:paapag_admin/utils/Extensions/app_common.dart';
+import '../main.dart';
+import '../utils/Constants.dart';
 
+import '../utils/Extensions/common.dart';
+import '../utils/Extensions/network_utils.dart';
+import '../utils/Extensions/shared_pref.dart';
 import 'RestApis.dart';
 
 
@@ -21,7 +22,7 @@ Map<String, String> buildHeaderTokens() {
   };
 
   if (appStore.isLoggedIn) {
-    header.putIfAbsent(HttpHeaders.authorizationHeader, () => 'Bearer ${shared_pref.getString('TOKEN')}');
+    header.putIfAbsent(HttpHeaders.authorizationHeader, () => 'Bearer ${getStringAsync('TOKEN')}');
   }
   log(jsonEncode(header));
   return header;
@@ -60,10 +61,10 @@ Future<Response> buildHttpResponse(String endPoint, {HttpMethod method = HttpMet
 
       return response;
     } catch (e) {
-      throw 'Something Went Wrong';
+      throw e.toString();
     }
   } else {
-    throw 'Your internet is not working';
+    throw language.internetNotWorking;
   }
 }
 
@@ -71,17 +72,17 @@ Future<Response> buildHttpResponse(String endPoint, {HttpMethod method = HttpMet
 
 Future handleResponse(Response response, [bool? avoidTokenError]) async {
   if (!await isNetworkAvailable()) {
-    throw 'Your internet is not working';
+    throw language.internetNotWorking;
   }
   if (response.statusCode == 401) {
     if (appStore.isLoggedIn) {
       Map req = {
-        'email': shared_pref.getString(USER_EMAIL),
-        'password': shared_pref.getString(USER_PASSWORD),
+        'email': getStringAsync(USER_EMAIL),
+        'password': getStringAsync(USER_PASSWORD),
       };
 
       await logInApi(req).then((value) {
-        throw 'Please try again.';
+        throw language.tryAgain;
       }).catchError((e) {
         throw TokenException(e);
       });
@@ -98,7 +99,7 @@ Future handleResponse(Response response, [bool? avoidTokenError]) async {
       throw parseHtmlString(body['message']);
     } on Exception catch (e) {
       log(e);
-      throw 'Something Went Wrong';
+      throw language.somethingWentWrong;
     }
   }
 }

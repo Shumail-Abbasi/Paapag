@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:paapag_admin/main.dart';
-import 'package:paapag_admin/network/RestApis.dart';
-import 'package:paapag_admin/utils/Colors.dart';
-import 'package:paapag_admin/utils/Common.dart';
-import 'package:paapag_admin/utils/Extensions/app_common.dart';
-import 'package:paapag_admin/utils/Extensions/app_textfield.dart';
+import '../main.dart';
+import '../network/RestApis.dart';
+import '../utils/Colors.dart';
+import '../utils/Common.dart';
+import '../utils/Extensions/app_textfield.dart';
+import '../utils/Constants.dart';
+import '../utils/Extensions/common.dart';
+import '../utils/Extensions/shared_pref.dart';
+import '../utils/Extensions/text_styles.dart';
 
 class ForgotPasswordDialog extends StatefulWidget {
   static String tag = '/ForgotPasswordDialog';
@@ -101,7 +104,11 @@ class ForgotPasswordDialogState extends State<ForgotPasswordDialog> {
         }),
         SizedBox(width: 4),
         dialogPrimaryButton(language.submit, () {
-          submit();
+          if (getStringAsync(USER_TYPE) == DEMO_ADMIN) {
+            toast(language.demo_admin_msg);
+          }else {
+            submit();
+          }
         }),
       ],
     );

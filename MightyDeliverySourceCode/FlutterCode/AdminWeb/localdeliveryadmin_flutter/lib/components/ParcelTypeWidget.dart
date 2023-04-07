@@ -1,27 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:paapag_admin/models/ParcelTypeListModel.dart';
-import 'package:paapag_admin/network/RestApis.dart';
-import 'package:paapag_admin/utils/Colors.dart';
-import 'package:paapag_admin/utils/Common.dart';
-import 'package:paapag_admin/utils/Constants.dart';
-import 'package:paapag_admin/utils/Extensions/app_common.dart';
-
+import '../models/ParcelTypeListModel.dart';
+import '../network/RestApis.dart';
+import '../utils/Colors.dart';
+import '../utils/Common.dart';
+import '../utils/Constants.dart';
+import '../utils/Extensions/ResponsiveWidget.dart';
 import '../main.dart';
+import '../utils/Extensions/common.dart';
+import '../utils/Extensions/constants.dart';
+import '../utils/Extensions/shared_pref.dart';
+import '../utils/Extensions/text_styles.dart';
 import 'AddParcelTypeDialog.dart';
+import 'BodyCornerWidget.dart';
 
 class ParcelTypeWidget extends StatefulWidget {
-  static String tag = '/ParcelTypeComponent';
+  static String route = '/admin/parcelType';
 
   @override
   ParcelTypeWidgetState createState() => ParcelTypeWidgetState();
 }
 
 class ParcelTypeWidgetState extends State<ParcelTypeWidget> {
+  ScrollController horizontalScrollController = ScrollController();
+
   int currentPage = 1;
   int totalPage = 1;
   int perPage = 10;
-  
 
   List<ParcelTypeData> parcelTypeList = [];
 
@@ -32,15 +37,13 @@ class ParcelTypeWidgetState extends State<ParcelTypeWidget> {
   }
 
   Future<void> init() async {
-    afterBuildCreated((){
-      appStore.setLoading(true);
-      getParcelTypeListApiCall();
-    });
+    appStore.setSelectedMenuIndex(PARCEL_TYPE_INDEX);
+    getParcelTypeListApiCall();
   }
 
   getParcelTypeListApiCall() async {
     appStore.setLoading(true);
-    await getParcelTypeList(page: currentPage,perPage:perPage).then((value) {
+    await getParcelTypeList(page: currentPage, perPage: perPage).then((value) {
       appStore.setLoading(false);
 
       currentPage = value.pagination!.currentPage!;
@@ -78,131 +81,155 @@ class ParcelTypeWidgetState extends State<ParcelTypeWidget> {
 
   @override
   Widget build(BuildContext context) {
+
+    Widget addParcelTypeButton(){
+      return   addButton(language.add_parcel_types, () {
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (BuildContext dialogContext) {
+            return AddParcelTypeDialog(
+              onUpdate: () {
+                getParcelTypeListApiCall();
+              },
+            );
+          },
+        );
+      });
+    }
+
     return Observer(builder: (context) {
-      return Stack(
-        fit: StackFit.expand,
-        children: [
-          SingleChildScrollView(
-            controller: ScrollController(),
-            padding: EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(language.parcel_type, style: boldTextStyle(size: 20, color: primaryColor)),
-                    addButton(language.add_parcel_types, () {
-                      showDialog(
-                        context: context,
-                        barrierDismissible: false,
-                        builder: (BuildContext dialogContext) {
-                          return AddParcelTypeDialog(
-                            onUpdate: () {
-                              getParcelTypeListApiCall();
-                            },
-                          );
-                        },
-                      );
-                    }),
-                  ],
-                ),
-                parcelTypeList.isNotEmpty
-                    ? Column(
-                        children: [
-                          SizedBox(height: 16),
-                          Container(
-                            padding: EdgeInsets.all(16),
-                            decoration: BoxDecoration(color: appStore.isDarkMode ? scaffoldColorDark : Colors.white, borderRadius: BorderRadius.circular(defaultRadius), boxShadow: commonBoxShadow()),
-                            child: SingleChildScrollView(
-                              controller: ScrollController(),
-                              scrollDirection: Axis.horizontal,
-                              child: ConstrainedBox(
-                                constraints: BoxConstraints(minWidth: getBodyWidth(context) - 48),
-                                child: DataTable(
-                                  dataRowHeight: 45,
-                                  headingRowHeight: 45,
-                                  horizontalMargin: 16,
-                                  headingRowColor: MaterialStateColor.resolveWith((states) => primaryColor.withOpacity(0.1)),
-                                  showCheckboxColumn: false,
-                                  dataTextStyle: primaryTextStyle(size: 14),
-                                  headingTextStyle: boldTextStyle(),
-                                  columns: [
-                                    DataColumn(label: Text(language.id)),
-                                    DataColumn(label: Text(language.label)),
-                                    DataColumn(label: Text(language.value)),
-                                    DataColumn(label: Text(language.created)),
-                                    DataColumn(label: Text(language.actions)),
-                                  ],
-                                  rows: parcelTypeList.map((mData) {
-                                    return DataRow(cells: [
-                                      DataCell(Text('${mData.id}')),
-                                      DataCell(Text('${mData.label ?? "-"}')),
-                                      DataCell(Text('${mData.value ?? "-"}')),
-                                      DataCell(Text(printDate(mData.createdAt!))),
-                                      DataCell(
-                                        IntrinsicHeight(
-                                          child: Row(
-                                            children: [
-                                              outlineActionIcon(Icons.edit, Colors.green, language.edit ,() {
-                                                showDialog(
-                                                  context: context,
-                                                  barrierDismissible: false,
-                                                  builder: (BuildContext dialogContext) {
-                                                    return AddParcelTypeDialog(
-                                                        parcelTypeData: mData,
-                                                        onUpdate: () {
-                                                          getParcelTypeListApiCall();
-                                                        });
-                                                  },
-                                                );
-                                              }),
-                                              SizedBox(width: 8),
-                                              outlineActionIcon(Icons.delete, Colors.red, language.delete ,() {
-                                                commonConfirmationDialog(context, DIALOG_TYPE_DELETE, () {
-                                                  if (shared_pref.getString(USER_TYPE) == DEMO_ADMIN) {
-                                                    toast(language.demo_admin_msg);
-                                                  } else {
-                                                    Navigator.pop(context);
-                                                    deleteParcelTypeApiCall(mData.id!);
-                                                  }
-                                                }, title: language.delete_parcel_type, subtitle: language.do_you_want_to_delete_this_parcel_type);
-                                              }),
-                                            ],
+      return BodyCornerWidget(
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            SingleChildScrollView(
+              controller: ScrollController(),
+              padding: EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  ResponsiveWidget.isSmallScreen(context) && appStore.isMenuExpanded
+                      ? Wrap(
+                          spacing: 16,
+                          runSpacing: 16,
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          children: [
+                            Text(language.parcel_type, style: boldTextStyle(size: 20, color: primaryColor)),
+                            addParcelTypeButton(),
+                          ],
+                        )
+                      : Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(language.parcel_type, style: boldTextStyle(size: 20, color: primaryColor)),
+                            addParcelTypeButton(),
+                          ],
+                        ),
+                  parcelTypeList.isNotEmpty
+                      ? Column(
+                          children: [
+                            SizedBox(height: 16),
+                            RawScrollbar(
+                              scrollbarOrientation: ScrollbarOrientation.bottom,
+                              controller: horizontalScrollController,
+                              thumbVisibility: true,
+                              thumbColor: appStore.isDarkMode ? Colors.white12 : Colors.black12,
+                              radius: Radius.circular(defaultRadius),
+                              child: Container(
+                                padding: EdgeInsets.all(16),
+                                decoration: BoxDecoration(color: appStore.isDarkMode ? scaffoldColorDark : Colors.white, borderRadius: BorderRadius.circular(defaultRadius), boxShadow: commonBoxShadow()),
+                                child: SingleChildScrollView(
+                                  controller: horizontalScrollController,
+                                  scrollDirection: Axis.horizontal,
+                                  child: ConstrainedBox(
+                                    constraints: BoxConstraints(minWidth: getBodyWidth(context) - 48),
+                                    child: DataTable(
+                                      dataRowHeight: 45,
+                                      headingRowHeight: 45,
+                                      horizontalMargin: 16,
+                                      headingRowColor: MaterialStateColor.resolveWith((states) => primaryColor.withOpacity(0.1)),
+                                      showCheckboxColumn: false,
+                                      dataTextStyle: primaryTextStyle(size: 14),
+                                      headingTextStyle: boldTextStyle(),
+                                      columns: [
+                                        DataColumn(label: Text(language.id)),
+                                        DataColumn(label: Text(language.label)),
+                                        DataColumn(label: Text(language.value)),
+                                        DataColumn(label: Text(language.created)),
+                                        DataColumn(label: Text(language.actions)),
+                                      ],
+                                      rows: parcelTypeList.map((mData) {
+                                        return DataRow(cells: [
+                                          DataCell(Text('${mData.id}')),
+                                          DataCell(Text('${mData.label ?? "-"}')),
+                                          DataCell(Text('${mData.value ?? "-"}')),
+                                          DataCell(Text(printDate(mData.createdAt!))),
+                                          DataCell(
+                                            IntrinsicHeight(
+                                              child: Row(
+                                                children: [
+                                                  outlineActionIcon(Icons.edit, Colors.green, language.edit, () {
+                                                    showDialog(
+                                                      context: context,
+                                                      barrierDismissible: false,
+                                                      builder: (BuildContext dialogContext) {
+                                                        return AddParcelTypeDialog(
+                                                            parcelTypeData: mData,
+                                                            onUpdate: () {
+                                                              getParcelTypeListApiCall();
+                                                            });
+                                                      },
+                                                    );
+                                                  }),
+                                                  SizedBox(width: 8),
+                                                  outlineActionIcon(Icons.delete, Colors.red, language.delete, () {
+                                                    commonConfirmationDialog(context, DIALOG_TYPE_DELETE, () {
+                                                      if (getStringAsync(USER_TYPE) == DEMO_ADMIN) {
+                                                        toast(language.demo_admin_msg);
+                                                      } else {
+                                                        Navigator.pop(context);
+                                                        deleteParcelTypeApiCall(mData.id!);
+                                                      }
+                                                    }, title: language.delete_parcel_type, subtitle: language.do_you_want_to_delete_this_parcel_type);
+                                                  }),
+                                                ],
+                                              ),
+                                            ),
                                           ),
-                                        ),
-                                      ),
-                                    ]);
-                                  }).toList(),
+                                        ]);
+                                      }).toList(),
+                                    ),
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
-                          SizedBox(height: 16),
-                          paginationWidget(
-                            context,
-                            currentPage: currentPage,
-                            totalPage: totalPage,
-                            perPage: perPage,
-                            onUpdate: (currentPageVal,perPageVal) {
-                              currentPage = currentPageVal;
-                              perPage=perPageVal;
-                              getParcelTypeListApiCall();
-                            },
-                          ),
-                          SizedBox(height: 80),
-                        ],
-                      )
-                    : SizedBox(),
-              ],
+                            SizedBox(height: 16),
+                            paginationWidget(
+                              context,
+                              currentPage: currentPage,
+                              totalPage: totalPage,
+                              perPage: perPage,
+                              onUpdate: (currentPageVal, perPageVal) {
+                                currentPage = currentPageVal;
+                                perPage = perPageVal;
+                                getParcelTypeListApiCall();
+                              },
+                            ),
+                            SizedBox(height: 80),
+                          ],
+                        )
+                      : SizedBox(),
+                ],
+              ),
             ),
-          ),
-          appStore.isLoading
-              ? loaderWidget()
-              : parcelTypeList.isEmpty
-                  ? emptyWidget()
-                  : SizedBox(),
-        ],
+            appStore.isLoading
+                ? loaderWidget()
+                : parcelTypeList.isEmpty
+                    ? emptyWidget()
+                    : SizedBox(),
+          ],
+        ),
       );
     });
   }

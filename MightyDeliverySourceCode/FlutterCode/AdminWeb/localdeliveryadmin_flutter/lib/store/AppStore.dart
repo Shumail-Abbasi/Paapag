@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:paapag_admin/models/CountryListModel.dart';
-import 'package:paapag_admin/language/AppLocalizations.dart';
-import 'package:paapag_admin/language/BaseLanguage.dart';
-import 'package:paapag_admin/main.dart';
-import 'package:paapag_admin/models/LanguageDataModel.dart';
-import 'package:paapag_admin/utils/Colors.dart';
-import 'package:paapag_admin/utils/Constants.dart';
-import 'package:paapag_admin/utils/Extensions/app_common.dart';
+import '../utils/Extensions/shared_pref.dart';
+import '../language/AppLocalizations.dart';
+import '../language/BaseLanguage.dart';
+import '../main.dart';
+import '../models/CountryListModel.dart';
+import '../models/LanguageDataModel.dart';
+import '../utils/Colors.dart';
+import '../utils/Constants.dart';
 import 'package:mobx/mobx.dart';
+
+import '../utils/Extensions/constants.dart';
 
 part 'AppStore.g.dart';
 
@@ -52,10 +54,13 @@ abstract class _AppStore with Store {
   @observable
   String currencyPosition = CURRENCY_POSITION_LEFT;
 
+  @observable
+  bool isMenuExpanded = true;
+
   @action
   Future<void> setLoggedIn(bool val, {bool isInitializing = false}) async {
     isLoggedIn = val;
-    if (!isInitializing) await shared_pref.setBool(IS_LOGGED_IN, val);
+    if (!isInitializing) await setValue(IS_LOGGED_IN, val);
   }
 
   @action
@@ -76,7 +81,7 @@ abstract class _AppStore with Store {
   @action
   Future<void> setUserProfile(String val, {bool isInitializing = false}) async {
     userProfile = val;
-    if (!isInitializing) await shared_pref.setString(USER_PROFILE_PHOTO, val);
+    if (!isInitializing) await setValue(USER_PROFILE_PHOTO, val);
   }
 
   @action
@@ -118,13 +123,18 @@ abstract class _AppStore with Store {
 
   @action
   Future<void> setLanguage(String aCode, {BuildContext? context}) async {
-    selectedLanguageDataModel = getSelectedLanguageModel(defaultLanguage: defaultValues.defaultLanguage);
-    selectedLanguage = getSelectedLanguageModel(defaultLanguage: defaultValues.defaultLanguage)!.languageCode!;
+    selectedLanguageDataModel = getSelectedLanguageModel(defaultLanguage: default_Language);
+    selectedLanguage = getSelectedLanguageModel(defaultLanguage: default_Language)!.languageCode!;
 
-    //shared_pref.setString(SELECTED_LANGUAGE_CODE, aCode);
+    setValue(SELECTED_LANGUAGE_CODE, aCode);
 
     if (context != null) language = BaseLanguage.of(context)!;
     language = await AppLocalizations().load(Locale(selectedLanguage));
+  }
+
+  @action
+  void setExpandedMenu(bool val) {
+    isMenuExpanded = val;
   }
 
 }

@@ -7,7 +7,7 @@ const mCodeCanyonURL = 'ADD_YOUR_CODE_CANYON_URL';
 
 const mBaseUrl = 'http://paapagapi.paapag.com/';
 
-const googleMapAPIKey = 'ADD_YOUR_GOOGLE_MAP_KEY';
+const googleMapAPIKey = 'AIzaSyDpqPiw4i031ijliU4Jt0C-joIsG3WAfrU';
 
 const mOneSignalAppId = '4d24c46a-9037-419e-8248-d49ffa2146c4';
 const mOneSignalRestKey = 'MjQ0MDRjMWEtYjVjOC00MDdkLTg5OTEtODA5NTNkMjc5YTJh';

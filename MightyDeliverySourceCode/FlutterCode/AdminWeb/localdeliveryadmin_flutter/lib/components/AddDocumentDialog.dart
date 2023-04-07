@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:paapag_admin/network/RestApis.dart';
+
+import '../network/RestApis.dart';
 
 import '../main.dart';
 import '../models/DocumentListModel.dart';
 import '../utils/Colors.dart';
 import '../utils/Common.dart';
 import '../utils/Constants.dart';
-import '../utils/Extensions/app_common.dart';
 import '../utils/Extensions/app_textfield.dart';
+import '../utils/Extensions/common.dart';
+import '../utils/Extensions/shared_pref.dart';
+import '../utils/Extensions/text_styles.dart';
 
 class AddDocumentDialog extends StatefulWidget {
   static String tag = '/AddDocumentDialog';
@@ -43,7 +46,7 @@ class AddDocumentDialogState extends State<AddDocumentDialog> {
     }
   }
 
-  addDocumentApiCall() async {
+  AddDocumentApiCall() async {
     if (_formKey.currentState!.validate()) {
       Navigator.pop(context);
       Map req = {
@@ -129,10 +132,10 @@ class AddDocumentDialogState extends State<AddDocumentDialog> {
         }),
         SizedBox(width: 4),
         dialogPrimaryButton(isUpdate ? language.update : language.add, () {
-          if (shared_pref.getString(USER_TYPE) == DEMO_ADMIN) {
+          if (getStringAsync(USER_TYPE) == DEMO_ADMIN) {
             toast(language.demo_admin_msg);
           } else {
-            addDocumentApiCall();
+            AddDocumentApiCall();
           }
         }),
       ],

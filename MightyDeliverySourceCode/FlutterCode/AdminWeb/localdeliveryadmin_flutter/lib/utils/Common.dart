@@ -1,47 +1,38 @@
 import 'dart:math';
-
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:html/parser.dart';
+import 'package:flutter_vector_icons/flutter_vector_icons.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
-import 'package:paapag_admin/main.dart';
-import 'package:paapag_admin/network/RestApis.dart';
-import 'package:paapag_admin/utils/Colors.dart';
-import 'package:paapag_admin/utils/Extensions/ResponsiveWidget.dart';
-import 'package:paapag_admin/utils/Extensions/StringExtensions.dart';
+import '../utils/Extensions/StringExtensions.dart';
+import '../utils/Extensions/bool_extensions.dart';
+import '../utils/Extensions/constants.dart';
+import '../utils/Extensions/context_extensions.dart';
+import '../utils/Extensions/int_extensions.dart';
+import '../utils/Extensions/shared_pref.dart';
+import '../utils/Extensions/widget_extensions.dart';
+import 'package:url_launcher/url_launcher.dart';
+import '../main.dart';
+import '../network/RestApis.dart';
+import '../utils/Colors.dart';
+import '../utils/Extensions/ResponsiveWidget.dart';
 import 'package:lottie/lottie.dart';
-
 import 'Constants.dart';
-import 'Extensions/app_common.dart';
+import 'Extensions/colors.dart';
+import 'Extensions/common.dart';
+import 'Extensions/decorations.dart';
+import 'Extensions/text_styles.dart';
+import 'Images.dart';
 
 getMenuWidth() {
-  //return isMenuExpanded ? 240 : 80;
-  return 270;
+  return appStore.isMenuExpanded ? 270 : 80;
+  // return 270;
 }
 
 getBodyWidth(BuildContext context) {
   return MediaQuery.of(context).size.width - getMenuWidth();
-}
-
-InputDecoration commonInputDecoration({String? hintText, IconData? suffixIcon, Function()? suffixOnTap,Widget? prefixIcon}) {
-  return InputDecoration(
-    prefixIcon: prefixIcon,
-    contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-    filled: true,
-    hintText: hintText != null ? hintText : '',
-    hintStyle: secondaryTextStyle(),
-    fillColor: Colors.grey.withOpacity(0.15),
-    counterText: '',
-    suffixIcon: suffixIcon != null ? GestureDetector(child: Icon(suffixIcon, color: Colors.grey, size: 22), onTap: suffixOnTap) : null,
-    enabledBorder: OutlineInputBorder(borderSide: BorderSide(style: BorderStyle.none), borderRadius: BorderRadius.circular(defaultRadius)),
-    focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: primaryColor), borderRadius: BorderRadius.circular(defaultRadius)),
-    errorBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.red), borderRadius: BorderRadius.circular(defaultRadius)),
-    focusedErrorBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.red), borderRadius: BorderRadius.circular(defaultRadius)),
-  );
 }
 
 Widget commonButton(String title, Function() onTap, {double? width}) {
@@ -49,9 +40,10 @@ Widget commonButton(String title, Function() onTap, {double? width}) {
     width: width,
     child: ElevatedButton(
       style: ElevatedButton.styleFrom(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(defaultRadius)), backgroundColor: primaryColor,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(defaultRadius)),
         elevation: 0,
         padding: EdgeInsets.symmetric(vertical: 20),
+        backgroundColor: primaryColor,
       ),
       child: Text(title, style: boldTextStyle(color: Colors.white)),
       onPressed: onTap,
@@ -63,44 +55,11 @@ List<BoxShadow> commonBoxShadow() {
   return [BoxShadow(color: Colors.black12, blurRadius: 10.0, spreadRadius: 0)];
 }
 
-Widget actionIcon(String title, Color color) {
-  return Container(
-    padding: EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-    decoration: BoxDecoration(
-      color: color,
-      borderRadius: BorderRadius.circular(defaultSmallRadius),
-    ),
-    child: Text(title, style: primaryTextStyle(size: 12, color: Colors.white)),
-  );
-}
-
-Widget outlineActionIcon(IconData icon, Color color, String message, Function() onTap) {
-  return GestureDetector(
-    child: Tooltip(
-      message: message,
-      child: MouseRegion(
-        cursor: SystemMouseCursors.click,
-        child: Container(
-          height: 25,
-          width: 25,
-          decoration: BoxDecoration(
-            color: color.withOpacity(0.2),
-            borderRadius: BorderRadius.circular(defaultSmallRadius),
-            border: Border.all(color: color),
-          ),
-          child: Icon(icon, color: color, size: 14),
-        ),
-      ),
-    ),
-    onTap: onTap,
-  );
-}
-
 containerDecoration() {
   return BoxDecoration(
     borderRadius: BorderRadius.circular(defaultRadius),
     color: appStore.isDarkMode ? scaffoldColorDark : Colors.white,
-    border: Border.all(color: appStore.isDarkMode ? Colors.white12 : viewLineColor,width: 1.5),
+    border: Border.all(color: appStore.isDarkMode ? Colors.white12 : viewLineColor, width: 1.5),
   );
 }
 
@@ -137,20 +96,6 @@ Widget commonCachedNetworkImage(
 
 Widget placeHolderWidget({double? height, double? width, BoxFit? fit, AlignmentGeometry? alignment, double? radius}) {
   return Image.asset('assets/placeholder.jpg', height: height, width: width, fit: fit ?? BoxFit.cover, alignment: alignment ?? Alignment.center);
-}
-
-Widget orderItemDetail(String title, String data) {
-  return Container(
-    width: statisticsItemWidth,
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(title, style: secondaryTextStyle(), overflow: TextOverflow.ellipsis),
-        SizedBox(height: 8),
-        Text(data, style: primaryTextStyle(), overflow: TextOverflow.ellipsis),
-      ],
-    ),
-  );
 }
 
 Widget informationWidget(String title, String value) {
@@ -190,8 +135,9 @@ Widget dialogSecondaryButton(String title, Function() onTap) {
     height: 40,
     child: ElevatedButton(
       style: ElevatedButton.styleFrom(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(defaultRadius), side: BorderSide(color: appStore.isDarkMode ? Colors.white12 : viewLineColor)), backgroundColor: Colors.transparent,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(defaultRadius), side: BorderSide(color: appStore.isDarkMode ? Colors.white12 : viewLineColor)),
           elevation: 0,
+          backgroundColor: Colors.transparent,
           shadowColor: Colors.transparent),
       child: Text(title, style: boldTextStyle(color: Colors.grey)),
       onPressed: onTap,
@@ -205,8 +151,9 @@ Widget dialogPrimaryButton(String title, Function() onTap, {Color? color}) {
     height: 40,
     child: ElevatedButton(
       style: ElevatedButton.styleFrom(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(defaultRadius)), backgroundColor: color ?? primaryColor,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(defaultRadius)),
         elevation: 0,
+        backgroundColor: color ?? primaryColor,
       ),
       child: Text(title, style: boldTextStyle(color: Colors.white)),
       onPressed: onTap,
@@ -214,66 +161,49 @@ Widget dialogPrimaryButton(String title, Function() onTap, {Color? color}) {
   );
 }
 
-Widget userDetailWidget({String? title, String? subtitle}) {
-  return Row(
-    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-    children: [
-      Expanded(
-        child: Text(title!, style: boldTextStyle()),
-      ),
-      Expanded(
-        child: Text(subtitle!, style: primaryTextStyle(), maxLines: 2, overflow: TextOverflow.visible, textAlign: TextAlign.right),
-      ),
-    ],
-  );
-}
-
-Widget paginationWidget(BuildContext context, {required int currentPage, required int totalPage, int perPage = 10, required Function(int currentPage, int perPage) onUpdate}) {
+Widget paginationWidget(BuildContext context, {required int currentPage, required int totalPage, int perPage = 10, bool? isPerpage = true, required Function(int currentPage, int perPage) onUpdate}) {
   List<int> perPageList = [5, 10, 25, 50, 100, -1];
   return Align(
     alignment: AlignmentDirectional.bottomEnd,
-    child: Row(
-      mainAxisSize: MainAxisSize.min,
+    child: Wrap(
+      spacing: 16,
+      runSpacing: 16,
       children: [
-        Container(
-          height: 40,
-          decoration: BoxDecoration(
-            border: Border.all(color: Theme.of(context).dividerColor),
-          ),
-          padding: EdgeInsets.only(left: 12, right: 12),
-          child: IntrinsicHeight(
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(language.perPage, style: primaryTextStyle()),
-                SizedBox(width: 12),
-                VerticalDivider(),
-                SizedBox(width: 12),
-                DropdownButton<int>(
-                    underline: SizedBox(),
-                    focusColor: Colors.transparent,
-                    style: primaryTextStyle(),
-                    dropdownColor: Theme.of(context).cardColor,
-                    value: perPage,
-                    items: List.generate(perPageList.length, (index) {
-                      int item = perPageList[index];
-                      return DropdownMenuItem(child: Text(item == -1 ? language.all : '$item'), value: item);
-                    }),
-                    onChanged: (value) {
-                      currentPage = 1;
-                      perPage = value!;
-                      onUpdate.call(currentPage, perPage);
-                    }),
-              ],
+        if (isPerpage != false)
+          Container(
+            height: 40,
+            decoration: BoxDecoration(border: Border.all(color: Theme.of(context).dividerColor)),
+            padding: EdgeInsets.only(left: 12, right: 12),
+            child: IntrinsicHeight(
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(language.perPage, style: primaryTextStyle()),
+                  SizedBox(width: 12),
+                  VerticalDivider(),
+                  SizedBox(width: 12),
+                  DropdownButton<int>(
+                      underline: SizedBox(),
+                      focusColor: Colors.transparent,
+                      style: primaryTextStyle(),
+                      dropdownColor: Theme.of(context).cardColor,
+                      value: perPage,
+                      items: List.generate(perPageList.length, (index) {
+                        int item = perPageList[index];
+                        return DropdownMenuItem(child: Text(item == -1 ? language.all : '$item'), value: item);
+                      }),
+                      onChanged: (value) {
+                        currentPage = 1;
+                        perPage = value!;
+                        onUpdate.call(currentPage, perPage);
+                      }),
+                ],
+              ),
             ),
           ),
-        ),
-        SizedBox(width: 16),
         Container(
           height: 40,
-          decoration: BoxDecoration(
-            border: Border.all(color: Theme.of(context).dividerColor),
-          ),
+          decoration: BoxDecoration(border: Border.all(color: Theme.of(context).dividerColor)),
           padding: EdgeInsets.only(left: 12, right: 12),
           child: IntrinsicHeight(
             child: Row(
@@ -305,15 +235,6 @@ Widget paginationWidget(BuildContext context, {required int currentPage, require
   );
 }
 
-String parseHtmlString(String? htmlString) {
-  return parse(parse(htmlString).body!.text).documentElement!.text;
-}
-
-Future<bool> isNetworkAvailable() async {
-  var connectivityResult = await Connectivity().checkConnectivity();
-  return connectivityResult != ConnectivityResult.none;
-}
-
 Widget loaderWidget() {
   return Center(child: Lottie.asset('assets/loader.json', width: 70, height: 70));
 }
@@ -324,24 +245,6 @@ Widget emptyWidget() {
 
 String printDate(String date) {
   return DateFormat.yMd().add_jm().format(DateTime.parse(date).toLocal());
-}
-
-Widget tiTleWidget({String? title, required BuildContext context}) {
-  return Row(
-    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-    children: [
-      Text(title!, style: boldTextStyle(size: 18)),
-      Container(
-        decoration: BoxDecoration(color: primaryColor, borderRadius: BorderRadius.circular(defaultRadius)),
-        child: IconButton(
-          icon: Icon(Icons.close, color: Colors.white),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-      )
-    ],
-  );
 }
 
 Widget totalUserWidget({String? title, int? totalCount, String? image}) {
@@ -446,16 +349,12 @@ commonConfirmationDialog(BuildContext context, String dialogType, Function() onS
   );
 }
 
-void afterBuildCreated(Function()? onCreated) {
-  SchedulerBinding.instance.addPostFrameCallback((_) => onCreated?.call());
-}
-
 String orderStatus(String orderStatus) {
   if (orderStatus == ORDER_ASSIGNED) {
     return language.assign;
   } else if (orderStatus == ORDER_DRAFT) {
     return language.draft;
-  } else if (orderStatus == ORDER_CREATED) {
+  } else if (orderStatus == ORDER_CREATE) {
     return language.create;
   } else if (orderStatus == ORDER_ACTIVE) {
     return language.active;
@@ -523,7 +422,7 @@ Future<void> logOutData({required BuildContext context}) async {
                   SizedBox(height: 16),
                 ],
               ),
-              Observer(builder: (context) => Visibility(visible:appStore.isLoading,child: Positioned.fill(child: loaderWidget()))),
+              Observer(builder: (context) => Visibility(visible: appStore.isLoading, child: Positioned.fill(child: loaderWidget()))),
             ],
           ),
         ),
@@ -531,22 +430,12 @@ Future<void> logOutData({required BuildContext context}) async {
           dialogSecondaryButton(language.no, () {
             Navigator.pop(context);
           }),
-          dialogPrimaryButton(language.yes, () async{
-            appStore.setLoading(true);
+          dialogPrimaryButton(language.yes, () async {
             await logout(context);
-            appStore.setLoading(false);
           }),
         ],
       );
     },
-  );
-}
-
-Widget settingData({String? name, IconData? icon, required BuildContext context, Function()? onTap}) {
-  return ListTile(
-    leading: Icon(icon!, color: Theme.of(context).iconTheme.color),
-    title: Text(name!, style: boldTextStyle()),
-    onTap: onTap,
   );
 }
 
@@ -569,16 +458,20 @@ Color statusColor(String status) {
 
 double countExtraCharge({required num totalAmount, required String chargesType, required num charges}) {
   if (chargesType == CHARGE_TYPE_PERCENTAGE) {
-    return double.parse((totalAmount * charges * 0.01).toStringAsFixed(2));
+    return double.parse((totalAmount * charges * 0.01).toStringAsFixed(digitAfterDecimal));
   } else {
-    return double.parse(charges.toStringAsFixed(2));
+    return double.parse(charges.toStringAsFixed(digitAfterDecimal));
   }
 }
 
-Widget backButton(BuildContext context) {
+Widget backButton(BuildContext context, {bool? value}) {
   return ElevatedButton(
     onPressed: () {
-      Navigator.pop(context);
+      if (value != null) {
+        finish(context, value);
+      } else {
+        finish(context);
+      }
     },
     child: Row(
       mainAxisSize: MainAxisSize.min,
@@ -599,7 +492,8 @@ Widget scheduleOptionWidget({required BuildContext context, required bool isSele
     onTap: onTap,
     child: Container(
       padding: EdgeInsets.all(24),
-      decoration: BoxDecoration(borderRadius: BorderRadius.circular(defaultRadius), border: Border.all(color: isSelected ? primaryColor : Theme.of(context).dividerColor), color: Theme.of(context).cardColor),
+      decoration:
+          BoxDecoration(borderRadius: BorderRadius.circular(defaultRadius), border: Border.all(color: isSelected ? primaryColor : Theme.of(context).dividerColor), color: Theme.of(context).cardColor),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -615,10 +509,10 @@ Widget scheduleOptionWidget({required BuildContext context, required bool isSele
 double calculateDistance(lat1, lon1, lat2, lon2) {
   var p = 0.017453292519943295;
   var a = 0.5 - cos((lat2 - lat1) * p) / 2 + cos(lat1 * p) * cos(lat2 * p) * (1 - cos((lon2 - lon1) * p)) / 2;
-  return double.tryParse((12742 * asin(sqrt(a))).toStringAsFixed(2))!;
+  return double.tryParse((12742 * asin(sqrt(a))).toStringAsFixed(digitAfterDecimal))!;
 }
 
-String? paymentStatus(String paymentStatus) {
+String paymentStatus(String paymentStatus) {
   if (paymentStatus.toLowerCase() == PAYMENT_PENDING.toLowerCase()) {
     return language.pending;
   } else if (paymentStatus.toLowerCase() == PAYMENT_FAILED.toLowerCase()) {
@@ -638,27 +532,11 @@ String? paymentCollectForm(String paymentType) {
   return language.on_pickup;
 }
 
-String? paymentType(String paymentType) {
-  if (paymentType.toLowerCase() == PAYMENT_GATEWAY_STRIPE.toLowerCase()) {
-    return language.stripe;
-  } else if (paymentType.toLowerCase() == PAYMENT_GATEWAY_RAZORPAY.toLowerCase()) {
-    return language.razorpay;
-  } else if (paymentType.toLowerCase() == PAYMENT_GATEWAY_PAYSTACK.toLowerCase()) {
-    return language.pay_stack;
-  } else if (paymentType.toLowerCase() == PAYMENT_GATEWAY_FLUTTERWAVE.toLowerCase()) {
-    return language.flutter_wave;
-  } else if (paymentType.toLowerCase() == PAYMENT_GATEWAY_MERCADOPAGO.toLowerCase()) {
-    return language.mercado_pago;
-  } else if (paymentType.toLowerCase() == PAYMENT_GATEWAY_PAYPAL.toLowerCase()) {
-    return language.paypal;
-  } else if (paymentType.toLowerCase() == PAYMENT_GATEWAY_PAYTABS.toLowerCase()) {
-    return language.paytabs;
-  } else if (paymentType.toLowerCase() == PAYMENT_GATEWAY_PAYTM.toLowerCase()) {
-    return language.paytm;
-  } else if (paymentType.toLowerCase() == PAYMENT_GATEWAY_MYFATOORAH.toLowerCase()) {
-    return language.my_fatoorah;
-  } else if (paymentType.toLowerCase() == PAYMENT_TYPE_CASH.toLowerCase()) {
+String paymentType(String paymentType) {
+  if (paymentType.toLowerCase() == PAYMENT_TYPE_CASH.toLowerCase()) {
     return language.cash;
+  } else if (paymentType.toLowerCase() == PAYMENT_TYPE_WALLET.toLowerCase()) {
+    return language.wallet;
   }
   return language.cash;
 }
@@ -689,12 +567,261 @@ String statusTypeIcon({String? type}) {
 
 Future<void> saveFcmTokenId() async {
   await FirebaseMessaging.instance.getToken().then((value) {
-     if (value!.isNotEmpty.validate()) shared_pref.setString(FCM_TOKEN, value.validate());
-  }).catchError((e) {
-    print(e);
+    if (value.validate().isNotEmpty) setValue(FCM_TOKEN, value.validate());
   });
 }
 
-String printAmount(num amount){
-  return appStore.currencyPosition==CURRENCY_POSITION_LEFT ? '${appStore.currencySymbol} $amount' : '$amount ${appStore.currencySymbol}';
+String printAmount(num amount) {
+  return appStore.currencyPosition == CURRENCY_POSITION_LEFT ? '${appStore.currencySymbol} ${amount.toStringAsFixed(digitAfterDecimal)}' : '${amount.toStringAsFixed(digitAfterDecimal)} ${appStore.currencySymbol}';
+}
+
+String dayTranslate(String day) {
+  String dayLanguage = "";
+  if (day == "Sunday") {
+    dayLanguage = language.sunday;
+  } else if (day == "Monday") {
+    dayLanguage = language.monday;
+  } else if (day == "Tuesday") {
+    dayLanguage = language.tuesday;
+  } else if (day == "Wednesday") {
+    dayLanguage = language.wednesday;
+  } else if (day == "Thursday") {
+    dayLanguage = language.thursday;
+  } else if (day == "Friday") {
+    dayLanguage = language.friday;
+  } else if (day == "Saturday") {
+    dayLanguage = language.saturday;
+  }
+  return dayLanguage;
+}
+
+String withdrawStatus(String mStatus) {
+  if (mStatus == DECLINE) {
+    return language.declined;
+  } else if (mStatus == APPROVED) {
+    return language.approved;
+  }
+  return language.requested;
+}
+
+Color withdrawStatusColor(String mStatus) {
+  if (mStatus == DECLINE) {
+    return Colors.red;
+  } else if (mStatus == APPROVED) {
+    return Colors.green;
+  }
+  return primaryColor;
+}
+
+double mCommonPadding(BuildContext context) {
+  return ResponsiveWidget.isLessMediumScreen(context) ? context.width() * 0.02 : context.width() * 0.13;
+}
+
+double mCommonPadding1(BuildContext context) {
+  return context.width() * 0.05;
+}
+
+InputDecoration commonInputDecoration({Color? fillColor, String? hintText, IconData? suffixIcon, Function()? suffixOnTap, Widget? prefixIcon, Widget? suffix}) {
+  return InputDecoration(
+    prefixIcon: prefixIcon,
+    contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+    filled: true,
+    hintText: hintText != null ? hintText : '',
+    hintStyle: secondaryTextStyle(),
+    fillColor: Colors.grey.withOpacity(0.15),
+    counterText: '',
+    suffixIcon: suffixIcon != null ? GestureDetector(child: Icon(suffixIcon, color: Colors.grey, size: 22), onTap: suffixOnTap) : null,
+    enabledBorder: OutlineInputBorder(borderSide: BorderSide(style: BorderStyle.none), borderRadius: BorderRadius.circular(defaultRadius)),
+    focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: primaryColor), borderRadius: BorderRadius.circular(defaultRadius)),
+    errorBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.red), borderRadius: BorderRadius.circular(defaultRadius)),
+    focusedErrorBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.red), borderRadius: BorderRadius.circular(defaultRadius)),
+    suffixIconColor: textSecondaryColorGlobal,
+    prefixIconColor: textSecondaryColorGlobal,
+    hoverColor: fillColor ?? editTextBackgroundColor,
+    suffix: suffix,
+  );
+}
+
+Widget clientScheduleOptionWidget(BuildContext context, bool isSelected, IconData imagePath, String title) {
+  return Container(
+    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+    decoration: boxDecorationWithRoundedCorners(border: Border.all(color: isSelected ? primaryColor : borderColor), backgroundColor: context.cardColor),
+    child: Row(
+      children: [
+        Icon(imagePath, size: 20, color: isSelected ? primaryColor : textPrimaryColorGlobal),
+        8.width,
+        Text(title, style: boldTextStyle(color: isSelected ? primaryColor : textPrimaryColorGlobal)).paddingTop(2).expand(),
+      ],
+    ),
+  );
+}
+
+Widget outlineActionIcon(IconData icon, Color color, String message, Function() onTap, {String? title}) {
+  return GestureDetector(
+    child: Tooltip(
+      message: message,
+      child: MouseRegion(
+        cursor: SystemMouseCursors.click,
+        child: Container(
+          padding: EdgeInsets.all(4),
+          decoration: BoxDecoration(
+            color: color.withOpacity(0.2),
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: color),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, color: color, size: 16),
+              if (!title.isEmptyOrNull) 4.width,
+              if (!title.isEmptyOrNull) Text(title.validate(), style: boldTextStyle(color: color)),
+              if (!title.isEmptyOrNull) 4.width,
+            ],
+          ),
+        ),
+      ),
+    ),
+    onTap: onTap,
+  );
+}
+
+Future<void> launchUrlWidget(String url, {bool forceWebView = false}) async {
+  await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication).catchError((e) {
+    log(e);
+  });
+}
+
+class GradientText extends StatelessWidget {
+  const GradientText(this.text, {required this.gradient, this.style});
+
+  final String text;
+  final TextStyle? style;
+  final Gradient gradient;
+
+  @override
+  Widget build(BuildContext context) {
+    return ShaderMask(
+      blendMode: BlendMode.srcIn,
+      shaderCallback: (bounds) => gradient.createShader(
+        Rect.fromLTWH(0, 0, bounds.width, bounds.height),
+      ),
+      child: Text(
+        text,
+        softWrap: true,
+        style: TextStyle(
+          fontSize: context.width() / 10.2,
+          fontWeight: FontWeight.w900,
+          fontFamily: GoogleFonts.poppins().fontFamily,
+          foreground: Paint()
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = 1
+            ..color = primaryColor,
+        ),
+      ),
+    );
+  }
+}
+
+Widget mHeading(String value) {
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text(value, style: boldTextStyle(size: 35, letterSpacing: 1.5, weight: FontWeight.w500)),
+      8.height,
+      Row(
+        children: [
+          Container(width: 90, height: 4, decoration: boxDecorationWithRoundedCorners(borderRadius: radius(8), backgroundColor: primaryColor)),
+          8.width,
+          Container(width: 25, height: 4, decoration: boxDecorationWithRoundedCorners(borderRadius: radius(8), backgroundColor: primaryColor))
+        ],
+      ),
+      20.height,
+    ],
+  );
+}
+
+downloadWidget() {
+  return Row(
+    children: [
+      Image.asset(ic_play_store, height: 40, width: 100).onTap(() {
+        launchUrlWidget(builderResponse.playStoreLink.validate());
+      }),
+      16.width,
+      Image.asset(ic_app_store, height: 40, width: 100).onTap(() {
+        launchUrlWidget(builderResponse.appStoreLink.validate());
+      }),
+    ],
+  );
+}
+
+socialWidget({bool? isAbout = false}) {
+  return Wrap(
+    spacing: 24,
+    runSpacing: 24,
+    children: [
+      InkWell(
+        onTap: () {
+          launchUrlWidget(builderResponse.facebookUrl.validate());
+        },
+        child: Icon(FontAwesome.facebook_f, size: 24, color: isAbout.validate() ? textSecondaryColorGlobal : Colors.white),
+      ).visible(builderResponse.facebookUrl.validate().isNotEmpty),
+      InkWell(
+        onTap: () {
+          launchUrlWidget(builderResponse.twitterUrl.validate());
+        },
+        child: Icon(AntDesign.twitter, size: 24, color: isAbout.validate() ? textSecondaryColorGlobal : Colors.white),
+      ).visible(builderResponse.twitterUrl.validate().isNotEmpty),
+      InkWell(
+        onTap: () {
+          launchUrlWidget(builderResponse.linkedinUrl.validate());
+        },
+        child: Icon(Entypo.linkedin, size: 24, color: isAbout.validate() ? textSecondaryColorGlobal : Colors.white),
+      ).visible(builderResponse.linkedinUrl.validate().isNotEmpty),
+      InkWell(
+        onTap: () {
+          launchUrlWidget(builderResponse.instagramUrl.validate());
+        },
+        child: Icon(AntDesign.instagram, size: 24, color: isAbout.validate() ? textSecondaryColorGlobal : Colors.white),
+      ).visible(builderResponse.instagramUrl.validate().isNotEmpty),
+    ],
+  );
+}
+
+String transactionType(String type) {
+  if (type == TRANSACTION_ORDER_FEE) {
+    return language.orderFee;
+  } else if (type == TRANSACTION_TOPUP) {
+    return language.topUp;
+  } else if (type == TRANSACTION_ORDER_CANCEL_CHARGE) {
+    return language.orderCancelCharge;
+  } else if (type == TRANSACTION_ORDER_CANCEL_REFUND) {
+    return language.orderCancelRefund;
+  } else if (type == TRANSACTION_CORRECTION) {
+    return language.correction;
+  } else if (type == TRANSACTION_COMMISSION) {
+    return language.commission;
+  } else if (type == TRANSACTION_WITHDRAW) {
+    return language.withdraw;
+  }
+  return '';
+}
+
+cashConfirmDialog() {
+  showDialog(
+    context: getContext,
+    builder: (p0) {
+      return AlertDialog(
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(language.balLessOrderCreateCash, style: primaryTextStyle(size: 16), textAlign: TextAlign.center),
+            30.height,
+            appButton(getContext, title: language.ok, onCall: () {
+              finish(getContext);
+            }),
+          ],
+        ),
+      );
+    },
+  );
 }

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:paapag_admin/main.dart';
-import 'package:paapag_admin/models/LanguageDataModel.dart';
-import 'package:paapag_admin/utils/Constants.dart';
-import 'package:paapag_admin/utils/DataProvider.dart';
-
-import '../utils/Extensions/app_common.dart';
+import '../utils/Extensions/shared_pref.dart';
+import '../main.dart';
+import '../models/LanguageDataModel.dart';
+import '../utils/Constants.dart';
+import '../utils/DataProvider.dart';
+import '../utils/Extensions/text_styles.dart';
 
 enum WidgetType { DROPDOWN, LIST }
 
@@ -61,7 +61,7 @@ class LanguageListWidgetState extends State<LanguageListWidget> {
 
             return ListTile(
               contentPadding: EdgeInsets.zero,
-              title: Text(data.name ?? '',style: primaryTextStyle(color: Colors.green)),
+              title: Text(data.name ?? '', style: primaryTextStyle(color: Colors.green)),
               subtitle: Text(data.subTitle ?? '-'),
               leading: (data.flag != null) ? _buildImageWidget(data.flag!) : null,
               trailing: Container(
@@ -75,7 +75,7 @@ class LanguageListWidgetState extends State<LanguageListWidget> {
                   data.languageCode.validate())*/
               ,
               onTap: () async {
-                await shared_pref.setString(SELECTED_LANGUAGE_CODE, data.languageCode!);
+                await setValue(SELECTED_LANGUAGE_CODE, data.languageCode!);
 
                 selectedLanguageDataModel = data;
 
@@ -92,6 +92,7 @@ class LanguageListWidgetState extends State<LanguageListWidget> {
     } else {
       return DropdownButton<LanguageDataModel>(
         underline: SizedBox(),
+        isDense: true,
         value: selectedLanguageDataModel,
         dropdownColor: Theme.of(context).cardColor,
         style: primaryTextStyle(color: Colors.white),
@@ -99,7 +100,7 @@ class LanguageListWidgetState extends State<LanguageListWidget> {
         onChanged: (LanguageDataModel? data) async {
           selectedLanguageDataModel = data;
 
-          await shared_pref.setString(SELECTED_LANGUAGE_CODE, data!.languageCode ?? '-');
+          await setValue(SELECTED_LANGUAGE_CODE, data!.languageCode ?? '-');
 
           setState(() {});
           widget.onLanguageChange?.call(data);

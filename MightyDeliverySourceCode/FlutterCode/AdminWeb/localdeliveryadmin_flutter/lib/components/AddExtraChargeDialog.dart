@@ -1,17 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:paapag_admin/main.dart';
-import 'package:paapag_admin/models/CityListModel.dart';
-import 'package:paapag_admin/models/ExtraChragesListModel.dart';
-import 'package:paapag_admin/network/RestApis.dart';
-import 'package:paapag_admin/utils/Colors.dart';
-import 'package:paapag_admin/utils/Common.dart';
-import 'package:paapag_admin/utils/Constants.dart';
-import 'package:paapag_admin/utils/Extensions/app_common.dart';
-import 'package:paapag_admin/utils/Extensions/app_textfield.dart';
+import '../main.dart';
+import '../models/CityListModel.dart';
+import '../models/ExtraChragesListModel.dart';
+
+import '../network/RestApis.dart';
+import '../utils/Colors.dart';
+import '../utils/Common.dart';
+import '../utils/Constants.dart';
+import '../utils/Extensions/app_textfield.dart';
 
 import '../utils/CommonApiCall.dart';
+import '../utils/Extensions/common.dart';
+import '../utils/Extensions/shared_pref.dart';
+import '../utils/Extensions/text_styles.dart';
 
 class AddExtraChargeDialog extends StatefulWidget {
   static String tag = '/AddExtraChargeDialog';
@@ -55,12 +58,12 @@ class AddExtraChargeDialogState extends State<AddExtraChargeDialog> {
       titleController.text = widget.extraChargesData!.title!;
       chargeController.text = widget.extraChargesData!.charges!.toString();
       appStore.countryList.forEach((element) {
-        if(element.id == widget.extraChargesData!.countryId!){
+        if (element.id == widget.extraChargesData!.countryId!) {
           selectedCountryId = widget.extraChargesData!.countryId!;
         }
       });
       cityList.forEach((element) {
-        if(element.id == widget.extraChargesData!.cityId!){
+        if (element.id == widget.extraChargesData!.cityId!) {
           selectedCityId = widget.extraChargesData!.cityId!;
         }
       });
@@ -83,7 +86,7 @@ class AddExtraChargeDialogState extends State<AddExtraChargeDialog> {
     });
   }
 
-  addExtraChargeApiCall() async {
+  AddExtraChargeApiCall() async {
     if (_formKey.currentState!.validate()) {
       if (chargeTypeValue == null) return toast(language.please_select_charge_type);
       Navigator.pop(context);
@@ -152,10 +155,7 @@ class AddExtraChargeDialogState extends State<AddExtraChargeDialog> {
                                 dropdownColor: Theme.of(context).cardColor,
                                 decoration: commonInputDecoration(),
                                 items: appStore.countryList.map<DropdownMenuItem<int>>((item) {
-                                  return DropdownMenuItem(
-                                    value: item.id,
-                                    child: Text(item.name!, style: primaryTextStyle()),
-                                  );
+                                  return DropdownMenuItem(value: item.id, child: Text(item.name!, style: primaryTextStyle()));
                                 }).toList(),
                                 onChanged: (value) {
                                   selectedCountryId = value;
@@ -182,10 +182,7 @@ class AddExtraChargeDialogState extends State<AddExtraChargeDialog> {
                                 dropdownColor: Theme.of(context).cardColor,
                                 decoration: commonInputDecoration(),
                                 items: cityList.map<DropdownMenuItem<int>>((item) {
-                                  return DropdownMenuItem(
-                                    value: item.id,
-                                    child: Text(item.name!, style: primaryTextStyle()),
-                                  );
+                                  return DropdownMenuItem(value: item.id, child: Text(item.name!, style: primaryTextStyle()));
                                 }).toList(),
                                 onChanged: (value) {
                                   selectedCityId = value;
@@ -294,10 +291,10 @@ class AddExtraChargeDialogState extends State<AddExtraChargeDialog> {
         }),
         SizedBox(width: 4),
         dialogPrimaryButton(isUpdate ? language.update : language.add, () {
-          if (shared_pref.getString(USER_TYPE) == DEMO_ADMIN) {
+          if (getStringAsync(USER_TYPE) == DEMO_ADMIN) {
             toast(language.demo_admin_msg);
           } else {
-            addExtraChargeApiCall();
+            AddExtraChargeApiCall();
           }
         }),
       ],

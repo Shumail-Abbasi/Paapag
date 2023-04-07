@@ -1,28 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_switch/flutter_switch.dart';
-import 'package:paapag_admin/components/ChangePasswordDialog.dart';
-import 'package:paapag_admin/components/EditProfileDialog.dart';
-
+import '../utils/Extensions/ResponsiveWidget.dart';
+import '../utils/Extensions/StringExtensions.dart';
+import '../utils/Extensions/shared_pref.dart';
+import '../utils/Extensions/widget_extensions.dart';
+import '../components/ChangePasswordDialog.dart';
+import '../components/EditProfileDialog.dart';
 import '../main.dart';
 import '../models/models.dart';
-import '../screens/DashboardScreen.dart';
+import '../screens/Client/DashboardScreen.dart';
 import '../utils/Colors.dart';
 import '../utils/Common.dart';
 import '../utils/Constants.dart';
 import '../utils/DataProvider.dart';
 import '../utils/Extensions/LiveStream.dart';
-import '../utils/Extensions/app_common.dart';
+import '../utils/Extensions/constants.dart';
 import '../utils/Extensions/on_hover.dart';
+import '../utils/Extensions/text_styles.dart';
 import 'LanguageListWidget.dart';
 import 'NotificationDialog.dart';
 
 class BodyCornerWidget extends StatefulWidget {
   static String tag = '/BodyCornerWidget2';
   final Widget? child;
-  final bool? isDashboard;
 
-  BodyCornerWidget({this.child, this.isDashboard = false});
+  BodyCornerWidget({this.child});
 
   @override
   BodyCornerWidgetState createState() => BodyCornerWidgetState();
@@ -63,10 +66,18 @@ class BodyCornerWidgetState extends State<BodyCornerWidget> {
           toolbarHeight: 60,
           automaticallyImplyLeading: false,
           title: Row(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Image.asset('assets/app_logo_white.png', height: 50, width: 50, fit: BoxFit.cover),
-              SizedBox(width: 16),
-              Text(language.app_name, style: boldTextStyle(color: Colors.white, size: 20)),
+              GestureDetector(
+                  onTap: () {
+                    appStore.setExpandedMenu(!appStore.isMenuExpanded);
+                  },
+                  child: Image.asset('assets/app_logo_white.png', height: 50, width: 50, fit: BoxFit.cover)),
+              if (!ResponsiveWidget.isSmallScreen(context))
+                Padding(
+                  padding: EdgeInsets.only(left: 16),
+                  child: Text(language.app_name, style: boldTextStyle(color: Colors.white, size: 20)),
+                ),
             ],
           ),
           actions: [
@@ -88,14 +99,14 @@ class BodyCornerWidgetState extends State<BodyCornerWidget> {
                           child: Container(
                             height: 18,
                             width: 18,
-                            padding: EdgeInsets.all(4),
+                            padding: EdgeInsets.all(0),
                             alignment: Alignment.center,
                             decoration: BoxDecoration(
                               color: Colors.orange,
                               shape: BoxShape.circle,
                             ),
                             child: Observer(builder: (_) {
-                              return Text('${appStore.allUnreadCount < 99 ? appStore.allUnreadCount : '99+'}', style: primaryTextStyle(size: 10, color: Colors.white));
+                              return Text('${appStore.allUnreadCount < 99 ? appStore.allUnreadCount : '99+'}', style: primaryTextStyle(size: appStore.allUnreadCount > 99 ? 9 : 12, color: Colors.white));
                             }),
                           ),
                         ),
@@ -132,7 +143,7 @@ class BodyCornerWidgetState extends State<BodyCornerWidget> {
                 inactiveColor: Colors.white,
                 onToggle: (value) {
                   appStore.setDarkMode(value);
-                  shared_pref.setInt(THEME_MODE_INDEX, value ? 1 : 0);
+                  setValue(THEME_MODE_INDEX, value ? 1 : 0);
                   LiveStream().emit(streamDarkMode);
                 },
               ),
@@ -146,7 +157,7 @@ class BodyCornerWidgetState extends State<BodyCornerWidget> {
                 widgetType: WidgetType.DROPDOWN,
                 onLanguageChange: (val) async {
                   appStore.setLanguage(val.languageCode ?? '-');
-                  await shared_pref.setString(SELECTED_LANGUAGE_CODE, val.languageCode ?? '');
+                  await setValue(SELECTED_LANGUAGE_CODE, val.languageCode ?? '');
                   LiveStream().emit(streamLanguage);
                   setState(() {});
                 },
@@ -167,14 +178,14 @@ class BodyCornerWidgetState extends State<BodyCornerWidget> {
                         image: DecorationImage(image: NetworkImage('${appStore.userProfile}'), fit: BoxFit.cover),
                       ),
                     ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('${shared_pref.getString(NAME) ?? ""}', style: boldTextStyle(color: Colors.white)),
-                        SizedBox(height: 4),
-                        Text(shared_pref.getString(USER_EMAIL) ?? "", style: secondaryTextStyle(size: 14, color: Colors.white)),
-                      ],
-                    ),
+                    if (!ResponsiveWidget.isSmallScreen(context))
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('${getStringAsync(NAME)}', style: boldTextStyle(color: Colors.white)),
+                          Text(getStringAsync(USER_EMAIL), style: secondaryTextStyle(size: 14, color: Colors.white)),
+                        ],
+                      ),
                   ],
                 ),
               ),
@@ -250,52 +261,94 @@ class BodyCornerWidgetState extends State<BodyCornerWidget> {
                   color: appStore.isDarkMode ? scaffoldColorDark : primaryColor,
                   padding: EdgeInsets.only(top: 16, bottom: 16),
                   width: getMenuWidth(),
-                  child: ListView(
-                    children: menuList.map((item) {
-                      return HoverWidget(builder: (context, isHovering) {
+                  child: Column(
+                    children: [
+                      HoverWidget(builder: (context, isHovering) {
                         return GestureDetector(
                           child: Container(
                             margin: EdgeInsets.only(bottom: 16),
                             alignment: Alignment.centerLeft,
                             padding: EdgeInsets.only(left: 16, top: 8, bottom: 8, right: appStore.selectedLanguage == 'ar' ? 16 : 0),
                             decoration: BoxDecoration(
-                              color: appStore.selectedMenuIndex == item.index
+                              color: isHovering
                                   ? hoverColor
-                                  : isHovering
-                                      ? hoverColor
-                                      : Colors.transparent,
+                                  : Colors.transparent,
                             ),
                             child: Row(
                               children: [
-                                ImageIcon(AssetImage(item.imagePath!), size: 24, color: Colors.white),
-                                SizedBox(width: 16),
-                                Expanded(
-                                  child: Text(
-                                    item.title!,
-                                    maxLines: 1,
-                                    style: appStore.selectedMenuIndex == item.index ? boldTextStyle(color: Colors.white) : primaryTextStyle(color: Colors.white, size: 15),
-                                  ),
-                                ),
-                                appStore.selectedMenuIndex == item.index
-                                    ? Card(
-                                        margin: EdgeInsets.zero,
-                                        color: Theme.of(context).cardColor,
-                                        shape: BeveledRectangleBorder(borderRadius: BorderRadius.circular(30)),
-                                        child: SizedBox(width: 30, height: 30),
+                                Tooltip(child: Icon(Icons.arrow_back, size: 24, color: Colors.white), message: language.viewSite),
+                                appStore.isMenuExpanded
+                                    ? Expanded(
+                                        child: Padding(
+                                          padding: EdgeInsets.only(left: 16),
+                                          child: Text(
+                                            language.viewSite,
+                                            maxLines: 1,
+                                            style: primaryTextStyle(color: Colors.white, size: 15),
+                                          ),
+                                        ),
                                       )
-                                    : SizedBox(),
+                                    : Spacer(),
                               ],
                             ),
                           ),
                           onTap: () {
-                            appStore.selectedMenuIndex = item.index!;
-                            if (!widget.isDashboard!) {
-                              launchScreen(context, DashboardScreen(), isNewTask: true);
-                            }
+                           Navigator.pushNamed(context,DashboardScreen.route);
                           },
                         );
-                      });
-                    }).toList(),
+                      }),
+                      ListView(
+                        children: menuList.map((item) {
+                          return HoverWidget(builder: (context, isHovering) {
+                            return GestureDetector(
+                              child: Container(
+                                margin: EdgeInsets.only(bottom: 16),
+                                alignment: Alignment.centerLeft,
+                                padding: EdgeInsets.only(left: 16, top: 8, bottom: 8, right: appStore.selectedLanguage == 'ar' ? 16 : 0),
+                                decoration: BoxDecoration(
+                                  color: appStore.selectedMenuIndex == item.index
+                                      ? hoverColor
+                                      : isHovering
+                                          ? hoverColor
+                                          : Colors.transparent,
+                                ),
+                                child: Row(
+                                  children: [
+                                    Tooltip(child: ImageIcon(AssetImage(item.imagePath!), size: 24, color: Colors.white), message: item.title.validate()),
+                                    appStore.isMenuExpanded
+                                        ? Expanded(
+                                            child: Padding(
+                                              padding: EdgeInsets.only(left: 16),
+                                              child: Text(
+                                                item.title!,
+                                                maxLines: 1,
+                                                style: appStore.selectedMenuIndex == item.index ? boldTextStyle(color: Colors.white) : primaryTextStyle(color: Colors.white, size: 15),
+                                              ),
+                                            ),
+                                          )
+                                        : Spacer(),
+                                    appStore.selectedMenuIndex == item.index
+                                        ? Card(
+                                            margin: EdgeInsets.zero,
+                                            color: Theme.of(context).cardColor,
+                                            shape: BeveledRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                                            child: SizedBox(width: 30, height: 30),
+                                          )
+                                        : SizedBox(),
+                                  ],
+                                ),
+                              ),
+                              onTap: () {
+                                if (appStore.selectedMenuIndex != item.index!) {
+                                  appStore.setSelectedMenuIndex(item.index!);
+                                  Navigator.pushNamed(context, item.route!);
+                                }
+                              },
+                            );
+                          });
+                        }).toList(),
+                      ).expand(),
+                    ],
                   ),
                 ),
               ),

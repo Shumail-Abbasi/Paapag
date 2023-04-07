@@ -4,11 +4,11 @@ class MenuItemModel {
   int? index;
   String? imagePath;
   String? title;
-  Widget? widget;
+  String? route;
   String? subtitle;
   bool? mISCheck;
 
-  MenuItemModel({this.index,this.imagePath, this.title, this.widget, this.subtitle, this.mISCheck = false});
+  MenuItemModel({this.index,this.imagePath, this.title, this.route, this.subtitle, this.mISCheck = false});
 }
 
 class StaticPaymentModel {

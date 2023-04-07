@@ -1,5 +1,5 @@
-import 'package:paapag_admin/models/OrderModel.dart';
-import 'package:paapag_admin/models/UserModel.dart';
+import '../models/OrderModel.dart';
+import '../models/UserModel.dart';
 
 class DashboardModel {
   List<UserModel>? recent_client;

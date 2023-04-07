@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:paapag_admin/utils/Colors.dart';
-import 'package:paapag_admin/utils/Extensions/app_common.dart';
+import '../utils/Extensions/colors.dart';
+import '../utils/Extensions/decorations.dart';
+import '../utils/Colors.dart';
 
 
 class AppTheme {

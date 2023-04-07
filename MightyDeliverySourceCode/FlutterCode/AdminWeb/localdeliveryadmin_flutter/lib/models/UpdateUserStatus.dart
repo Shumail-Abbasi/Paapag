@@ -1,4 +1,4 @@
-import 'package:paapag_admin/models/UserModel.dart';
+import '../models/UserModel.dart';
 
 class UpdateUserStatus {
   UserModel? data;

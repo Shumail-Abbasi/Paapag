@@ -1,7 +1,8 @@
-import 'package:paapag_admin/network/RestApis.dart';
+
+import '../network/RestApis.dart';
 
 import '../main.dart';
-import 'Extensions/app_common.dart';
+import 'Extensions/common.dart';
 
 getAllCountryApiCall() async{
   await getCountryList().then((value) {

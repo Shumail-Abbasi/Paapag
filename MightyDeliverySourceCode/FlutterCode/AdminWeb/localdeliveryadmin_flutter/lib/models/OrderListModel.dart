@@ -1,12 +1,15 @@
-import 'package:paapag_admin/models/OrderModel.dart';
-import 'package:paapag_admin/models/PaginationModel.dart';
+import '../models/OrderModel.dart';
+import '../models/PaginationModel.dart';
+import 'Client/WalletListModel.dart';
 
 class OrderListModel {
   PaginationModel? pagination;
   List<OrderModel>? data;
   int? allUnreadCount;
+  UserWalletModel? walletData;
 
-  OrderListModel({this.pagination, this.data, this.allUnreadCount});
+
+  OrderListModel({this.pagination, this.data, this.allUnreadCount,this.walletData});
 
   OrderListModel.fromJson(Map<String, dynamic> json) {
     pagination = json['pagination'] != null ? new PaginationModel.fromJson(json['pagination']) : null;
@@ -17,6 +20,9 @@ class OrderListModel {
       });
     }
     allUnreadCount = json['all_unread_count'];
+    walletData = json['wallet_data'] != null
+        ? new UserWalletModel.fromJson(json['wallet_data'])
+        : null;
   }
 
   Map<String, dynamic> toJson() {
@@ -28,6 +34,9 @@ class OrderListModel {
       data['data'] = this.data!.map((v) => v.toJson()).toList();
     }
     data['all_unread_count'] = this.allUnreadCount;
+    if (this.walletData != null) {
+      data['wallet_data'] = this.walletData!.toJson();
+    }
     return data;
   }
 }

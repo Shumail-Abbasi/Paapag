@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
+import '../utils/Extensions/shared_pref.dart';
 
 import '../main.dart';
+
 import '../network/RestApis.dart';
 import '../utils/Colors.dart';
 import '../utils/Common.dart';
 import '../utils/Constants.dart';
-import '../utils/Extensions/app_common.dart';
 import '../utils/Extensions/app_textfield.dart';
+import '../utils/Extensions/common.dart';
+import '../utils/Extensions/text_styles.dart';
 
 class ChangePasswordDialog extends StatefulWidget {
   static String tag = '/ChangePasswordDialog';
@@ -45,7 +48,7 @@ class ChangePasswordDialogState extends State<ChangePasswordDialog> {
       };
       appStore.setLoading(true);
 
-      await shared_pref.setString(USER_PASSWORD, newPassController.text.trim());
+      await setValue(USER_PASSWORD, newPassController.text.trim());
 
       await changePassword(req).then((value) {
         toast(value.message.toString());
@@ -145,7 +148,11 @@ class ChangePasswordDialogState extends State<ChangePasswordDialog> {
         }),
         SizedBox(width: 4),
         dialogPrimaryButton(language.save, () {
-          submit();
+          if (getStringAsync(USER_TYPE) == DEMO_ADMIN) {
+            toast(language.demo_admin_msg);
+          } else {
+            submit();
+          }
         }),
       ],
     );

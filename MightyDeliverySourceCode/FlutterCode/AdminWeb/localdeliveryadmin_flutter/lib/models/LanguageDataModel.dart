@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:paapag_admin/main.dart';
-import 'package:paapag_admin/utils/Constants.dart';
-import 'package:paapag_admin/utils/Extensions/StringExtensions.dart';
+import '../main.dart';
+import '../utils/Constants.dart';
+import '../utils/Extensions/StringExtensions.dart';
+import '../utils/Extensions/shared_pref.dart';
 
 class LanguageDataModel {
   int? id;
@@ -45,7 +46,7 @@ LanguageDataModel? getSelectedLanguageModel({String? defaultLanguage}) {
   LanguageDataModel? data;
 
   localeLanguageList.forEach((element) {
-    if (element.languageCode == (shared_pref.getString(SELECTED_LANGUAGE_CODE) ?? default_Language)) {
+    if (element.languageCode == (getStringAsync(SELECTED_LANGUAGE_CODE,defaultValue: default_Language))) {
       data = element;
     }
   });

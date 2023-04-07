@@ -1,6 +1,5 @@
-import 'package:paapag_admin/models/ExtraChragesListModel.dart';
+import '../models/ExtraChragesListModel.dart';
 
-import 'CountryListModel.dart';
 import 'PaginationModel.dart';
 
 class CityListModel {
@@ -37,6 +36,7 @@ class CityData {
   String? address;
   int? countryId;
   String? countryName;
+  Country? country;
   int? status;
   double? fixedCharges;
   List<ExtraChargesData>? extraCharges;
@@ -48,7 +48,8 @@ class CityData {
   String? createdAt;
   String? updatedAt;
   String? deletedAt;
-  CountryData? country;
+  String? commissionType;
+  num? adminCommission;
 
   CityData(
       {this.id,
@@ -56,6 +57,7 @@ class CityData {
       this.address,
       this.countryId,
       this.countryName,
+      this.country,
       this.status,
       this.fixedCharges,
       this.extraCharges,
@@ -67,7 +69,8 @@ class CityData {
       this.createdAt,
       this.updatedAt,
       this.deletedAt,
-      this.country});
+      this.commissionType,
+      this.adminCommission});
 
   CityData.fromJson(Map<String, dynamic> json) {
     id = json['id'];
@@ -75,6 +78,7 @@ class CityData {
     address = json['address'];
     countryId = json['country_id'];
     countryName = json['country_name'];
+    country = json['country'] != null ? new Country.fromJson(json['country']) : null;
     status = json['status'];
     fixedCharges = json['fixed_charges'];
     if (json['extra_charges'] != null) {
@@ -91,7 +95,8 @@ class CityData {
     createdAt = json['created_at'];
     updatedAt = json['updated_at'];
     deletedAt = json['deleted_at'];
-    country = CountryData.fromJson(json['country']);
+    commissionType = json['commission_type'];
+    adminCommission = json['admin_commission'];
   }
 
   Map<String, dynamic> toJson() {
@@ -101,6 +106,9 @@ class CityData {
     data['address'] = this.address;
     data['country_id'] = this.countryId;
     data['country_name'] = this.countryName;
+    if (this.country != null) {
+      data['country'] = this.country!.toJson();
+    }
     data['status'] = this.status;
     data['fixed_charges'] = this.fixedCharges;
     if (this.extraCharges != null) {
@@ -114,8 +122,94 @@ class CityData {
     data['created_at'] = this.createdAt;
     data['updated_at'] = this.updatedAt;
     data['deleted_at'] = this.deletedAt;
-    data['country'] = this.country!.toJson();
+    data['commission_type'] = this.commissionType;
+    data['admin_commission'] = this.adminCommission;
     return data;
   }
 }
 
+class Country {
+  int? id;
+  String? name;
+  String? code;
+  String? distanceType;
+  String? weightType;
+  String? links;
+  int? status;
+  String? createdAt;
+  String? updatedAt;
+  String? deletedAt;
+
+  Country({this.id, this.name, this.code, this.distanceType, this.weightType, this.links, this.status, this.createdAt, this.updatedAt, this.deletedAt});
+
+  Country.fromJson(Map<String, dynamic> json) {
+    id = json['id'];
+    name = json['name'];
+    code = json['code'];
+    distanceType = json['distance_type'];
+    weightType = json['weight_type'];
+    links = json['links'];
+    status = json['status'];
+    createdAt = json['created_at'];
+    updatedAt = json['updated_at'];
+    deletedAt = json['deleted_at'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['id'] = this.id;
+    data['name'] = this.name;
+    data['code'] = this.code;
+    data['distance_type'] = this.distanceType;
+    data['weight_type'] = this.weightType;
+    data['links'] = this.links;
+    data['status'] = this.status;
+    data['created_at'] = this.createdAt;
+    data['updated_at'] = this.updatedAt;
+    data['deleted_at'] = this.deletedAt;
+    return data;
+  }
+}
+
+class ExtraCharges {
+  int? id;
+  String? title;
+  String? chargesType;
+  int? charges;
+  int? countryId;
+  int? cityId;
+  int? status;
+  String? createdAt;
+  String? updatedAt;
+  String? deletedAt;
+
+  ExtraCharges({this.id, this.title, this.chargesType, this.charges, this.countryId, this.cityId, this.status, this.createdAt, this.updatedAt, this.deletedAt});
+
+  ExtraCharges.fromJson(Map<String, dynamic> json) {
+    id = json['id'];
+    title = json['title'];
+    chargesType = json['charges_type'];
+    charges = json['charges'];
+    countryId = json['country_id'];
+    cityId = json['city_id'];
+    status = json['status'];
+    createdAt = json['created_at'];
+    updatedAt = json['updated_at'];
+    deletedAt = json['deleted_at'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['id'] = this.id;
+    data['title'] = this.title;
+    data['charges_type'] = this.chargesType;
+    data['charges'] = this.charges;
+    data['country_id'] = this.countryId;
+    data['city_id'] = this.cityId;
+    data['status'] = this.status;
+    data['created_at'] = this.createdAt;
+    data['updated_at'] = this.updatedAt;
+    data['deleted_at'] = this.deletedAt;
+    return data;
+  }
+}

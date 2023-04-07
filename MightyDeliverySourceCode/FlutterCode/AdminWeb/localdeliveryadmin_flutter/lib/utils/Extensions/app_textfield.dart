@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:paapag_admin/utils/Extensions/StringExtensions.dart';
+import '../../utils/Extensions/text_styles.dart';
+import '../../utils/Extensions/StringExtensions.dart';
 
-import '../Constants.dart';
-import 'app_common.dart';
+import 'constants.dart';
 
 enum TextFieldType { EMAIL, PASSWORD, NAME, ADDRESS, OTHER, PHONE, URL, USERNAME }
 

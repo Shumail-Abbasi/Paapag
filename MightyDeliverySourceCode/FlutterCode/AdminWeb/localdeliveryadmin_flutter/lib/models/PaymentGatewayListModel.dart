@@ -1,4 +1,4 @@
-import 'package:paapag_admin/models/PaginationModel.dart';
+import '../models/PaginationModel.dart';
 
 class PaymentGatewayListModel {
   PaginationModel? pagination;
@@ -63,7 +63,7 @@ class PaymentGatewayData {
     data['status'] = this.status;
     data['is_test'] = this.isTest;
     if (this.testValue != null) {
-      data['test_Value'] = this.testValue!.toJson();
+      data['test_value'] = this.testValue!.toJson();
     }
     if (this.liveValue != null) {
       data['live_value'] = this.liveValue!.toJson();

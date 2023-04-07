@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:paapag_admin/main.dart';
-import 'package:paapag_admin/models/NotificationModel.dart';
-import 'package:paapag_admin/network/RestApis.dart';
-import 'package:paapag_admin/screens/NotificationViewAllScreen.dart';
-import 'package:paapag_admin/screens/OrderDetailScreen.dart';
-import 'package:paapag_admin/utils/Colors.dart';
-import 'package:paapag_admin/utils/Common.dart';
-import 'package:paapag_admin/utils/Extensions/app_common.dart';
+import '../utils/Extensions/common.dart';
+import '../main.dart';
+import '../models/NotificationModel.dart';
+import '../network/RestApis.dart';
+import '../screens/AdminOrderDetailScreen.dart';
+import '../screens/NotificationViewAllScreen.dart';
+import '../utils/Colors.dart';
+import '../utils/Common.dart';
+import '../utils/Extensions/text_styles.dart';
+
 
 class NotificationDialog extends StatefulWidget {
   @override
@@ -16,6 +18,7 @@ class NotificationDialog extends StatefulWidget {
 
 class NotificationDialogState extends State<NotificationDialog> {
   List<NotificationData> notificationData = [];
+  bool isLoading = false;
 
   @override
   void initState() {
@@ -24,14 +27,14 @@ class NotificationDialogState extends State<NotificationDialog> {
   }
 
   void init() async {
-    appStore.setLoading(true);
+    isLoading = true;
     getNotification(page: 1).then((value) {
-      appStore.setLoading(false);
+      isLoading = false;
       appStore.setAllUnreadCount(value.all_unread_count ?? 0);
       notificationData.addAll(value.notification_data!);
       setState(() {});
     }).catchError((error) {
-      appStore.setLoading(false);
+      isLoading = false;
       log(error);
     });
   }
@@ -45,7 +48,7 @@ class NotificationDialogState extends State<NotificationDialog> {
   Widget build(BuildContext context) {
     return Observer(builder: (context) {
       return Padding(
-        padding: EdgeInsets.only(left: 16,top: 16,right: 16),
+        padding: EdgeInsets.only(left: 16, top: 16, right: 16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -54,10 +57,10 @@ class NotificationDialogState extends State<NotificationDialog> {
               children: [
                 Text(language.notification, style: boldTextStyle()),
                 GestureDetector(
-                  child: Text(language.view_all,style: primaryTextStyle(size: 14,color: primaryColor)),
+                  child: Text(language.view_all, style: primaryTextStyle(size: 14, color: primaryColor)),
                   onTap: () {
                     Navigator.pop(context);
-                    Navigator.push(context, MaterialPageRoute(builder: (_) => NotificationViewAllScreen()));
+                    Navigator.pushNamed(context,NotificationViewAllScreen.route);
                   },
                 ),
               ],
@@ -76,9 +79,8 @@ class NotificationDialogState extends State<NotificationDialog> {
                               NotificationData data = notificationData[index];
                               return GestureDetector(
                                 onTap: () async {
-                                  await launchScreen(context, OrderDetailScreen(orderId: data.data!.id!));
-                                  init();
                                   Navigator.pop(context);
+                                  Navigator.pushNamed(context, AdminOrderDetailScreen.route+"?order_Id=${data.data!.id!}");
                                 },
                                 child: Padding(
                                   padding: EdgeInsets.only(bottom: 16),
@@ -109,7 +111,7 @@ class NotificationDialogState extends State<NotificationDialog> {
                                           children: [
                                             Text(data.data!.subject ?? '-', style: boldTextStyle(size: 12)),
                                             SizedBox(height: 4),
-                                            Text(data.data!.message ?? '-', style: primaryTextStyle(size: 12), maxLines: 2,overflow: TextOverflow.ellipsis),
+                                            Text(data.data!.message ?? '-', style: primaryTextStyle(size: 12), maxLines: 2, overflow: TextOverflow.ellipsis),
                                           ],
                                         ),
                                       ),
@@ -133,7 +135,7 @@ class NotificationDialogState extends State<NotificationDialog> {
                         ],
                       )
                     : SizedBox(),
-                appStore.isLoading
+                isLoading
                     ? loaderWidget()
                     : notificationData.isEmpty
                         ? emptyWidget()

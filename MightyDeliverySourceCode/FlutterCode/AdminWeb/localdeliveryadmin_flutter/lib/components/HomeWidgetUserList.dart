@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:paapag_admin/main.dart';
-import 'package:paapag_admin/models/UserModel.dart';
-import 'package:paapag_admin/utils/Colors.dart';
-import 'package:paapag_admin/utils/Common.dart';
-import 'package:paapag_admin/utils/Extensions/app_common.dart';
+import '../main.dart';
+import '../models/UserModel.dart';
+import '../utils/Colors.dart';
+import '../utils/Common.dart';
+import '../utils/Extensions/text_styles.dart';
 
 class HomeWidgetUserList extends StatefulWidget {
   final List<UserModel> userModel;

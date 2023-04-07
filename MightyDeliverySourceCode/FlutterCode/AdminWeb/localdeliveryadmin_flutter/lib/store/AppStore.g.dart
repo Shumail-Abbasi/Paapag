@@ -201,6 +201,22 @@ mixin _$AppStore on _AppStore, Store {
     });
   }
 
+  late final _$isMenuExpandedAtom =
+      Atom(name: '_AppStore.isMenuExpanded', context: context);
+
+  @override
+  bool get isMenuExpanded {
+    _$isMenuExpandedAtom.reportRead();
+    return super.isMenuExpanded;
+  }
+
+  @override
+  set isMenuExpanded(bool value) {
+    _$isMenuExpandedAtom.reportWrite(value, super.isMenuExpanded, () {
+      super.isMenuExpanded = value;
+    });
+  }
+
   late final _$setLoggedInAsyncAction =
       AsyncAction('_AppStore.setLoggedIn', context: context);
 
@@ -296,6 +312,17 @@ mixin _$AppStore on _AppStore, Store {
   }
 
   @override
+  void setExpandedMenu(bool val) {
+    final _$actionInfo = _$_AppStoreActionController.startAction(
+        name: '_AppStore.setExpandedMenu');
+    try {
+      return super.setExpandedMenu(val);
+    } finally {
+      _$_AppStoreActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
   String toString() {
     return '''
 isLoggedIn: ${isLoggedIn},
@@ -309,7 +336,8 @@ selectedMenuIndex: ${selectedMenuIndex},
 userProfile: ${userProfile},
 currencyCode: ${currencyCode},
 currencySymbol: ${currencySymbol},
-currencyPosition: ${currencyPosition}
+currencyPosition: ${currencyPosition},
+isMenuExpanded: ${isMenuExpanded}
     ''';
   }
 }

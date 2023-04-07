@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:paapag_admin/main.dart';
-import 'package:paapag_admin/models/CityListModel.dart';
-import 'package:paapag_admin/utils/Common.dart';
-import 'package:paapag_admin/utils/Constants.dart';
-import 'package:paapag_admin/utils/Extensions/app_common.dart';
-
+import '../main.dart';
+import '../models/CityListModel.dart';
+import '../utils/Common.dart';
+import '../utils/Constants.dart';
+import '../utils/Extensions/constants.dart';
+import '../utils/Extensions/text_styles.dart';
 
 class CityInfoDialog extends StatefulWidget {
   static String tag = '/CityInfoDialog';
@@ -40,7 +40,7 @@ class CityInfoDialogState extends State<CityInfoDialog> {
       child: Container(
         width: 500,
         padding: EdgeInsets.all(16),
-        child:  Column(
+        child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -68,6 +68,7 @@ class CityInfoDialogState extends State<CityInfoDialog> {
             informationWidget(language.cancel_charge, '${widget.cityData!.cancelCharges}'),
             informationWidget(language.per_distance_charge, '${widget.cityData!.perDistanceCharges}'),
             informationWidget(language.per_weight_charge, '${widget.cityData!.perWeightCharges}'),
+            informationWidget(language.adminCommission, '${widget.cityData!.adminCommission} ${widget.cityData!.commissionType==CHARGE_TYPE_PERCENTAGE ? '%' : ''}'),
             Divider(height: 20),
             informationWidget(language.created_date, printDate(widget.cityData!.createdAt!)),
             informationWidget(language.updated_date, printDate(widget.cityData!.updatedAt!)),

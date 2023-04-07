@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:paapag_admin/components/OrderSummeryWidget.dart';
+import '../components/OrderSummeryWidget.dart';
 
 import '../main.dart';
 import '../models/ExtraChargeRequestModel.dart';
 import '../utils/Common.dart';
-import '../utils/Constants.dart';
-import '../utils/Extensions/app_common.dart';
+import '../utils/Extensions/constants.dart';
+import '../utils/Extensions/text_styles.dart';
 
 class CreateOrderConfirmationDialog extends StatefulWidget {
   final List<ExtraChargeRequestModel> extraChargesList;

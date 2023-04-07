@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:paapag_admin/main.dart';
-import 'package:paapag_admin/models/DashboardModel.dart';
-import 'package:paapag_admin/utils/Colors.dart';
-import 'package:paapag_admin/utils/Common.dart';
-import 'package:paapag_admin/utils/Constants.dart';
-import 'package:paapag_admin/utils/Extensions/app_common.dart';
+import '../main.dart';
+import '../models/DashboardModel.dart';
+import '../utils/Colors.dart';
+import '../utils/Common.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
+
+import '../utils/Extensions/constants.dart';
+import '../utils/Extensions/text_styles.dart';
 
 class WeeklyUserCountComponent extends StatefulWidget {
   static String tag = '/WeeklyUserCountComponent';
@@ -48,7 +49,7 @@ class WeeklyUserCountComponentState extends State<WeeklyUserCountComponent> {
             enableTooltip: true,
             markerSettings: MarkerSettings(isVisible: true),
             dataSource: widget.weeklyCount,
-            xValueMapper: (WeeklyDataModel exp, _) => exp.day,
+            xValueMapper: (WeeklyDataModel exp, _) => dayTranslate(exp.day!),
             yValueMapper: (WeeklyDataModel exp, _) => widget.isPaymentType ? exp.totalAmount : exp.total,
           ),
         ],

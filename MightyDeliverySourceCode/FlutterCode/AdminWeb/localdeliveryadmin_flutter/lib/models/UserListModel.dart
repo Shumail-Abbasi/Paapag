@@ -1,5 +1,5 @@
-import 'package:paapag_admin/models/UserModel.dart';
-import 'package:paapag_admin/models/PaginationModel.dart';
+import '../models/UserModel.dart';
+import '../models/PaginationModel.dart';
 
 class UserListModel {
   List<UserModel>? data;

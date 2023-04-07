@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:paapag_admin/main.dart';
-import 'package:paapag_admin/models/DashboardModel.dart';
-import 'package:paapag_admin/utils/Colors.dart';
-import 'package:paapag_admin/utils/Common.dart';
-import 'package:paapag_admin/utils/Constants.dart';
-import 'package:paapag_admin/utils/Extensions/app_common.dart';
+import '../main.dart';
+import '../models/DashboardModel.dart';
+import '../utils/Colors.dart';
+import '../utils/Common.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
+
+import '../utils/Extensions/constants.dart';
+import '../utils/Extensions/text_styles.dart';
 
 class WeeklyOrderCountComponent extends StatefulWidget {
   static String tag = '/WeeklyOrderCountComponent';
@@ -46,7 +47,7 @@ class WeeklyOrderCountComponentState extends State<WeeklyOrderCountComponent> {
         series: <CircularSeries>[
           PieSeries<WeeklyDataModel, String>(
               dataSource: widget.weeklyOrderCount,
-              xValueMapper: (WeeklyDataModel data, _) => data.day,
+              xValueMapper: (WeeklyDataModel data, _) => dayTranslate(data.day!),
               yValueMapper: (WeeklyDataModel data, _) => data.total,
               dataLabelSettings: DataLabelSettings(isVisible: true, textStyle: boldTextStyle()))
         ],

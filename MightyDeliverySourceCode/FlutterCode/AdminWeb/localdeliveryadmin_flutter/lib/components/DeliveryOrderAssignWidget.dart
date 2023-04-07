@@ -1,30 +1,35 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:paapag_admin/main.dart';
-import 'package:paapag_admin/models/OrderModel.dart';
-import 'package:paapag_admin/models/UserModel.dart';
-import 'package:paapag_admin/network/RestApis.dart';
-import 'package:paapag_admin/utils/Colors.dart';
-import 'package:paapag_admin/utils/Common.dart';
-import 'package:paapag_admin/utils/Constants.dart';
-import 'package:paapag_admin/utils/Extensions/app_common.dart';
+import '../main.dart';
+import '../models/OrderModel.dart';
+import '../models/UserModel.dart';
+import '../network/RestApis.dart';
+import '../utils/Colors.dart';
+import '../utils/Common.dart';
+import '../utils/Constants.dart';
+import '../utils/Extensions/common.dart';
+import '../utils/Extensions/constants.dart';
+import '../utils/Extensions/shared_pref.dart';
+import '../utils/Extensions/text_styles.dart';
 
 class DeliveryOrderAssignWidget extends StatefulWidget {
-  final int orderId;
+  final int OrderId;
   final OrderModel orderModel;
   final Function()? onUpdate;
 
-  DeliveryOrderAssignWidget({this.onUpdate, required this.orderId, required this.orderModel});
+  DeliveryOrderAssignWidget({this.onUpdate, required this.OrderId, required this.orderModel});
 
   @override
   DeliveryOrderAssignWidgetState createState() => DeliveryOrderAssignWidgetState();
 }
 
 class DeliveryOrderAssignWidgetState extends State<DeliveryOrderAssignWidget> {
+  ScrollController horizontalScrollController = ScrollController();
+
   int currentPage = 1;
   int totalPage = 0;
   int perPage = 10;
-  
+
 
   List<UserModel> deliveryList = [];
 
@@ -109,45 +114,53 @@ class DeliveryOrderAssignWidgetState extends State<DeliveryOrderAssignWidget> {
                       ? Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          SingleChildScrollView(
-                            scrollDirection: Axis.horizontal,
-                            child: ConstrainedBox(
-                              constraints: BoxConstraints(minWidth: 670),
-                              child: DataTable(
-                                dataRowHeight: 45,
-                                headingRowHeight: 45,
-                                horizontalMargin: 16,
-                                headingRowColor: MaterialStateColor.resolveWith((states) => primaryColor.withOpacity(0.1)),
-                                showCheckboxColumn: false,
-                                dataTextStyle: primaryTextStyle(size: 14),
-                                headingTextStyle: boldTextStyle(),
-                                columns: [
-                                  DataColumn(label: Text(language.id)),
-                                  DataColumn(label: Text(language.delivery_person)),
-                                  DataColumn(label: Text(language.city_name)),
-                                  DataColumn(label: Text(language.assign)),
-                                ],
-                                rows: deliveryList.map((e) {
-                                  return DataRow(
-                                    cells: [
-                                      DataCell(Text('#${e.id}')),
-                                      DataCell(Text(e.name ?? '')),
-                                      DataCell(Text(e.cityName ?? '')),
-                                      DataCell(
-                                        OutlinedButton(
-                                          child: widget.orderModel.deliveryManId == null ? Text(language.assign_order) : Text(language.order_transfer),
-                                          onPressed: () async {
-                                            if (shared_pref.getString(USER_TYPE) == DEMO_ADMIN) {
-                                              toast(language.demo_admin_msg);
-                                            } else {
-                                              await orderAssignApi(orderId: widget.orderId, deliveryBoyID: e.id!);
-                                            }
-                                          },
+                          RawScrollbar(
+                            scrollbarOrientation: ScrollbarOrientation.bottom,
+                            controller: horizontalScrollController,
+                            thumbVisibility: true,
+                            thumbColor: appStore.isDarkMode ? Colors.white12 : Colors.black12,
+                            radius: Radius.circular(defaultRadius),
+                            child: SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              controller: horizontalScrollController,
+                              child: ConstrainedBox(
+                                constraints: BoxConstraints(minWidth: 700),
+                                child: DataTable(
+                                  dataRowHeight: 45,
+                                  headingRowHeight: 45,
+                                  horizontalMargin: 16,
+                                  headingRowColor: MaterialStateColor.resolveWith((states) => primaryColor.withOpacity(0.1)),
+                                  showCheckboxColumn: false,
+                                  dataTextStyle: primaryTextStyle(size: 14),
+                                  headingTextStyle: boldTextStyle(),
+                                  columns: [
+                                    DataColumn(label: Text(language.id)),
+                                    DataColumn(label: Text(language.delivery_person)),
+                                    DataColumn(label: Text(language.city_name)),
+                                    DataColumn(label: Text(language.assign)),
+                                  ],
+                                  rows: deliveryList.map((e) {
+                                    return DataRow(
+                                      cells: [
+                                        DataCell(Text('#${e.id}')),
+                                        DataCell(Text(e.name ?? '')),
+                                        DataCell(Text(e.cityName ?? '')),
+                                        DataCell(
+                                          OutlinedButton(
+                                            child: widget.orderModel.deliveryManId == null ? Text(language.assign_order) : Text(language.order_transfer),
+                                            onPressed: () async {
+                                              if (getStringAsync(USER_TYPE) == DEMO_ADMIN) {
+                                                toast(language.demo_admin_msg);
+                                              } else {
+                                                await orderAssignApi(orderId: widget.OrderId, deliveryBoyID: e.id!);
+                                              }
+                                            },
+                                          ),
                                         ),
-                                      ),
-                                    ],
-                                  );
-                                }).toList(),
+                                      ],
+                                    );
+                                  }).toList(),
+                                ),
                               ),
                             ),
                           ),

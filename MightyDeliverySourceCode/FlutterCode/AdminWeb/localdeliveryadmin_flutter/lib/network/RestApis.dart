@@ -4,37 +4,42 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
 import 'package:http/http.dart' as http;
-import 'package:paapag_admin/models/AutoCompletePlacesListModel.dart';
-import 'package:paapag_admin/models/CityListModel.dart';
-import 'package:paapag_admin/models/CountryListModel.dart';
-import 'package:paapag_admin/models/DashboardModel.dart';
-import 'package:paapag_admin/models/DeliveryDocumentListModel.dart';
-import 'package:paapag_admin/models/DocumentListModel.dart';
-import 'package:paapag_admin/models/ExtraChragesListModel.dart';
-import 'package:paapag_admin/models/LDBaseResponse.dart';
-import 'package:paapag_admin/models/LoginResponse.dart';
-import 'package:paapag_admin/models/NotificationModel.dart';
-import 'package:paapag_admin/models/AppSettingModel.dart';
-import 'package:paapag_admin/models/OrderDetailModel.dart';
-import 'package:paapag_admin/models/OrderListModel.dart';
-import 'package:paapag_admin/models/ParcelTypeListModel.dart';
-import 'package:paapag_admin/models/PaymentGatewayListModel.dart';
-import 'package:paapag_admin/models/PlaceIdDetailModel.dart';
-import 'package:paapag_admin/models/UpdateUserStatus.dart';
-import 'package:paapag_admin/models/UserListModel.dart';
-import 'package:paapag_admin/models/UserModel.dart';
-import 'package:paapag_admin/network/NetworkUtils.dart';
-import 'package:paapag_admin/screens/LoginScreen.dart';
-import 'package:paapag_admin/utils/Constants.dart';
-import 'package:paapag_admin/utils/Extensions/StringExtensions.dart';
-import 'package:paapag_admin/utils/Extensions/app_common.dart';
+import '../models/WithdrawModel.dart';
+import '../utils/Extensions/int_extensions.dart';
+import '../models/AutoCompletePlacesListModel.dart';
+import '../models/CityListModel.dart';
+import '../models/CountryListModel.dart';
+import '../models/DashboardModel.dart';
+import '../models/DeliveryDocumentListModel.dart';
+import '../models/DocumentListModel.dart';
+import '../models/ExtraChragesListModel.dart';
+import '../models/LDBaseResponse.dart';
+import '../models/LoginResponse.dart';
+import '../models/NotificationModel.dart';
+import '../models/AppSettingModel.dart';
+import '../models/OrderDetailModel.dart';
+import '../models/OrderListModel.dart';
+import '../models/ParcelTypeListModel.dart';
+import '../models/PaymentGatewayListModel.dart';
+import '../models/PlaceIdDetailModel.dart';
+import '../models/UpdateUserStatus.dart';
+import '../models/UserDetailModel.dart';
+import '../models/UserListModel.dart';
+import '../models/UserModel.dart';
+import '../network/NetworkUtils.dart';
+import '../screens/AdminLoginScreen.dart';
+import '../screens/Client/DashboardScreen.dart';
+import '../utils/Constants.dart';
+import '../utils/Extensions/StringExtensions.dart';
 
 import '../main.dart';
+import '../utils/Extensions/common.dart';
+import '../utils/Extensions/shared_pref.dart';
 
-Future<LoginResponse> logInApi(Map request) async {
-  Response response = await buildHttpResponse('login', request: request, method: HttpMethod.POST);
+Future<LoginResponse> signUpApi(Map request) async {
+  Response response = await buildHttpResponse('register', request: request, method: HttpMethod.POST);
 
-  if (!(response.statusCode >= 200 && response.statusCode <= 206)) {
+  if (!response.statusCode.isSuccessful()) {
     if (response.body.isJson()) {
       var json = jsonDecode(response.body);
 
@@ -46,64 +51,166 @@ Future<LoginResponse> logInApi(Map request) async {
 
   return await handleResponse(response).then((json) async {
     var loginResponse = LoginResponse.fromJson(json);
-    await shared_pref.setString(TOKEN, loginResponse.data!.apiToken.validate());
-    await shared_pref.setInt(USER_ID, loginResponse.data!.id!);
-    await shared_pref.setString(USER_TYPE, loginResponse.data!.userType!);
-    await shared_pref.setString(USER_EMAIL, loginResponse.data!.email.validate());
-    await shared_pref.setString(USER_PASSWORD, request['password']);
-    await shared_pref.setString(NAME, loginResponse.data!.name.validate());
-    await shared_pref.setString(USER_PROFILE_PHOTO, loginResponse.data!.profileImage.validate());
-    await shared_pref.setString(USER_CONTACT_NUMBER, loginResponse.data!.contactNumber.validate());
-    await shared_pref.setString(USER_NAME, loginResponse.data!.username.validate());
-    await shared_pref.setString(USER_ADDRESS, loginResponse.data!.address.validate());
 
-    appStore.setUserProfile(loginResponse.data!.profileImage!.validate());
+    if (getStringAsync(USER_TYPE) != ADMIN && getStringAsync(USER_TYPE) != DEMO_ADMIN) {
+      await setValue(USER_ID, loginResponse.data!.id.validate());
+      await setValue(USER_NAME, loginResponse.data!.name.validate());
+      await setValue(USER_EMAIL, loginResponse.data!.email.validate());
+      await setValue(TOKEN, loginResponse.data!.fcmToken.validate());
+      await setValue(USER_CONTACT_NUMBER, loginResponse.data!.contactNumber.validate());
+      await setValue(USER_PROFILE_PHOTO, loginResponse.data!.profileImage.validate());
+      await setValue(USER_TYPE, loginResponse.data!.userType.validate());
+      await setValue(USER_NAME, loginResponse.data!.username.validate());
+      await setValue(USER_ADDRESS, loginResponse.data!.address.validate());
+      await setValue(COUNTRY_ID, loginResponse.data!.countryId.validate());
+      await setValue(CITY_ID, loginResponse.data!.cityId.validate());
+      await setValue(UID, loginResponse.data!.uid.validate());
+      await setValue(IS_VERIFIED_DELIVERY_MAN, loginResponse.data!.isVerifiedDeliveryMan == 1);
 
-    await appStore.setLoggedIn(true);
+      await clientStore.setClientEmail(loginResponse.data!.email.validate());
+      await appStore.setLoggedIn(true);
+
+      await setValue(USER_PASSWORD, request['password']);
+    }
+
+    return loginResponse;
+  }).catchError((e) {
+    log(e.toString());
+    throw e.toString();
+  });
+}
+
+Future<LoginResponse> logInApi(Map request, {bool isSocialLogin = false}) async {
+  Response response = await buildHttpResponse('login', request: request, method: HttpMethod.POST);
+  if (!response.statusCode.isSuccessful()) {
+    if (response.body.isJson()) {
+      var json = jsonDecode(response.body);
+
+      if (json.containsKey('code') && json['code'].toString().contains('invalid_username')) {
+        throw 'invalid_username';
+      }
+    }
+  }
+
+  return await handleResponse(response).then((json) async {
+    var loginResponse = LoginResponse.fromJson(json);
+
+    /*if (request['login_type'] == LoginTypeGoogle) {
+      await setValue(USER_PHOTO_URL, request['image']);
+    } else {
+      await setValue(USER_PHOTO_URL, loginResponse.userData!.profile_image.validate());
+    }
+
+    await setValue(GENDER, loginResponse.userData!.gender.validate());
+    await setValue(NAME, loginResponse.userData!.name.validate());
+    await setValue(BIO, loginResponse.userData!.bio.validate());
+    await setValue(DOB, loginResponse.userData!.dob.validate());
+*/
+
+    await setValue(USER_ID, loginResponse.data!.id.validate());
+    await setValue(NAME, loginResponse.data!.name.validate());
+    await setValue(USER_EMAIL, loginResponse.data!.email.validate());
+    await setValue(TOKEN, loginResponse.data!.apiToken.validate());
+    await setValue(USER_CONTACT_NUMBER, loginResponse.data!.contactNumber.validate());
+    await setValue(USER_PROFILE_PHOTO, loginResponse.data!.profileImage.validate());
+    await setValue(USER_TYPE, loginResponse.data!.userType.validate());
+    await setValue(USER_NAME, loginResponse.data!.username.validate());
+    await setValue(USER_STATUS, loginResponse.data!.status.validate());
+    await setValue(USER_ADDRESS, loginResponse.data!.address.validate());
+    await setValue(COUNTRY_ID, loginResponse.data!.countryId.validate());
+    await setValue(CITY_ID, loginResponse.data!.cityId.validate());
+    await setValue(UID, loginResponse.data!.uid.validate());
+    await setValue(IS_VERIFIED_DELIVERY_MAN, loginResponse.data!.isVerifiedDeliveryMan == 1);
+    await clientStore.setClientEmail(loginResponse.data!.email.validate());
+    if (getIntAsync(USER_STATUS) == 1) {
+      await appStore.setLoggedIn(true);
+    } else {
+      await appStore.setLoggedIn(false);
+    }
+
+    await setValue(USER_PASSWORD, request['password']);
+    appStore.setUserProfile(getStringAsync(USER_PROFILE_PHOTO));
+
     return loginResponse;
   }).catchError((e) {
     throw e.toString();
   });
 }
 
-Future<void> logout(BuildContext context, {bool isFromLogin = false}) async {
-  await logoutApi().then((value) async {
-    await shared_pref.remove(TOKEN);
-    await shared_pref.remove(IS_LOGGED_IN);
-    await shared_pref.remove(USER_ID);
-    await shared_pref.remove(USER_TYPE);
-    await shared_pref.remove(USER_EMAIL);
-    await shared_pref.remove(USER_PASSWORD);
-    await shared_pref.remove(FCM_TOKEN);
-    await shared_pref.remove(NAME);
-    await shared_pref.remove(USER_PROFILE_PHOTO);
-    await shared_pref.remove(USER_CONTACT_NUMBER);
-    await shared_pref.remove(USER_NAME);
-    await shared_pref.remove(USER_ADDRESS);
-
+Future<void> logout(BuildContext context, {bool isFromLogin = false, bool isDeleteAccount = false}) async {
+  clearData() async {
+    await removeKey(USER_ID);
+    await removeKey(USER_NAME);
+    await removeKey(TOKEN);
+    await removeKey(USER_CONTACT_NUMBER);
+    await removeKey(USER_PROFILE_PHOTO);
+    await removeKey(USER_TYPE);
+    await removeKey(USER_NAME);
+    await removeKey(USER_ADDRESS);
+    await removeKey(USER_STATUS);
+    await removeKey(COUNTRY_ID);
+    await removeKey(COUNTRY_DATA);
+    await removeKey(CITY_ID);
+    await removeKey(CITY_DATA);
+    await removeKey(FILTER_DATA);
+    await removeKey(IS_VERIFIED_DELIVERY_MAN);
+    await removeKey(IS_LOGGED_IN);
+    await removeKey(FCM_TOKEN);
     await appStore.setLoggedIn(false);
+    clientStore.setFiltering(false);
+    clientStore.availableBal = 0;
+
+    if (!getBoolAsync(REMEMBER_ME) || getStringAsync(USER_TYPE) == ADMIN || getStringAsync(USER_TYPE) == DEMO_ADMIN) {
+      await removeKey(USER_EMAIL);
+      await removeKey(USER_PASSWORD);
+    }
     if (isFromLogin) {
       toast('These credential do not match our records');
     } else {
-      launchScreen(context, LoginScreen(), isNewTask: true);
+      if (getStringAsync(USER_TYPE) == ADMIN || getStringAsync(USER_TYPE) == DEMO_ADMIN) {
+        Navigator.pushNamedAndRemoveUntil(context, AdminLoginScreen.route, (route) {
+          return true;
+        });
+      } else {
+        Navigator.pushNamedAndRemoveUntil(context, DashboardScreen.route, (route) {
+          return true;
+        });
+      }
     }
-  }).catchError((e) {
-    throw e.toString();
-  });
+    appStore.setLoading(false);
+  }
+
+  if (getStringAsync(USER_TYPE) == ADMIN || getStringAsync(USER_TYPE) == DEMO_ADMIN) {
+    removeKey(THEME_MODE_INDEX);
+    appStore.setDarkMode(false);
+    if (!isFromLogin) {
+      Navigator.pop(context);
+      appStore.setLoading(true);
+    }
+  }
+  if (isDeleteAccount) {
+    clearData();
+  } else {
+    await logoutApi().then((value) async {
+      clearData();
+    }).catchError((e) {
+      appStore.setLoading(false);
+      throw e.toString();
+    });
+  }
 }
 
 /// Profile Update
-Future updateProfile({String? userName, String? name, String? userEmail, String? address, String? contactNumber, Uint8List? image, String? fileName}) async {
+Future updateProfile({int? id, String? userName, String? name, String? userEmail, String? address, String? contactNumber, Uint8List? image, String? fileName}) async {
   MultipartRequest multiPartRequest = await getMultiPartRequest('update-profile');
-  multiPartRequest.fields['id'] = shared_pref.getInt(USER_ID).toString();
-  multiPartRequest.fields['username'] = userName ?? shared_pref.getString(USER_NAME).validate();
-  multiPartRequest.fields['email'] = userEmail ?? shared_pref.getString(USER_EMAIL).validate();
-  multiPartRequest.fields['name'] = name ?? shared_pref.getString(NAME).validate();
-  multiPartRequest.fields['contact_number'] = contactNumber ?? shared_pref.getString(USER_CONTACT_NUMBER).validate();
-  multiPartRequest.fields['address'] = address ?? shared_pref.getString(USER_CONTACT_NUMBER).validate();
+  multiPartRequest.fields['id'] = '${id ?? getIntAsync(USER_ID)}';
+  if (userName != null) multiPartRequest.fields['username'] = userName.validate();
+  if (userEmail != null) multiPartRequest.fields['email'] = userEmail.validate();
+  if (name != null) multiPartRequest.fields['name'] = name.validate();
+  if (contactNumber != null) multiPartRequest.fields['contact_number'] = contactNumber.validate();
+  if (address != null) multiPartRequest.fields['address'] = address.validate();
 
   if (image != null) {
-    print('Call');
     multiPartRequest.files.add(MultipartFile.fromBytes('profile_image', image, filename: fileName));
   }
 
@@ -111,13 +218,14 @@ Future updateProfile({String? userName, String? name, String? userEmail, String?
   await sendMultiPartRequest(multiPartRequest, onSuccess: (data) async {
     if (data != null) {
       LoginResponse res = LoginResponse.fromJson(data);
-
-      await shared_pref.setString(NAME, res.data!.name.validate());
-      await shared_pref.setString(USER_NAME, res.data!.username.validate());
-      await shared_pref.setString(USER_ADDRESS, res.data!.address.validate());
-      await shared_pref.setString(USER_CONTACT_NUMBER, res.data!.contactNumber.validate());
-      await shared_pref.setString(USER_EMAIL, res.data!.email.validate());
-      appStore.setUserProfile(res.data!.profileImage.validate());
+      if (id == null) {
+        await setValue(NAME, res.data!.name.validate());
+        await setValue(USER_NAME, res.data!.username.validate());
+        await setValue(USER_ADDRESS, res.data!.address.validate());
+        await setValue(USER_CONTACT_NUMBER, res.data!.contactNumber.validate());
+        await setValue(USER_EMAIL, res.data!.email.validate());
+        appStore.setUserProfile(res.data!.profileImage.validate());
+      }
     }
   }, onError: (error) {
     toast(error.toString());
@@ -286,7 +394,7 @@ Future<void> sendMultiPartRequest(MultipartRequest multiPartRequest, {Function(d
   if (response.statusCode >= 200 && response.statusCode <= 206) {
     onSuccess?.call(jsonDecode(response.body));
   } else {
-    onError?.call('Something Went Wrong');
+    onError?.call(language.somethingWentWrong);
   }
 }
 
@@ -299,8 +407,8 @@ Future<LDBaseResponse> getRestoreOrderApi(Map req) async {
   return LDBaseResponse.fromJson(await handleResponse(await buildHttpResponse('order-action', request: req, method: HttpMethod.POST)));
 }
 
-Future<LDBaseResponse> deleteOrderApi(int orderId) async {
-  return LDBaseResponse.fromJson(await handleResponse(await buildHttpResponse('order-delete/$orderId', method: HttpMethod.POST)));
+Future<LDBaseResponse> deleteOrderApi(int OrderId) async {
+  return LDBaseResponse.fromJson(await handleResponse(await buildHttpResponse('order-delete/$OrderId', method: HttpMethod.POST)));
 }
 
 Future<UserListModel> getAllDeliveryBoyList({String? type, int? page, int? cityID, int? countryId, int? perPage = 10}) async {
@@ -337,4 +445,29 @@ Future<PlaceIdDetailModel> getPlaceDetail({String placeId = ''}) async {
 
 Future<LDBaseResponse> logoutApi() async {
   return LDBaseResponse.fromJson(await handleResponse(await buildHttpResponse('logout?clear=fcm_token', method: HttpMethod.GET)));
+}
+
+// Wallet Api
+Future<WithDrawListModel> getWithdrawList({int? page, int perPage = 10}) async {
+  return WithDrawListModel.fromJson(await handleResponse(await buildHttpResponse('withdrawrequest-list?page=$page&per_page=$perPage', method: HttpMethod.GET)));
+}
+
+Future<LDBaseResponse> deleteWithdraw(Map req) async {
+  return LDBaseResponse.fromJson(await handleResponse(await buildHttpResponse('decline-withdrawrequest', request: req, method: HttpMethod.POST)));
+}
+
+Future<LDBaseResponse> approveWithdraw(Map req) async {
+  return LDBaseResponse.fromJson(await handleResponse(await buildHttpResponse('approved-withdrawrequest', request: req, method: HttpMethod.POST)));
+}
+
+Future<UserDetailModel> userDetailApi(int id) async {
+  return UserDetailModel.fromJson(await handleResponse(await buildHttpResponse('user-profile-detail?id=$id', method: HttpMethod.GET)));
+}
+
+Future<WalletHistory> walletUserByUser(int page, int userId) async {
+  return WalletHistory.fromJson(await handleResponse(await buildHttpResponse('wallet-list?page=$page&user_id=$userId', method: HttpMethod.GET)));
+}
+
+Future<EarningList> earningUserByUser(int page, int userId) async {
+  return EarningList.fromJson(await handleResponse(await buildHttpResponse('payment-list?page=$page&delivery_man_id=$userId&type=earning', method: HttpMethod.GET)));
 }

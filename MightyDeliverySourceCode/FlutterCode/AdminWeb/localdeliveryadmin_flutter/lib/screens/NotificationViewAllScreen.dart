@@ -1,17 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:paapag_admin/components/BodyCornerWidget.dart';
-import 'package:paapag_admin/models/NotificationModel.dart';
-import 'package:paapag_admin/network/RestApis.dart';
-import 'package:paapag_admin/screens/OrderDetailScreen.dart';
-import 'package:paapag_admin/utils/Colors.dart';
-import 'package:paapag_admin/utils/Common.dart';
-import 'package:paapag_admin/utils/Constants.dart';
-import 'package:paapag_admin/utils/Extensions/app_common.dart';
-
+import '../components/BodyCornerWidget.dart';
+import '../models/NotificationModel.dart';
+import '../network/RestApis.dart';
+import '../utils/Colors.dart';
+import '../utils/Common.dart';
 import '../main.dart';
+import '../utils/Extensions/common.dart';
+import '../utils/Extensions/constants.dart';
+import '../utils/Extensions/text_styles.dart';
+import 'AdminOrderDetailScreen.dart';
 
 class NotificationViewAllScreen extends StatefulWidget {
+  static String route = '/admin/notifications';
+
   @override
   NotificationViewAllScreenState createState() => NotificationViewAllScreenState();
 }
@@ -92,9 +94,7 @@ class NotificationViewAllScreenState extends State<NotificationViewAllScreen> {
                             constraints: BoxConstraints(minWidth: getBodyWidth(context) - 48),
                             child: DataTable(
                               headingTextStyle: boldTextStyle(size: 14),
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(defaultRadius),
-                              ),
+                              decoration: BoxDecoration(borderRadius: BorderRadius.circular(defaultRadius)),
                               dataTextStyle: primaryTextStyle(),
                               headingRowColor: MaterialStateColor.resolveWith((states) => primaryColor.withOpacity(0.1)),
                               showCheckboxColumn: false,
@@ -111,18 +111,30 @@ class NotificationViewAllScreenState extends State<NotificationViewAllScreen> {
                               rows: notificationData.map((e) {
                                 return DataRow(
                                   cells: [
-                                    DataCell(Text(e.data!.subject ?? '-')),
+                                    DataCell(
+                                      Row(
+                                        children: [
+                                          Container(
+                                            alignment: Alignment.center,
+                                            decoration: BoxDecoration(shape: BoxShape.circle, color: e.read_at == null ? primaryColor : null),
+                                            width: 10,
+                                            height: 10,
+                                          ),
+                                          SizedBox(width: 8),
+                                          Text(e.data!.subject ?? '-'),
+                                        ],
+                                      ),
+                                    ),
                                     DataCell(Text((e.data!.type ?? '-').replaceAll('_', ' '))),
                                     DataCell(Text(e.data!.message ?? '-')),
                                     DataCell(Text(e.created_at ?? '-')),
                                     DataCell(
                                       outlineActionIcon(Icons.visibility, primaryColor, language.view, () async {
-                                        await launchScreen(
-                                          context,
-                                          OrderDetailScreen(orderId: e.data!.id!),
-                                        );
-                                        currentPage = 1;
-                                        init();
+                                        var res = await Navigator.pushNamed(context, AdminOrderDetailScreen.route + "?order_Id=${e.data!.id!}");
+                                        if (res != null) {
+                                          currentPage = 1;
+                                          init();
+                                        }
                                       }),
                                     ),
                                   ],
