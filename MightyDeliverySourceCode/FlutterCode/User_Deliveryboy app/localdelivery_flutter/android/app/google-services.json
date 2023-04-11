@@ -14,7 +14,23 @@
       },
       "oauth_client": [
         {
-          "client_id": "115794562052-mb2dp52m1t3g5jvgtagkmrf3u1fjkt5h.apps.googleusercontent.com",
+          "client_id": "115794562052-3emrju1v2brmau5lja45u3af9803cejs.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.paapag.app",
+            "certificate_hash": "fd3028246b1ba16b5064d98e5a9c3f374b7d0cbc"
+          }
+        },
+        {
+          "client_id": "115794562052-4ob17lqci4ubjkre6iatnc04fgees856.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.paapag.app",
+            "certificate_hash": "602555cf7812ad3150c6b9aaf3b507e7177e5e16"
+          }
+        },
+        {
+          "client_id": "115794562052-ol51m6lssf72i544ci0d28t1likpbgde.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
