@@ -1,4 +1,4 @@
-import 'package:country_code_picker/country_code_picker.dart';
+import 'package:country_code_picker_x/country_code_picker_x.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import '../../utils/Extensions/context_extensions.dart';
@@ -166,7 +166,7 @@ class SignUpScreenState extends State<SignUpScreen> {
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            CountryCodePicker(
+                            CountryCodePickerX(
                               initialSelection: countryCode,
                               showCountryOnly: false,
                               dialogSize: Size(context.width() - 60, context.height() * 0.6),

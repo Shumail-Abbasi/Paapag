@@ -80,7 +80,7 @@ class _BankDetailScreenState extends State<BankDetailScreen> {
       sendMultiPartRequest(
         multiPartRequest,
         onSuccess: (data) async {
-          UserModel? userData = UserModel.fromJson(data["data"]);
+          UserModel? _ = UserModel.fromJson(data["data"]);
           log(data);
           toast(data['message']);
           appStore.setLoading(false);

@@ -688,6 +688,7 @@ Widget outlineActionIcon(IconData icon, Color color, String message, Function() 
 Future<void> launchUrlWidget(String url, {bool forceWebView = false}) async {
   await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication).catchError((e) {
     log(e);
+    return true;
   });
 }
 

@@ -1,4 +1,4 @@
-import 'package:country_code_picker/country_code_picker.dart';
+import 'package:country_code_picker_x/country_code_picker_x.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
@@ -245,7 +245,7 @@ class AddUserDialogState extends State<AddUserDialog> {
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              CountryCodePicker(
+                              CountryCodePickerX(
                                 initialSelection: countryCode,
                                 showCountryOnly: false,
                                 showFlag: true,

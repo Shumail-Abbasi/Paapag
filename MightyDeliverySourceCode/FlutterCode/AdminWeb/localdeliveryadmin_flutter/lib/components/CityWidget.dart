@@ -186,7 +186,8 @@ class CityWidgetState extends State<CityWidget> {
                                         DataColumn(label: Text(language.id)),
                                         DataColumn(label: Text(language.city_name)),
                                         DataColumn(label: Text(language.country_name)),
-                                        DataColumn(label: Text(language.created_date)),
+                                        if(language.created_date.isNotEmpty )
+                                          DataColumn(label: Text(language.created_date)),
                                         DataColumn(label: Text(language.status)),
                                         DataColumn(label: Text(language.actions)),
                                       ],
@@ -195,7 +196,7 @@ class CityWidgetState extends State<CityWidget> {
                                           DataCell(Text('${mData.id}')),
                                           DataCell(Text('${mData.name ?? "-"}')),
                                           DataCell(Text('${mData.countryName ?? "-"}')),
-                                          DataCell(Text(printDate(mData.createdAt ?? ""))),
+                                          DataCell(Text(((mData.createdAt == null) ? '' : printDate(mData.createdAt ?? "")))),
                                           DataCell(TextButton(
                                             child: Text(
                                               '${mData.status == 1 ? language.enable : language.disable}',

@@ -1,4 +1,4 @@
-import 'package:country_code_picker/country_code_picker.dart';
+import 'package:country_code_picker_x/country_code_picker_x.dart';
 import 'package:date_time_picker/date_time_picker.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
@@ -790,7 +790,7 @@ class SendPackageFragmentState extends State<SendPackageFragment> {
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            CountryCodePicker(
+                            CountryCodePickerX(
                               initialSelection: pickupCountryCode,
                               showCountryOnly: false,
                               dialogSize: Size(context.width() - 60, context.height() * 0.6),
@@ -945,7 +945,7 @@ class SendPackageFragmentState extends State<SendPackageFragment> {
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            CountryCodePicker(
+                            CountryCodePickerX(
                               initialSelection: deliverCountryCode,
                               showCountryOnly: false,
                               dialogSize: Size(context.width() - 60, context.height() * 0.6),

@@ -50,12 +50,14 @@ class WhyDeliveryComponentState extends State<WhyDeliveryComponent> {
 
   Widget mWhyDeliveryOption() {
     return ResponsiveGridList(
-      shrinkWrap: true,
       horizontalGridMargin: 16,
       verticalGridMargin: 16,
       maxItemsPerRow: 3,
       minItemsPerRow: 1,
-      listViewBuilderOptions: ListViewBuilderOptions(physics: NeverScrollableScrollPhysics()),
+      listViewBuilderOptions: ListViewBuilderOptions(
+        physics: NeverScrollableScrollPhysics(),
+        shrinkWrap: true,
+      ),
       minItemWidth: ResponsiveWidget.isSmallScreen(context) ? context.width() / 3 : context.width() / 8,
       children: List.generate(
         builderResponse.whyChoose!.data!.length,

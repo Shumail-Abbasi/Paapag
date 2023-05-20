@@ -94,11 +94,13 @@ class DeliveryPartnerScreenState extends State<DeliveryPartnerScreen> {
               ),
             ),
             ResponsiveGridList(
-                shrinkWrap: true,
                 horizontalGridMargin: 30,
                 verticalGridMargin: 50,
                 maxItemsPerRow: 3,
-                listViewBuilderOptions: ListViewBuilderOptions(physics: NeverScrollableScrollPhysics()),
+                listViewBuilderOptions: ListViewBuilderOptions(
+                  physics: NeverScrollableScrollPhysics(),
+                  shrinkWrap: true,
+                ),
                 minItemsPerRow: 1,
                 minItemWidth: ResponsiveWidget.isSmallScreen(context) ? context.width() / 3 : context.width() / 6,
                 children: List.generate(

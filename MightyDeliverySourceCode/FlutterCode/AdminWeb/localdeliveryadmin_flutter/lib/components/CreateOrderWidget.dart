@@ -1,4 +1,4 @@
-import 'package:country_code_picker/country_code_picker.dart';
+import 'package:country_code_picker_x/country_code_picker_x.dart';
 import 'package:date_time_picker/date_time_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -887,7 +887,7 @@ class CreateOrderWidgetState extends State<CreateOrderWidget> {
                                           child: Row(
                                             mainAxisSize: MainAxisSize.min,
                                             children: [
-                                              CountryCodePicker(
+                                              CountryCodePickerX(
                                                 initialSelection: pickupCountryCode,
                                                 showCountryOnly: false,
                                                 showFlag: true,
@@ -1032,7 +1032,7 @@ class CreateOrderWidgetState extends State<CreateOrderWidget> {
                                         child: Row(
                                           mainAxisSize: MainAxisSize.min,
                                           children: [
-                                            CountryCodePicker(
+                                            CountryCodePickerX(
                                               initialSelection: deliverCountryCode,
                                               showCountryOnly: false,
                                               showFlag: true,

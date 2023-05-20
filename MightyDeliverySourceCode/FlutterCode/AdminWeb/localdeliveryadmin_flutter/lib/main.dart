@@ -185,7 +185,7 @@ class MyApp extends StatelessWidget {
         onGenerateRoute: (settings) {
           var uriData = Uri.parse(settings.name!);
           final queryParameters = uriData.queryParameters;
-          var settingData = settings.copyWith(arguments: settings.arguments);
+          var settingData = RouteSettings(arguments: settings.arguments);
           if (settings.name == OrderDetailScreen.route + "?order_Id=${queryParameters['order_Id']}") {
             return MaterialPageRoute(builder: (context) => OrderDetailScreen(orderId: queryParameters['order_Id'].toInt()), settings: settingData);
           }

@@ -19,6 +19,7 @@ Map<String, String> buildHeaderTokens() {
     HttpHeaders.acceptHeader: 'application/json; charset=utf-8',
     'Access-Control-Allow-Headers': '*',
     'Access-Control-Allow-Origin': '*',
+    "Access-Control-Allow-Methods": "GET,PUT,PATCH,POST,DELETE"
   };
 
   if (appStore.isLoggedIn) {
@@ -61,6 +62,7 @@ Future<Response> buildHttpResponse(String endPoint, {HttpMethod method = HttpMet
 
       return response;
     } catch (e) {
+      log('HTTP Error ($method): ${url.toString()} ${e.toString()}');
       throw e.toString();
     }
   } else {

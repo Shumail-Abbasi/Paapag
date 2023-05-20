@@ -1,4 +1,4 @@
-import 'package:country_code_picker/country_code_picker.dart';
+import 'package:country_code_picker_x/country_code_picker_x.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import '../models/CountryListModel.dart';
@@ -120,7 +120,7 @@ class AddCountryDialogState extends State<AddCountryDialog> {
                       color: Colors.grey.withOpacity(0.15),
                       borderRadius: BorderRadius.circular(defaultRadius),
                     ),
-                    child: CountryCodePicker(
+                    child: CountryCodePickerX(
                       initialSelection: countryCode!.code,
                       showCountryOnly: true,
                       showFlag: true,

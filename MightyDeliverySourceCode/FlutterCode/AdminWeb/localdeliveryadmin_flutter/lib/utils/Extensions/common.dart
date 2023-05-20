@@ -99,9 +99,10 @@ Future<dynamic> pasteObject() async {
 enum LinkProvider { PLAY_STORE, APPSTORE, FACEBOOK, INSTAGRAM, LINKEDIN, TWITTER, YOUTUBE, REDDIT, TELEGRAM, WHATSAPP, FB_MESSENGER, GOOGLE_DRIVE }
 
 class SBehavior extends ScrollBehavior {
+
   @override
-  Widget buildViewportChrome(BuildContext context, Widget child, AxisDirection axisDirection) {
-    return child;
+  Widget buildOverscrollIndicator(BuildContext context, Widget child, ScrollableDetails details) {
+    return super.buildOverscrollIndicator(context, child, details);
   }
 }
 

@@ -196,7 +196,7 @@ class CountryWidgetState extends State<CountryWidget> {
                                           DataCell(Text('${mData.name ?? "-"}')),
                                           DataCell(Text('${mData.distanceType ?? "-"}')),
                                           DataCell(Text('${mData.weightType ?? "-"}')),
-                                          DataCell(Text(printDate(mData.createdAt ?? ""))),
+                                          DataCell(Text((mData.createdAt ?? "").isEmpty ? '' : printDate(mData.createdAt ?? ""))),
                                           DataCell(TextButton(
                                             child: Text(
                                               '${mData.status == 1 ? language.enable : language.disable}',

@@ -1,4 +1,4 @@
-import 'package:country_code_picker/country_code_picker.dart';
+import 'package:country_code_picker_x/country_code_picker_x.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../main.dart';
@@ -258,7 +258,7 @@ class EditProfileScreenState extends State<EditProfileScreen> {
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              CountryCodePicker(
+                              CountryCodePickerX(
                                 initialSelection: countryCode,
                                 showCountryOnly: false,
                                 dialogSize: Size(context.width() - 60, context.height() * 0.6),

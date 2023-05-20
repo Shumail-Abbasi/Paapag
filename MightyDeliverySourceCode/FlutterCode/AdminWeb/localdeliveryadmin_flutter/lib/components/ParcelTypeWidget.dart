@@ -164,7 +164,7 @@ class ParcelTypeWidgetState extends State<ParcelTypeWidget> {
                                           DataCell(Text('${mData.id}')),
                                           DataCell(Text('${mData.label ?? "-"}')),
                                           DataCell(Text('${mData.value ?? "-"}')),
-                                          DataCell(Text(printDate(mData.createdAt!))),
+                                          DataCell(Text((mData.createdAt ?? '').isEmpty ? '' : printDate(mData.createdAt ?? ''))),
                                           DataCell(
                                             IntrinsicHeight(
                                               child: Row(

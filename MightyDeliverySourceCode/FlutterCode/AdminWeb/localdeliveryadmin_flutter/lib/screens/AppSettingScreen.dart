@@ -1,4 +1,3 @@
-import 'package:currency_picker/currency_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
@@ -349,25 +348,25 @@ class AppSettingScreenState extends State<AppSettingScreen> {
                           child: MouseRegion(cursor: SystemMouseCursors.click, child: Text(language.pick, style: primaryTextStyle(color: primaryColor))),
                         ),
                         onTap: () {
-                          showCurrencyPicker(
-                            theme: CurrencyPickerThemeData(
-                              bottomSheetHeight: MediaQuery.of(context).size.height * 0.8,
-                              backgroundColor: Theme.of(context).cardColor,
-                              titleTextStyle: primaryTextStyle(size: 17),
-                              subtitleTextStyle: primaryTextStyle(size: 15),
-                            ),
-                            context: context,
-                            showFlag: true,
-                            showSearchField: true,
-                            showCurrencyName: true,
-                            showCurrencyCode: true,
-                            onSelect: (Currency currency) {
-                              currencySymbolController.text = currency.symbol;
-                              currencyCode = currency.code;
-                              currencySymbol = currency.symbol;
-                              setState(() {});
-                            },
-                          );
+                          // showCurrencyPicker(
+                          //   theme: CurrencyPickerThemeData(
+                          //     bottomSheetHeight: MediaQuery.of(context).size.height * 0.8,
+                          //     backgroundColor: Theme.of(context).cardColor,
+                          //     titleTextStyle: primaryTextStyle(size: 17),
+                          //     subtitleTextStyle: primaryTextStyle(size: 15),
+                          //   ),
+                          //   context: context,
+                          //   showFlag: true,
+                          //   showSearchField: true,
+                          //   showCurrencyName: true,
+                          //   showCurrencyCode: true,
+                          //   onSelect: (Currency currency) {
+                          //     currencySymbolController.text = currency.symbol;
+                          //     currencyCode = currency.code;
+                          //     currencySymbol = currency.symbol;
+                          //     setState(() {});
+                          //   },
+                          // );
                         }),
                     enabledBorder: OutlineInputBorder(borderSide: BorderSide(style: BorderStyle.none), borderRadius: BorderRadius.circular(defaultRadius)),
                     focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: primaryColor), borderRadius: BorderRadius.circular(defaultRadius)),
