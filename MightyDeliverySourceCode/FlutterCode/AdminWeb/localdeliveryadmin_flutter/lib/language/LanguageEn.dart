@@ -1,7 +1,7 @@
 import 'BaseLanguage.dart';
 
 class LanguageEn extends BaseLanguage {
-  String get app_name => 'Mighty Delivery';
+  String get app_name => 'Papag';
 
   String get update_city => 'Update City';
 
