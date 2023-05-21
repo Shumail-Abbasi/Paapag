@@ -344,8 +344,8 @@ class EarningDetail {
   num? totalWithdrawn;
   num? adminCommission;
   num? deliveryManCommission;
-  int? totalOrder;
-  int? paidOrder;
+  String? totalOrder;
+  String? paidOrder;
 
   EarningDetail({this.id, this.name, this.walletBalance, this.totalWithdrawn, this.adminCommission, this.deliveryManCommission, this.totalOrder, this.paidOrder});
 

@@ -1,4 +1,5 @@
 import 'package:intl/intl.dart';
+import 'package:paapag_admin/models/CountryListModel.dart';
 import '../models/OrderModel.dart';
 import '../utils/Extensions/StringExtensions.dart';
 import '../../main.dart';
@@ -44,7 +45,7 @@ generateInvoiceCall(OrderModel orderData) async {
     items: [
       InvoiceItem(
         product:
-            '${orderData.parcelType} (${orderData.totalWeight} ${appStore.countryList.isNotEmpty ? '${appStore.countryList.firstWhere((element) => element.id == orderData.countryId).weightType ?? 'kg'}' : 'kg'})',
+            '${orderData.parcelType} (${orderData.totalWeight} ${appStore.countryList.isNotEmpty ? '${appStore.countryList.firstWhere((element) => element.id == orderData.countryId, orElse: () => CountryData.empty()).weightType ?? 'kg'}' : 'kg'})',
         description: language.delivery_charges,
         price: orderData.fixedCharges!.toDouble(),
       ),

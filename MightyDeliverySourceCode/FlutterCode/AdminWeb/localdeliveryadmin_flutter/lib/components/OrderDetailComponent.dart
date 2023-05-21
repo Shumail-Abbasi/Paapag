@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:paapag_admin/models/CountryListModel.dart';
 import '../utils/Extensions/ResponsiveWidget.dart';
 import '../models/OrderDetailModel.dart';
 import '../models/OrderModel.dart';
@@ -46,7 +47,10 @@ class OrderDetailComponent extends StatelessWidget {
                   children: [
                     Text(language.weight, style: primaryTextStyle()),
                     Text(
-                        '${orderModel.totalWeight.toString()} ${appStore.countryList.isNotEmpty ? '${appStore.countryList.firstWhere((element) => element.id == orderModel.countryId).weightType ?? 'kg'}' : 'kg'}',
+                        '${orderModel.totalWeight.toString()} ${appStore.countryList.isNotEmpty ?
+                        '${appStore.countryList.firstWhere((element)
+                        => element.id == orderModel.countryId, orElse: () => CountryData.empty()).weightType
+                            ?? 'kg'}' : 'kg'}',
                         style: primaryTextStyle()),
                   ],
                 ),

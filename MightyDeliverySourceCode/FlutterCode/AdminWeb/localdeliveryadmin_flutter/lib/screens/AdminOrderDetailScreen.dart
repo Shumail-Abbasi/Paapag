@@ -150,7 +150,9 @@ class AdminOrderDetailScreenState extends State<AdminOrderDetailScreen> with Sin
                     },
                   ),
                 ),
-                selectedTab == 0 ? OrderDetailComponent(orderModel: orderModel!, payment: payment, extraChargeForListType: extraChargeForListType) : OrderHistoryComponent(orderHistory: orderHistory),
+                selectedTab == 0
+                    ? OrderDetailComponent(orderModel: orderModel!, payment: payment, extraChargeForListType: extraChargeForListType)
+                    : OrderHistoryComponent(orderHistory: orderHistory),
               ],
             ),
           );

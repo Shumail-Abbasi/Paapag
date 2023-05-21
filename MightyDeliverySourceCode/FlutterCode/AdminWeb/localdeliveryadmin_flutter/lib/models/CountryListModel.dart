@@ -66,6 +66,19 @@ class CountryData {
     code = json['code'];
   }
 
+  CountryData.empty() {
+    id = id;
+    name = '';
+    distanceType = '';
+    weightType = '';
+    status = 0;
+    links = '';
+    createdAt = '';
+    updatedAt = '';
+    deletedAt = '';
+    code = '';
+  }
+
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['id'] = this.id;
