@@ -5,7 +5,7 @@ const mHelpAndSupport = 'ADD_YOUR_HELP_AND_SUPPORT_URL';
 const mContactPref = 'ADD_YOUR_CONTACT_MAIL';
 const mCodeCanyonURL = 'ADD_YOUR_CODE_CANYON_URL';
 
-const mBaseUrl = 'http://paapagapi.paapag.com/';
+const mBaseUrl = 'https://paapagapi.paapag.com/';
 
 const googleMapAPIKey = 'AIzaSyDpqPiw4i031ijliU4Jt0C-joIsG3WAfrU';
 

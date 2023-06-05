@@ -45,6 +45,8 @@ class SplashScreenState extends State<SplashScreen> {
                 UserCitySelectScreen().launch(context);
               }
             }
+          }).catchError((_) {
+            LoginScreen().launch(context, isNewTask: true);
           });
         } else {
           if (getBoolAsync(IS_FIRST_TIME, defaultValue: true)) {

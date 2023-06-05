@@ -153,7 +153,7 @@ class MyApp extends StatelessWidget {
             child: child!,
           );
         },
-        initialRoute: (getStringAsync(USER_TYPE) == ADMIN || getStringAsync(USER_TYPE) == DEMO_ADMIN) ? AdminHomeWidget.route : DashboardScreen.route,
+        initialRoute: AdminLoginScreen.route,  //(getStringAsync(USER_TYPE) == ADMIN || getStringAsync(USER_TYPE) == DEMO_ADMIN) ? AdminHomeWidget.route : DashboardScreen.route,
         routes: {
           DashboardScreen.route: (context) => DashboardScreen(),
           AboutUsScreen.route: (context) => AboutUsScreen(),

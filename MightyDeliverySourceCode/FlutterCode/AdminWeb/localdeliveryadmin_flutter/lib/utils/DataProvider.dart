@@ -8,7 +8,6 @@ import '../components/ExtraChargesWidget.dart';
 import '../components/HomeWidget.dart';
 import '../components/OrderWidget.dart';
 import '../components/ParcelTypeWidget.dart';
-import '../components/PaymentGatewayWidget.dart';
 import '../components/UserWidget.dart';
 import '../components/WithdrawWidget.dart';
 import '../main.dart';
@@ -37,7 +36,7 @@ List<MenuItemModel> getMenuItems() {
   list.add(MenuItemModel(index: CITY_INDEX, imagePath: 'assets/icons/ic_city.png', title: language.city, route: CityWidget.route));
   list.add(MenuItemModel(index: EXTRA_CHARGES_INDEX, imagePath: 'assets/icons/ic_extra_charges.png', title: language.extra_charges, route: ExtraChargesWidget.route));
   list.add(MenuItemModel(index: PARCEL_TYPE_INDEX, imagePath: 'assets/icons/ic_parcel_type.png', title: language.parcel_type, route: ParcelTypeWidget.route));
-  list.add(MenuItemModel(index: PAYMENT_GATEWAY_INDEX, imagePath: 'assets/icons/ic_payment_gateway.png', title: language.payment_gateway, route: PaymentGatewayWidget.route));
+  // list.add(MenuItemModel(index: PAYMENT_GATEWAY_INDEX, imagePath: 'assets/icons/ic_payment_gateway.png', title: language.payment_gateway, route: PaymentGatewayWidget.route));
   list.add(MenuItemModel(index: CREATE_ORDER_INDEX, imagePath: 'assets/icons/ic_create_order.png', title: language.create_order, route: CreateOrderWidget.route));
   list.add(MenuItemModel(index: ORDER_INDEX, imagePath: 'assets/icons/ic_orders.png', title: language.all_order, route: OrderWidget.route));
   list.add(MenuItemModel(index: DOCUMENT_INDEX, imagePath: 'assets/icons/ic_document.png', title: language.document, route: DocumentWidget.route));

@@ -52,6 +52,10 @@ class AdminLoginScreenState extends State<AdminLoginScreen> {
       };
 
       await logInApi(req).then((value) async {
+        print("I am here with");
+        if(value.data == null) {
+          print("with null data");
+        }
         appStore.setLoading(false);
         if (value.data!.userType != ADMIN && value.data!.userType != DEMO_ADMIN) {
           await logout(context, isFromLogin: true);
@@ -61,7 +65,7 @@ class AdminLoginScreenState extends State<AdminLoginScreen> {
       }).catchError((e) {
         appStore.setLoading(false);
 
-        toast(e.toString());
+        toast('ERROR during login ${e.toString()}');
       });
     }
   }

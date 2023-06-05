@@ -106,6 +106,9 @@ Future<LoginResponse> logInApi(Map request, {bool isSocialLogin = false}) async 
     await setValue(BIO, loginResponse.userData!.bio.validate());
     await setValue(DOB, loginResponse.userData!.dob.validate());
 */
+    if(loginResponse.data == null) {
+      print("GOT NULL DATA");
+    }
 
     await setValue(USER_ID, loginResponse.data!.id.validate());
     await setValue(NAME, loginResponse.data!.name.validate());
@@ -133,6 +136,7 @@ Future<LoginResponse> logInApi(Map request, {bool isSocialLogin = false}) async 
 
     return loginResponse;
   }).catchError((e) {
+    print('ERROR WHILE PARSING RESPONSE: ${e.toString()}');
     throw e.toString();
   });
 }

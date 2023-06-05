@@ -263,40 +263,40 @@ class BodyCornerWidgetState extends State<BodyCornerWidget> {
                   width: getMenuWidth(),
                   child: Column(
                     children: [
-                      HoverWidget(builder: (context, isHovering) {
-                        return GestureDetector(
-                          child: Container(
-                            margin: EdgeInsets.only(bottom: 16),
-                            alignment: Alignment.centerLeft,
-                            padding: EdgeInsets.only(left: 16, top: 8, bottom: 8, right: appStore.selectedLanguage == 'ar' ? 16 : 0),
-                            decoration: BoxDecoration(
-                              color: isHovering
-                                  ? hoverColor
-                                  : Colors.transparent,
-                            ),
-                            child: Row(
-                              children: [
-                                Tooltip(child: Icon(Icons.arrow_back, size: 24, color: Colors.white), message: language.viewSite),
-                                appStore.isMenuExpanded
-                                    ? Expanded(
-                                        child: Padding(
-                                          padding: EdgeInsets.only(left: 16),
-                                          child: Text(
-                                            language.viewSite,
-                                            maxLines: 1,
-                                            style: primaryTextStyle(color: Colors.white, size: 15),
-                                          ),
-                                        ),
-                                      )
-                                    : Spacer(),
-                              ],
-                            ),
-                          ),
-                          onTap: () {
-                           Navigator.pushNamed(context,DashboardScreen.route);
-                          },
-                        );
-                      }),
+                      // HoverWidget(builder: (context, isHovering) {
+                      //   return GestureDetector(
+                      //     child: Container(
+                      //       margin: EdgeInsets.only(bottom: 16),
+                      //       alignment: Alignment.centerLeft,
+                      //       padding: EdgeInsets.only(left: 16, top: 8, bottom: 8, right: appStore.selectedLanguage == 'ar' ? 16 : 0),
+                      //       decoration: BoxDecoration(
+                      //         color: isHovering
+                      //             ? hoverColor
+                      //             : Colors.transparent,
+                      //       ),
+                      //       child: Row(
+                      //         children: [
+                      //           Tooltip(child: Icon(Icons.arrow_back, size: 24, color: Colors.white), message: language.viewSite),
+                      //           appStore.isMenuExpanded
+                      //               ? Expanded(
+                      //                   child: Padding(
+                      //                     padding: EdgeInsets.only(left: 16),
+                      //                     child: Text(
+                      //                       language.viewSite,
+                      //                       maxLines: 1,
+                      //                       style: primaryTextStyle(color: Colors.white, size: 15),
+                      //                     ),
+                      //                   ),
+                      //                 )
+                      //               : Spacer(),
+                      //         ],
+                      //       ),
+                      //     ),
+                      //     onTap: () {
+                      //      Navigator.pushNamed(context,DashboardScreen.route);
+                      //     },
+                      //   );
+                      // }),
                       ListView(
                         children: menuList.map((item) {
                           return HoverWidget(builder: (context, isHovering) {

@@ -1,7 +1,7 @@
 const currencySymbolDefault = 'RS';
 const currencyCodeDefault = 'PKR';
 
-const mBaseUrl = "http://paapagapi.paapag.com/";
+const mBaseUrl = "https://paapagapi.paapag.com/";
 
 const mOneSignalAppId = 'ADD_YOUR_ONE_SIGNAL_APP_APP_ID';
 const mOneSignalRestKey = 'ADD_YOUR_ONE_SIGNAL_REST_KEY';

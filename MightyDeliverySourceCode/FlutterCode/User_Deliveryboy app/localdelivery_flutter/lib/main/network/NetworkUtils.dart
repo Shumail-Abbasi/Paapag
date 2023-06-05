@@ -12,11 +12,7 @@ import 'RestApis.dart';
 
 Map<String, String> buildHeaderTokens() {
   Map<String, String> header = {
-    HttpHeaders.contentTypeHeader: 'application/json; charset=utf-8',
-    HttpHeaders.cacheControlHeader: 'no-cache',
-    HttpHeaders.acceptHeader: 'application/json; charset=utf-8',
-    'Access-Control-Allow-Headers': '*',
-    'Access-Control-Allow-Origin': '*',
+    HttpHeaders.contentTypeHeader: 'application/json; charset=utf-8'
   };
 
   if (appStore.isLoggedIn) {

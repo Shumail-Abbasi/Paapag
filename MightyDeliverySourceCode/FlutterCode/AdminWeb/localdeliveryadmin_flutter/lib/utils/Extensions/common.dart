@@ -32,7 +32,7 @@ const bool kReleaseMode = bool.fromEnvironment('dart.vm.product');
 
 /// Prints only if in debug or profile mode
 void log(Object? value) {
-  if (!kReleaseMode) print(value);
+  print(value);
 }
 
 /// Show SnackBar
