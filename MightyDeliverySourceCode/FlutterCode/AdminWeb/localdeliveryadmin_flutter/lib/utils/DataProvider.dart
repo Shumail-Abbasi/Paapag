@@ -39,8 +39,8 @@ List<MenuItemModel> getMenuItems() {
   // list.add(MenuItemModel(index: PAYMENT_GATEWAY_INDEX, imagePath: 'assets/icons/ic_payment_gateway.png', title: language.payment_gateway, route: PaymentGatewayWidget.route));
   list.add(MenuItemModel(index: CREATE_ORDER_INDEX, imagePath: 'assets/icons/ic_create_order.png', title: language.create_order, route: CreateOrderWidget.route));
   list.add(MenuItemModel(index: ORDER_INDEX, imagePath: 'assets/icons/ic_orders.png', title: language.all_order, route: OrderWidget.route));
-  list.add(MenuItemModel(index: DOCUMENT_INDEX, imagePath: 'assets/icons/ic_document.png', title: language.document, route: DocumentWidget.route));
-  list.add(MenuItemModel(index: DELIVERY_PERSON_DOCUMENT_INDEX, imagePath: 'assets/icons/ic_document.png', title: language.delivery_person_documents, route: DeliveryPersonDocumentWidget.route));
+  //list.add(MenuItemModel(index: DOCUMENT_INDEX, imagePath: 'assets/icons/ic_document.png', title: language.document, route: DocumentWidget.route));
+  //list.add(MenuItemModel(index: DELIVERY_PERSON_DOCUMENT_INDEX, imagePath: 'assets/icons/ic_document.png', title: language.delivery_person_documents, route: DeliveryPersonDocumentWidget.route));
   list.add(MenuItemModel(index: USER_INDEX, imagePath: 'assets/icons/ic_users.png', title: language.users, route: UserWidget.route));
   list.add(MenuItemModel(index: DELIVERY_PERSON_INDEX, imagePath: 'assets/icons/ic_delivery_boy.png', title: language.delivery_person, route: DeliveryBoyWidget.route));
   list.add(MenuItemModel(index: WITHDRAW_INDEX, imagePath: 'assets/icons/ic_document.png', title: language.withdrawRequest, route: WithdrawWidget.route));

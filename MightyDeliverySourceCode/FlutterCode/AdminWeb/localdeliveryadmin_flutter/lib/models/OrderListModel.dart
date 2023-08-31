@@ -20,9 +20,9 @@ class OrderListModel {
       });
     }
     allUnreadCount = json['all_unread_count'];
-    walletData = json['wallet_data'] != null
-        ? new UserWalletModel.fromJson(json['wallet_data'])
-        : null;
+    // walletData = json['wallet_data'] != null
+    //     ? new UserWalletModel.fromJson(json['wallet_data'])
+    //     : null;
   }
 
   Map<String, dynamic> toJson() {

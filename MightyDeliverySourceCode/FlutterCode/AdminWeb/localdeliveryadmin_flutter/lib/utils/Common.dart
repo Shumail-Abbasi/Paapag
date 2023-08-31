@@ -244,7 +244,11 @@ Widget emptyWidget() {
 }
 
 String printDate(String date) {
-  return DateFormat.yMd().add_jm().format(DateTime.parse(date).toLocal());
+  try {
+    return DateFormat.yMd().add_jm().format(DateTime.parse(date).toLocal());
+  } catch(_) {
+    return '__';
+  }
 }
 
 Widget totalUserWidget({String? title, int? totalCount, String? image}) {
@@ -572,7 +576,7 @@ Future<void> saveFcmTokenId() async {
 }
 
 String printAmount(num amount) {
-  return appStore.currencyPosition == CURRENCY_POSITION_LEFT ? '${appStore.currencySymbol} ${amount.toStringAsFixed(digitAfterDecimal)}' : '${amount.toStringAsFixed(digitAfterDecimal)} ${appStore.currencySymbol}';
+  return appStore.currencyPosition == CURRENCY_POSITION_LEFT ? 'RS ${amount.toStringAsFixed(digitAfterDecimal)}' : '${amount.toStringAsFixed(digitAfterDecimal)} RS';
 }
 
 String dayTranslate(String day) {

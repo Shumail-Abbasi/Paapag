@@ -230,15 +230,18 @@ class OrderFragmentState extends State<OrderFragment> {
                                     Row(
                                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                       children: [
-                                        Row(
-                                          children: [
-                                            Text(language.invoice, style: primaryTextStyle(color: colorPrimary)),
-                                            4.width,
-                                            Icon(Icons.download_rounded, color: colorPrimary),
-                                          ],
-                                        ).onTap(() {
-                                          generateInvoiceCall(item);
-                                        }),
+                                        Visibility(
+                                          visible: false,
+                                          child: Row(
+                                            children: [
+                                              Text(language.invoice, style: primaryTextStyle(color: colorPrimary)),
+                                              4.width,
+                                              Icon(Icons.download_rounded, color: colorPrimary),
+                                            ],
+                                          ).onTap(() {
+                                            generateInvoiceCall(item);
+                                          }),
+                                        ),
                                         AppButton(
                                           elevation: 0,
                                           height: 35,

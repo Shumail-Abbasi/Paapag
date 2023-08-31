@@ -352,10 +352,10 @@ class EarningDetail {
   EarningDetail.fromJson(Map<String, dynamic> json) {
     id = json['id'];
     name = json['name'];
-    walletBalance = json['wallet_balance'];
-    totalWithdrawn = json['total_withdrawn'];
-    adminCommission = json['admin_commission'];
-    deliveryManCommission = json['delivery_man_commission'];
+    walletBalance = num.tryParse(json['wallet_balance']) ?? 0;
+    totalWithdrawn = num.tryParse(json['total_withdrawn']) ?? 0;
+    adminCommission = num.tryParse(json['admin_commission']) ?? 0;
+    deliveryManCommission = num.tryParse(json['delivery_man_commission']) ?? 0;
     totalOrder = json['total_order'];
     paidOrder = json['paid_order'];
   }

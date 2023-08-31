@@ -150,9 +150,7 @@ class AdminOrderDetailScreenState extends State<AdminOrderDetailScreen> with Sin
                     },
                   ),
                 ),
-                selectedTab == 0
-                    ? OrderDetailComponent(orderModel: orderModel!, payment: payment, extraChargeForListType: extraChargeForListType)
-                    : OrderHistoryComponent(orderHistory: orderHistory),
+                selectedTab == 0 ? OrderDetailComponent(orderModel: orderModel!, payment: payment, extraChargeForListType: extraChargeForListType) : OrderHistoryComponent(orderHistory: orderHistory),
               ],
             ),
           );
@@ -346,23 +344,26 @@ class AdminOrderDetailScreenState extends State<AdminOrderDetailScreen> with Sin
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             if (orderModel != null && orderModel!.status != ORDER_CANCELLED)
-                              ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                  elevation: 0,
-                                  backgroundColor: primaryColor,
-                                  padding: EdgeInsets.all(6),
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(defaultRadius), side: BorderSide(color: primaryColor)),
+                              Visibility(
+                                visible: false,
+                                child: ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                    elevation: 0,
+                                    backgroundColor: primaryColor,
+                                    padding: EdgeInsets.all(6),
+                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(defaultRadius), side: BorderSide(color: primaryColor)),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(language.invoiceCapital, style: primaryTextStyle(color: Colors.white)),
+                                      Icon(Icons.download_outlined, color: Colors.white),
+                                    ],
+                                  ),
+                                  onPressed: () async {
+                                    generateInvoiceCall(orderModel!);
+                                  },
                                 ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Text(language.invoiceCapital, style: primaryTextStyle(color: Colors.white)),
-                                    Icon(Icons.download_outlined, color: Colors.white),
-                                  ],
-                                ),
-                                onPressed: () async {
-                                  generateInvoiceCall(orderModel!);
-                                },
                               ),
                             SizedBox(width: 16),
                             backButton(context, value: true),

@@ -396,7 +396,7 @@ Future<void> sendMultiPartRequest(MultipartRequest multiPartRequest, {Function(d
   http.Response response = await http.Response.fromStream(await multiPartRequest.send());
 
   if (response.statusCode >= 200 && response.statusCode <= 206) {
-    onSuccess?.call(jsonDecode(response.body));
+    onSuccess?.call(response.body.isEmpty ? null : jsonDecode(response.body));
   } else {
     onError?.call(language.somethingWentWrong);
   }

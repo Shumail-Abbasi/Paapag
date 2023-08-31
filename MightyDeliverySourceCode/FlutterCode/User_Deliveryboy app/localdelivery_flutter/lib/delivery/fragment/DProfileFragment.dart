@@ -68,21 +68,21 @@ class DProfileFragmentState extends State<DProfileFragment> {
                         settingItemWidget(Icons.person_outline, language.editProfile, () {
                           EditProfileScreen().launch(context);
                         }),
-                        settingItemWidget(Icons.assignment_outlined, language.verifyDocument, () {
-                          VerifyDeliveryPersonScreen().launch(context);
-                        },suffixIcon: getBoolAsync(IS_VERIFIED_DELIVERY_MAN) ? Icons.verified_user : null),
+                        // settingItemWidget(Icons.assignment_outlined, language.verifyDocument, () {
+                        //   VerifyDeliveryPersonScreen().launch(context);
+                        // },suffixIcon: getBoolAsync(IS_VERIFIED_DELIVERY_MAN) ? Icons.verified_user : null),
                         settingItemWidget(Icons.lock_outline, language.changePassword, () {
                           ChangePasswordScreen().launch(context);
                         }),
                         settingItemWidget(Icons.location_on_outlined, language.changeLocation, () {
                           UserCitySelectScreen(isBack: true).launch(context);
                         }),
-                        settingItemWidget(Icons.language, language.language, () {
-                          LanguageScreen().launch(context);
-                        }),
-                        settingItemWidget(Icons.wb_sunny_outlined, language.theme, () {
-                          ThemeScreen().launch(context);
-                        }),
+                        // settingItemWidget(Icons.language, language.language, () {
+                        //   LanguageScreen().launch(context);
+                        // }),
+                        // settingItemWidget(Icons.wb_sunny_outlined, language.theme, () {
+                        //   ThemeScreen().launch(context);
+                        // }),
                         settingItemWidget(Icons.assignment_outlined, language.privacyPolicy, () {
                           launchUrl(Uri.parse(mPrivacyPolicy));
                         }),

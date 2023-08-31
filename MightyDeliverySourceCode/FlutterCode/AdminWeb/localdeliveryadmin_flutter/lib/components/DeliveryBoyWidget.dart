@@ -191,7 +191,7 @@ class DeliveryBoyWidgetState extends State<DeliveryBoyWidget> {
                                         DataColumn(label: Text(language.country)),
                                         DataColumn(label: Text(language.register_date)),
                                         DataColumn(label: Text(language.status)),
-                                        DataColumn(label: Text(language.is_verified)),
+                                       // DataColumn(label: Text(language.is_verified)),
                                         DataColumn(label: Text(language.actions)),
                                       ],
                                       rows: deliveryBoyList.map((e) {
@@ -224,7 +224,7 @@ class DeliveryBoyWidgetState extends State<DeliveryBoyWidget> {
                                                 },
                                               ),
                                             ),
-                                            DataCell(
+                                           /* DataCell(
                                               e.isVerifiedDeliveryMan! == 1
                                                   ? Text(language.verified, style: primaryTextStyle(color: Colors.green))
                                                   : SizedBox(
@@ -234,7 +234,7 @@ class DeliveryBoyWidgetState extends State<DeliveryBoyWidget> {
                                                             Navigator.pushNamed(context, DeliveryPersonDocumentWidget.route + "?delivery_man_id=${e.id!}");
                                                           },
                                                           child: Text(language.verify))),
-                                            ),
+                                            ),*/
                                             DataCell(
                                               Row(
                                                 children: [

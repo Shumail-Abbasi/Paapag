@@ -126,28 +126,28 @@ class BodyCornerWidgetState extends State<BodyCornerWidget> {
               tooltip: language.notification,
             ),
             SizedBox(width: 16),
-            Tooltip(
-              message: language.theme,
-              child: FlutterSwitch(
-                value: appStore.isDarkMode,
-                width: 55,
-                height: 30,
-                toggleSize: 25,
-                borderRadius: 30.0,
-                padding: 4.0,
-                activeIcon: ImageIcon(AssetImage('assets/icons/ic_moon.png'), color: Colors.white, size: 30),
-                inactiveIcon: ImageIcon(AssetImage('assets/icons/ic_sun.png'), color: Colors.white, size: 30),
-                activeColor: primaryColor,
-                activeToggleColor: Colors.black,
-                inactiveToggleColor: Colors.orangeAccent,
-                inactiveColor: Colors.white,
-                onToggle: (value) {
-                  appStore.setDarkMode(value);
-                  setValue(THEME_MODE_INDEX, value ? 1 : 0);
-                  LiveStream().emit(streamDarkMode);
-                },
-              ),
-            ),
+            // Tooltip(
+            //   message: language.theme,
+            //   child: FlutterSwitch(
+            //     value: appStore.isDarkMode,
+            //     width: 55,
+            //     height: 30,
+            //     toggleSize: 25,
+            //     borderRadius: 30.0,
+            //     padding: 4.0,
+            //     activeIcon: ImageIcon(AssetImage('assets/icons/ic_moon.png'), color: Colors.white, size: 30),
+            //     inactiveIcon: ImageIcon(AssetImage('assets/icons/ic_sun.png'), color: Colors.white, size: 30),
+            //     activeColor: primaryColor,
+            //     activeToggleColor: Colors.black,
+            //     inactiveToggleColor: Colors.orangeAccent,
+            //     inactiveColor: Colors.white,
+            //     onToggle: (value) {
+            //       appStore.setDarkMode(value);
+            //       setValue(THEME_MODE_INDEX, value ? 1 : 0);
+            //       LiveStream().emit(streamDarkMode);
+            //     },
+            //   ),
+            // ),
             SizedBox(width: 16),
             Container(
               margin: EdgeInsets.only(top: 10, bottom: 10),

@@ -429,7 +429,8 @@ class _DeliveryPersonDetailScreenState extends State<DeliveryPersonDetailScreen>
                               16.height,
                               commonDetailWidget(icon: Icons.phone, title: userData!.contactNumber),
                               if (userData!.cityName != null || userData!.countryName != null) 16.height,
-                              if (userData!.cityName != null || userData!.countryName != null) commonDetailWidget(icon: Icons.map, title: userData!.cityName.validate() + ',' + userData!.countryName.validate())
+                              if (userData!.cityName != null || userData!.countryName != null)
+                                commonDetailWidget(icon: Icons.map, title: userData!.cityName.validate() + ',' + userData!.countryName.validate())
                             ],
                           ),
                         ),
@@ -471,8 +472,8 @@ class _DeliveryPersonDetailScreenState extends State<DeliveryPersonDetailScreen>
                                   spacing: 16,
                                   runSpacing: 16,
                                   children: [
-                                    commonWidget(title: language.walletTotalBalance, value: printAmount(earningDetail!.walletBalance ?? 0)),
-                                    commonWidget(title: language.totalWithdrawal, value: printAmount(earningDetail!.totalWithdrawn ?? 0)),
+                                   // commonWidget(title: language.walletTotalBalance, value: printAmount(earningDetail!.walletBalance ?? 0)),
+                                    // commonWidget(title: language.totalWithdrawal, value: printAmount(earningDetail!.totalWithdrawn ?? 0)),
                                     commonWidget(title: language.adminCommission, value: printAmount(earningDetail!.adminCommission ?? 0)),
                                     commonWidget(title: language.commission, value: printAmount(earningDetail!.deliveryManCommission ?? 0)),
                                     commonWidget(title: language.total_order, value: earningDetail!.totalOrder.toString().validate(value: '0')),
@@ -480,76 +481,79 @@ class _DeliveryPersonDetailScreenState extends State<DeliveryPersonDetailScreen>
                                   ],
                                 ),
                               userData!.userType == CLIENT && walletHistory != null && walletHistory!.walletDataModel!.isNotEmpty
-                                  ? Container(
-                                      width: getWalletTableWidth(),
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Container(
-                                            margin: EdgeInsets.only(bottom: 16),
-                                            child: SingleChildScrollView(
-                                              controller: recentOrderController,
-                                              padding: EdgeInsets.only(left: 8, right: 8, top: 16, bottom: 20),
-                                              child: Column(
-                                                crossAxisAlignment: CrossAxisAlignment.start,
-                                                children: [
-                                                  Text(language.walletHistory, style: boldTextStyle(color: primaryColor)),
-                                                  SizedBox(height: 20),
-                                                  RawScrollbar(
-                                                    scrollbarOrientation: ScrollbarOrientation.bottom,
-                                                    controller: recentOrderHorizontalController,
-                                                    thumbVisibility: true,
-                                                    thumbColor: appStore.isDarkMode ? Colors.white12 : Colors.black12,
-                                                    radius: Radius.circular(defaultRadius),
-                                                    child: SingleChildScrollView(
+                                  ? Visibility(
+                                      visible: false,
+                                      child: Container(
+                                        width: getWalletTableWidth(),
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Container(
+                                              margin: EdgeInsets.only(bottom: 16),
+                                              child: SingleChildScrollView(
+                                                controller: recentOrderController,
+                                                padding: EdgeInsets.only(left: 8, right: 8, top: 16, bottom: 20),
+                                                child: Column(
+                                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                                  children: [
+                                                    Text(language.walletHistory, style: boldTextStyle(color: primaryColor)),
+                                                    SizedBox(height: 20),
+                                                    RawScrollbar(
+                                                      scrollbarOrientation: ScrollbarOrientation.bottom,
                                                       controller: recentOrderHorizontalController,
-                                                      scrollDirection: Axis.horizontal,
-                                                      child: ConstrainedBox(
-                                                        constraints: BoxConstraints(minWidth: getWalletTableWidth()),
-                                                        child: DataTable(
-                                                          headingTextStyle: boldTextStyle(),
-                                                          dataTextStyle: primaryTextStyle(size: 15),
-                                                          headingRowColor: MaterialStateColor.resolveWith((states) => primaryColor.withOpacity(0.1)),
-                                                          showCheckboxColumn: false,
-                                                          dataRowHeight: 45,
-                                                          headingRowHeight: 45,
-                                                          horizontalMargin: 16,
-                                                          columns: [
-                                                            DataColumn(label: Text(language.order_id)),
-                                                            DataColumn(label: Text(language.transactionType)),
-                                                            DataColumn(label: Text(language.amount)),
-                                                            DataColumn(label: Text(language.date)),
-                                                          ],
-                                                          rows: walletHistory!.walletDataModel!.map((e) {
-                                                            return DataRow(
-                                                              cells: [
-                                                                DataCell(Text('${e.orderId ?? "-"}')),
-                                                                DataCell(Text(transactionType(e.transactionType.validate()))),
-                                                                DataCell(Text(printAmount(e.amount ?? 0))),
-                                                                DataCell(Text(e.datetime!=null ? printDate(e.datetime!) : "-")),
-                                                              ],
-                                                            );
-                                                          }).toList(),
+                                                      thumbVisibility: true,
+                                                      thumbColor: appStore.isDarkMode ? Colors.white12 : Colors.black12,
+                                                      radius: Radius.circular(defaultRadius),
+                                                      child: SingleChildScrollView(
+                                                        controller: recentOrderHorizontalController,
+                                                        scrollDirection: Axis.horizontal,
+                                                        child: ConstrainedBox(
+                                                          constraints: BoxConstraints(minWidth: getWalletTableWidth()),
+                                                          child: DataTable(
+                                                            headingTextStyle: boldTextStyle(),
+                                                            dataTextStyle: primaryTextStyle(size: 15),
+                                                            headingRowColor: MaterialStateColor.resolveWith((states) => primaryColor.withOpacity(0.1)),
+                                                            showCheckboxColumn: false,
+                                                            dataRowHeight: 45,
+                                                            headingRowHeight: 45,
+                                                            horizontalMargin: 16,
+                                                            columns: [
+                                                              DataColumn(label: Text(language.order_id)),
+                                                              DataColumn(label: Text(language.transactionType)),
+                                                              DataColumn(label: Text(language.amount)),
+                                                              DataColumn(label: Text(language.date)),
+                                                            ],
+                                                            rows: walletHistory!.walletDataModel!.map((e) {
+                                                              return DataRow(
+                                                                cells: [
+                                                                  DataCell(Text('${e.orderId ?? "-"}')),
+                                                                  DataCell(Text(transactionType(e.transactionType.validate()))),
+                                                                  DataCell(Text(printAmount(e.amount ?? 0))),
+                                                                  DataCell(Text(e.datetime != null ? printDate(e.datetime!) : "-")),
+                                                                ],
+                                                              );
+                                                            }).toList(),
+                                                          ),
                                                         ),
                                                       ),
                                                     ),
-                                                  ),
-                                                ],
+                                                  ],
+                                                ),
                                               ),
+                                              decoration: boxDecorationWithRoundedCorners(
+                                                  backgroundColor: context.cardColor, border: Border.all(width: 0.9, color: context.dividerColor), borderRadius: radius(16)),
                                             ),
-                                            decoration: boxDecorationWithRoundedCorners(
-                                                backgroundColor: context.cardColor, border: Border.all(width: 0.9, color: context.dividerColor), borderRadius: radius(16)),
-                                          ),
-                                          if (walletHistory!.pagination!.totalItems!.toInt() > walletHistory!.pagination!.perPage!.toInt())
-                                            paginationWidget(context,
-                                                isPerpage: false,
-                                                currentPage: walletHistory!.pagination!.currentPage!,
-                                                totalPage: walletHistory!.pagination!.totalPages!,
-                                                perPage: walletHistory!.pagination!.perPage!, onUpdate: (currentPageVal, perPageVal) {
-                                              getWalletHistory(currentPageVal);
-                                              setState(() {});
-                                            }),
-                                        ],
+                                            if (walletHistory!.pagination!.totalItems!.toInt() > walletHistory!.pagination!.perPage!.toInt())
+                                              paginationWidget(context,
+                                                  isPerpage: false,
+                                                  currentPage: walletHistory!.pagination!.currentPage!,
+                                                  totalPage: walletHistory!.pagination!.totalPages!,
+                                                  perPage: walletHistory!.pagination!.perPage!, onUpdate: (currentPageVal, perPageVal) {
+                                                getWalletHistory(currentPageVal);
+                                                setState(() {});
+                                              }),
+                                          ],
+                                        ),
                                       ),
                                     )
                                   : SizedBox(),
@@ -564,78 +568,81 @@ class _DeliveryPersonDetailScreenState extends State<DeliveryPersonDetailScreen>
                       spacing: 16,
                       children: [
                         walletHistory != null && walletHistory!.walletDataModel!.isNotEmpty
-                            ? Container(
-                                width: getTableWidth(),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Container(
-                                      margin: EdgeInsets.only(bottom: 16),
-                                      child: SingleChildScrollView(
-                                        controller: recentOrderController,
-                                        padding: EdgeInsets.only(left: 8, right: 8, top: 16, bottom: 20),
-                                        child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            Text(language.walletHistory, style: boldTextStyle(color: primaryColor)),
-                                            SizedBox(height: 20),
-                                            RawScrollbar(
-                                              scrollbarOrientation: ScrollbarOrientation.bottom,
-                                              controller: recentOrderHorizontalController,
-                                              thumbVisibility: true,
-                                              thumbColor: appStore.isDarkMode ? Colors.white12 : Colors.black12,
-                                              radius: Radius.circular(defaultRadius),
-                                              child: SingleChildScrollView(
+                            ? Visibility(
+                          visible: false,
+                              child: Container(
+                                  width: getTableWidth(),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Container(
+                                        margin: EdgeInsets.only(bottom: 16),
+                                        child: SingleChildScrollView(
+                                          controller: recentOrderController,
+                                          padding: EdgeInsets.only(left: 8, right: 8, top: 16, bottom: 20),
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Text(language.walletHistory, style: boldTextStyle(color: primaryColor)),
+                                              SizedBox(height: 20),
+                                              RawScrollbar(
+                                                scrollbarOrientation: ScrollbarOrientation.bottom,
                                                 controller: recentOrderHorizontalController,
-                                                scrollDirection: Axis.horizontal,
-                                                child: ConstrainedBox(
-                                                  constraints: BoxConstraints(minWidth: getTableWidth()),
-                                                  child: DataTable(
-                                                    headingTextStyle: boldTextStyle(),
-                                                    dataTextStyle: primaryTextStyle(size: 15),
-                                                    headingRowColor: MaterialStateColor.resolveWith((states) => primaryColor.withOpacity(0.1)),
-                                                    showCheckboxColumn: false,
-                                                    dataRowHeight: 45,
-                                                    headingRowHeight: 45,
-                                                    horizontalMargin: 16,
-                                                    columns: [
-                                                      DataColumn(label: Text(language.order_id)),
-                                                      DataColumn(label: Text(language.transactionType)),
-                                                      DataColumn(label: Text(language.amount)),
-                                                      DataColumn(label: Text(language.date)),
-                                                    ],
-                                                    rows: walletHistory!.walletDataModel!.map((e) {
-                                                      return DataRow(
-                                                        cells: [
-                                                          DataCell(Text('${e.orderId ?? "-"}')),
-                                                          DataCell(Text(transactionType(e.transactionType.validate()))),
-                                                          DataCell(Text(printAmount(e.amount ?? 0))),
-                                                          DataCell(Text(e.datetime!=null ? printDate(e.datetime!) : "-")),
-                                                        ],
-                                                      );
-                                                    }).toList(),
+                                                thumbVisibility: true,
+                                                thumbColor: appStore.isDarkMode ? Colors.white12 : Colors.black12,
+                                                radius: Radius.circular(defaultRadius),
+                                                child: SingleChildScrollView(
+                                                  controller: recentOrderHorizontalController,
+                                                  scrollDirection: Axis.horizontal,
+                                                  child: ConstrainedBox(
+                                                    constraints: BoxConstraints(minWidth: getTableWidth()),
+                                                    child: DataTable(
+                                                      headingTextStyle: boldTextStyle(),
+                                                      dataTextStyle: primaryTextStyle(size: 15),
+                                                      headingRowColor: MaterialStateColor.resolveWith((states) => primaryColor.withOpacity(0.1)),
+                                                      showCheckboxColumn: false,
+                                                      dataRowHeight: 45,
+                                                      headingRowHeight: 45,
+                                                      horizontalMargin: 16,
+                                                      columns: [
+                                                        DataColumn(label: Text(language.order_id)),
+                                                        DataColumn(label: Text(language.transactionType)),
+                                                        DataColumn(label: Text(language.amount)),
+                                                        DataColumn(label: Text(language.date)),
+                                                      ],
+                                                      rows: walletHistory!.walletDataModel!.map((e) {
+                                                        return DataRow(
+                                                          cells: [
+                                                            DataCell(Text('${e.orderId ?? "-"}')),
+                                                            DataCell(Text(transactionType(e.transactionType.validate()))),
+                                                            DataCell(Text(printAmount(e.amount ?? 0))),
+                                                            DataCell(Text(e.datetime != null ? printDate(e.datetime!) : "-")),
+                                                          ],
+                                                        );
+                                                      }).toList(),
+                                                    ),
                                                   ),
                                                 ),
                                               ),
-                                            ),
-                                          ],
+                                            ],
+                                          ),
                                         ),
+                                        decoration:
+                                            boxDecorationWithRoundedCorners(backgroundColor: context.cardColor, border: Border.all(width: 0.9, color: context.dividerColor), borderRadius: radius(16)),
                                       ),
-                                      decoration:
-                                          boxDecorationWithRoundedCorners(backgroundColor: context.cardColor, border: Border.all(width: 0.9, color: context.dividerColor), borderRadius: radius(16)),
-                                    ),
-                                    if (walletHistory!.pagination!.totalItems!.toInt() > walletHistory!.pagination!.perPage!.toInt())
-                                      paginationWidget(context,
-                                          isPerpage: false,
-                                          currentPage: walletHistory!.pagination!.currentPage!,
-                                          totalPage: walletHistory!.pagination!.totalPages!,
-                                          perPage: walletHistory!.pagination!.perPage!, onUpdate: (currentPageVal, perPageVal) {
-                                        getWalletHistory(currentPageVal);
-                                        setState(() {});
-                                      }),
-                                  ],
+                                      if (walletHistory!.pagination!.totalItems!.toInt() > walletHistory!.pagination!.perPage!.toInt())
+                                        paginationWidget(context,
+                                            isPerpage: false,
+                                            currentPage: walletHistory!.pagination!.currentPage!,
+                                            totalPage: walletHistory!.pagination!.totalPages!,
+                                            perPage: walletHistory!.pagination!.perPage!, onUpdate: (currentPageVal, perPageVal) {
+                                          getWalletHistory(currentPageVal);
+                                          setState(() {});
+                                        }),
+                                    ],
+                                  ),
                                 ),
-                              )
+                            )
                             : SizedBox(),
                         earningList != null && earningList!.earningDataModel!.isNotEmpty
                             ? Container(
@@ -686,7 +693,7 @@ class _DeliveryPersonDetailScreenState extends State<DeliveryPersonDetailScreen>
                                                           DataCell(Text(printAmount(e.deliveryManCommission ?? 0))),
                                                           DataCell(Text(printAmount(e.adminCommission ?? 0))),
                                                           DataCell(Text(paymentType(e.paymentType.validate()))),
-                                                          DataCell(Text(e.datetime!=null ? printDate(e.datetime!) : "-")),
+                                                          DataCell(Text(e.datetime != null ? printDate(e.datetime!) : "-")),
                                                         ],
                                                       );
                                                     }).toList(),
